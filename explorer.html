@@ -394,6 +394,7 @@
 </div>
 
 <div id="toast"></div>
+<div id="load-bar"></div>
 <div id="modal-overlay" class="modal-overlay" style="display:none" onclick="if(event.target===this)closeModal()">
   <div class="modal-box" id="modal-box"></div>
 </div>
@@ -415,7 +416,7 @@ const CHAINS = [
   { name:'Sunrise',    slug:'sunrise',   chainId:'sunrise-1',      denom:'urise',  exp:6, sym:'RISE',  color:'#f59e0b', featured:true,
     logo:'https://raw.githubusercontent.com/cosmos/chain-registry/master/sunrise/images/sunrise.png',
     rest:'https://rest.cosmos.directory/sunrise' },
-  { name:'BitBadges',  slug:'bitbadges', chainId:'bitbadges-1',    denom:'ubadge', exp:6, sym:'BADGE', color:'#10b981', featured:true,
+  { name:'BitBadges',  slug:'bitbadges', chainId:'bitbadges-1',    denom:'ubadge', exp:9, sym:'BADGE', color:'#10b981', featured:true,
     logo:'https://raw.githubusercontent.com/cosmos/chain-registry/master/bitbadges/images/badge_logo.svg',
     rest:'https://rest.cosmos.directory/bitbadges' },
   { name:'Kopi',       slug:'kopi',      chainId:'luwak-1',        denom:'uskopi', exp:6, sym:'KOPI',  color:'#92400e', featured:true,
@@ -454,6 +455,7 @@ const NAV = [
 let cur = -1;
 let view = '';
 let refreshT = null;
+let _topbarT = null;
 let blockH = null;
 let favs = new Set(JSON.parse(localStorage.getItem('stilucky-favorites') || '[]'));
 let _customEndpoints = JSON.parse(localStorage.getItem('stilucky-endpoints') || '{}');
@@ -488,6 +490,7 @@ function _restoreChain(slug) {
   $('chainNavSection').style.display = '';
   $('chainNavHd').innerHTML = chainLogoImg(ch, 22, 'sb-chain-hd-logo') + '<span class="sb-chain-hd-name">' + ch.name + '</span>';
   updateTopbar();
+  _startTopbarPoller();
   return true;
 }
 
@@ -566,8 +569,33 @@ async function apiFetch(url, ms=9000) {
   } catch(e) { clearTimeout(t); throw e; }
 }
 
-function setContent(html) { $('content').innerHTML = html; }
-function showLoading()    { setContent('<div class="p-empty">Loading…</div>'); }
+function _barOn() {
+  const b=$('load-bar'); if(!b) return;
+  b.className=''; void b.offsetWidth;
+  b.className='running';
+}
+function _barOff() {
+  const b=$('load-bar'); if(!b) return;
+  b.className='done';
+  setTimeout(()=>{ if(b.className==='done') b.className=''; }, 400);
+}
+
+function setContent(html) {
+  $('content').innerHTML = html;
+  _barOff();
+  if (cur>=0 && view) _pageCache[CHAINS[cur].slug+'/'+view] = html;
+}
+
+function showLoading() {
+  _barOn();
+  const key = cur>=0&&view ? CHAINS[cur].slug+'/'+view : null;
+  const cached = key && _pageCache[key];
+  if (cached) {
+    $('content').innerHTML = cached;
+  } else {
+    $('content').innerHTML = '<div class="p-empty">Loading…</div>';
+  }
+}
 
 let toastT;
 function showToast(m) {
@@ -626,6 +654,24 @@ function setTopbarBlock(h) {
   if (el && h) el.textContent = '#' + fmt(h);
 }
 
+function _startTopbarPoller() {
+  clearInterval(_topbarT);
+  _topbarT = setInterval(async () => {
+    const c = chain(); if (!c) return;
+    try {
+      const d = await apiFetch(c.rest + '/cosmos/base/tendermint/v1beta1/blocks/latest');
+      const nh = parseInt(d.block?.header?.height || 0);
+      if (nh && nh > (blockH || 0)) {
+        blockH = nh; setTopbarBlock(nh);
+        if (view === 'dashboard') {
+          const bv = $('dashLatestBlock'); if (bv) bv.textContent = '#' + fmt(nh);
+          const bt = $('dashLatestBlockTime'); if (bt && d.block?.header?.time) bt.textContent = timeAgo(d.block.header.time);
+        }
+      }
+    } catch(e) {}
+  }, 1000);
+}
+
 /* ═══════════════════════════════════════════
    CHAIN SELECT
 ═══════════════════════════════════════════ */
@@ -642,6 +688,7 @@ function selectChain(i) {
     <span class="sb-chain-hd-name">${c.name}</span>`;
 
   updateTopbar();
+  _startTopbarPoller();
   navigate('dashboard');
 }
 
@@ -665,6 +712,7 @@ function navigate(v) {
 
   if (v === 'home' || v === 'favorites') {
     cur = -1;
+    clearInterval(_topbarT);
     $('chainNavSection').style.display = 'none';
     updateTopbar();
   }
@@ -945,8 +993,8 @@ async function viewDashboard() {
   let html = walletHtml + `
     <div class="stat-grid">
       <div class="stat-card"><div class="sc-lbl">Latest Block</div>
-        <div class="sc-val">${height ? '#'+fmt(height) : '—'}</div>
-        <div class="sc-sub">${block?.header?.time ? timeAgo(block.header.time) : ''}</div></div>
+        <div class="sc-val" id="dashLatestBlock">${height ? '#'+fmt(height) : '—'}</div>
+        <div class="sc-sub" id="dashLatestBlockTime">${block?.header?.time ? timeAgo(block.header.time) : ''}</div></div>
       <div class="stat-card"><div class="sc-lbl">Active Validators</div>
         <div class="sc-val g">${vals.length || '—'}</div>
         <div class="sc-sub">bonded set</div></div>
@@ -991,15 +1039,6 @@ async function viewDashboard() {
 
   setContent(html);
   if (height) loadDashTxs(base, height, c);
-
-  refreshT = setInterval(async () => {
-    if (view !== 'dashboard') return;
-    try {
-      const d=await apiFetch(base+'/cosmos/base/tendermint/v1beta1/blocks/latest');
-      const nh=parseInt(d.block?.header?.height||0);
-      if (nh && nh !== blockH) { blockH=nh; viewDashboard(); }
-    } catch(e){}
-  }, 7000);
 }
 
 async function loadDashTxs(base, h, c) {
@@ -1190,6 +1229,57 @@ function _applyEndpt(url, slug) {
 /* ═══════════════════════════════════════════
    WALLET & DELEGATE
 ═══════════════════════════════════════════ */
+let _cosmjsMod = null;
+async function _getCosmJS() {
+  if (!_cosmjsMod) _cosmjsMod = await import('https://esm.sh/@cosmjs/stargate@0.32.4');
+  return _cosmjsMod;
+}
+
+function _encodeTxRaw(bodyBytes, authInfoBytes, signatures) {
+  function varint(n) {
+    const buf = [];
+    while (n > 0x7f) { buf.push((n & 0x7f) | 0x80); n >>>= 7; }
+    buf.push(n); return buf;
+  }
+  function field(num, bytes) {
+    return new Uint8Array([(num << 3) | 2, ...varint(bytes.length), ...bytes]);
+  }
+  const parts = [field(1, bodyBytes), field(2, authInfoBytes), ...signatures.map(s => field(3, s))];
+  const out = new Uint8Array(parts.reduce((s, p) => s + p.length, 0));
+  let i = 0; for (const p of parts) { out.set(p, i); i += p.length; }
+  return out;
+}
+
+async function _signAndBroadcast(msgs, gasPerMsg = 200000) {
+  const c = chain();
+  const { SigningStargateClient } = await _getCosmJS();
+  const signer = window.keplr.getOfflineSigner(c.chainId);
+
+  const accRes = await apiFetch(c.rest + `/cosmos/auth/v1beta1/accounts/${_walletAddr}`);
+  const acc = accRes?.account?.base_account || accRes?.account;
+  const accountNumber = parseInt(acc?.account_number || 0);
+  const sequence = parseInt(acc?.sequence || 0);
+
+  const client = await SigningStargateClient.offline(signer);
+  const gasLimit = msgs.length * gasPerMsg;
+  const fee = { amount: [{ denom: c.denom, amount: String(Math.ceil(gasLimit * 0.025)) }], gas: String(gasLimit) };
+  const txRaw = await client.sign(_walletAddr, msgs, fee, '', { accountNumber, sequence, chainId: c.chainId });
+
+  const txBytes = _encodeTxRaw(txRaw.bodyBytes, txRaw.authInfoBytes, txRaw.signatures);
+  let b64 = ''; for (let i = 0; i < txBytes.length; i++) b64 += String.fromCharCode(txBytes[i]);
+  b64 = btoa(b64);
+
+  const res = await fetch(c.rest + '/cosmos/tx/v1beta1/txs', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ tx_bytes: b64, mode: 'BROADCAST_MODE_SYNC' })
+  });
+  const data = await res.json();
+  const txr = data?.tx_response || data;
+  if (txr?.code && txr.code !== 0) throw new Error(txr.raw_log || txr.log || 'tx failed');
+  return txr?.txhash || '?';
+}
+
 function updateWalletBtn() {
   const btn=document.getElementById('walletBtn');
   if(!btn) return;
@@ -1241,6 +1331,7 @@ async function connectWallet() {
     _walletAddr=accounts[0].address;
     updateWalletBtn();
     showToast('Connected: '+_walletAddr.slice(0,12)+'…');
+    if (view === 'dashboard') viewDashboard();
   } catch(e) {
     showToast('Failed to get account: '+(e.message||e));
   }
@@ -1315,46 +1406,37 @@ async function doDelegate(opAddr) {
   const btn=document.getElementById('dlg-btn');
   if(btn){btn.disabled=true;btn.textContent='Signing…';}
   try {
-    const {SigningStargateClient,GasPrice}=await import('https://esm.sh/@cosmjs/stargate@0.32.4');
-    const rpc=c.rest.replace('rest.cosmos.directory','rpc.cosmos.directory');
-    const signer=window.keplr.getOfflineSigner(c.chainId);
-    const gasPrice=GasPrice.fromString('0.025'+c.denom);
-    const client=await SigningStargateClient.connectWithSigner(rpc,signer,{gasPrice});
-    const result=await client.delegateTokens(
-      _walletAddr, opAddr,
-      {denom:c.denom, amount:amtUtoken},
-      'auto', ''
-    );
+    const msgs=[{typeUrl:'/cosmos.staking.v1beta1.MsgDelegate',value:{delegatorAddress:_walletAddr,validatorAddress:opAddr,amount:{denom:c.denom,amount:amtUtoken}}}];
+    const txhash=await _signAndBroadcast(msgs,250000);
     closeModal();
-    showToast('Delegated! Tx: '+result.transactionHash.slice(0,16)+'…');
+    showToast('Delegated! Tx: '+txhash.slice(0,16)+'…');
   } catch(e) {
     if(btn){btn.disabled=false;btn.textContent='Delegate';}
-    showToast('Error: '+(e.message||String(e)).slice(0,80));
+    console.error('Delegate error:',e);
+    showToast('Error: '+(e.message||String(e)).slice(0,160));
   }
 }
 
 async function claimRewards(btn) {
   if(!_walletAddr) return connectWallet();
-  const c=chain();
-  const delRes=await apiFetch(c.rest+`/cosmos/staking/v1beta1/delegations/${_walletAddr}?pagination.limit=100`);
-  const valAddrs=(delRes?.delegation_responses||[]).map(d=>d.delegation.validator_address);
-  if(!valAddrs.length) return showToast('No delegations found.');
   if(btn){btn.disabled=true;btn.textContent='Claiming…';}
+  const c=chain();
   try {
-    const {SigningStargateClient,GasPrice}=await import('https://esm.sh/@cosmjs/stargate@0.32.4');
-    const rpc=c.rest.replace('rest.cosmos.directory','rpc.cosmos.directory');
-    const signer=window.keplr.getOfflineSigner(c.chainId);
-    const client=await SigningStargateClient.connectWithSigner(rpc,signer,{gasPrice:GasPrice.fromString('0.025'+c.denom)});
-    const msgs=valAddrs.map(va=>({
-      typeUrl:'/cosmos.distribution.v1beta1.MsgWithdrawDelegatorReward',
-      value:{delegatorAddress:_walletAddr,validatorAddress:va}
-    }));
-    const result=await client.signAndBroadcast(_walletAddr,msgs,'auto','');
-    showToast('Rewards claimed! Tx: '+result.transactionHash.slice(0,16)+'…');
+    const delRes=await apiFetch(c.rest+`/cosmos/staking/v1beta1/delegations/${_walletAddr}?pagination.limit=100`);
+    const valAddrs=(delRes?.delegation_responses||[]).map(d=>d.delegation.validator_address);
+    if(!valAddrs.length){
+      if(btn){btn.disabled=false;btn.textContent='Claim ↗';}
+      return showToast('No delegations found.');
+    }
+    const msgs=valAddrs.map(va=>({typeUrl:'/cosmos.distribution.v1beta1.MsgWithdrawDelegatorReward',value:{delegatorAddress:_walletAddr,validatorAddress:va}}));
+    const txhash=await _signAndBroadcast(msgs,150000);
+    if(btn){btn.disabled=false;btn.textContent='Claim ↗';}
+    showToast('Rewards claimed! Tx: '+txhash.slice(0,16)+'…');
     viewDashboard();
   } catch(e) {
-    if(btn){btn.disabled=false;btn.textContent='Claim';}
-    showToast('Error: '+(e.message||String(e)).slice(0,80));
+    if(btn){btn.disabled=false;btn.textContent='Claim ↗';}
+    console.error('Claim error:',e);
+    showToast('Error: '+(e.message||String(e)).slice(0,160));
   }
 }
 
@@ -1499,13 +1581,13 @@ async function viewStaking() {
   setContent(`
     ${statsBar}
     <div class="stk-tabbar">
-      <button class="stk-tab active" id="stk-tab-popular"  onclick="stkTab('popular')">Popular</button>
-      <button class="stk-tab"        id="stk-tab-active"   onclick="stkTab('active')">Active</button>
+      <button class="stk-tab"        id="stk-tab-popular"  onclick="stkTab('popular')">Popular</button>
+      <button class="stk-tab active" id="stk-tab-active"   onclick="stkTab('active')">Active</button>
       <button class="stk-tab"        id="stk-tab-inactive" onclick="stkTab('inactive')">Inactive</button>
       <span class="stk-tabbar-count">${activeVals.length}/${activeVals.length+inactiveVals.length}</span>
     </div>
-    <div id="stk-panel-popular">${panel(popularRows,'popular')}</div>
-    <div id="stk-panel-active"  style="display:none">${panel(activeRows,'active')}</div>
+    <div id="stk-panel-popular"  style="display:none">${panel(popularRows,'popular')}</div>
+    <div id="stk-panel-active">${panel(activeRows,'active')}</div>
     <div id="stk-panel-inactive" style="display:none">${panel(inactiveRows,'inactive')}</div>
   `);
   _loadKeybaseAvatars(activeVals.concat(inactiveVals));
@@ -1732,6 +1814,7 @@ let _utInfos=[], _utVals=[], _utWin=10000;
 let _stkMap={}, _stkTotal=0;
 let _walletAddr='';
 const _kbCache={};
+const _pageCache={};
 
 async function viewUptime() {
   showLoading();
@@ -1764,6 +1847,7 @@ async function viewUptime() {
 
   if(!_utVals.length){setContent('<div class="p-empty error">Could not load uptime data.</div>');return;}
   renderUptimeBlocks();
+  refreshT=setInterval(_refreshUptimeData,30000);
 }
 
 function _utItems(){
@@ -1772,48 +1856,30 @@ function _utItems(){
     : _utVals.map(()=>({missed_blocks_counter:'0',index_offset:String(_utWin)}));
 }
 
-function renderUptimeBlocks(){
-  const items=_utItems();
-  const SHOW=100; // blocks to visualize per validator
+let _utActiveTab='blocks';
 
-  const cards=items.map((info,i)=>{
+function _buildBlocksGrid(){
+  const SHOW=100;
+  return _utItems().map((info,i)=>{
     const missed=parseInt(info.missed_blocks_counter||0);
     const offset=parseInt(info.index_offset||_utWin);
-    const name=(_utVals[i]?.description?.moniker||info.address?.slice(0,16)||'#'+(i+1));
+    const name=_utVals[i]?.description?.moniker||info.address?.slice(0,16)||'#'+(i+1);
     const scaledMiss=Math.round((missed/Math.max(offset,1))*SHOW);
-    const blocks=_genBlocks(SHOW,scaledMiss,i);
-    const blksHtml=blocks.map(t=>`<span class="ut-blk ut-blk-${t}"></span>`).join('');
-    const missedCls=missed>0?'has-miss':'';
+    const blksHtml=_genBlocks(SHOW,scaledMiss,i).map(t=>`<span class="ut-blk ut-blk-${t}"></span>`).join('');
     return `<div class="ut-card" data-name="${name.toLowerCase()}">
       <div class="ut-vname">${i+1}.${name}</div>
       <div class="ut-blkrow">${blksHtml}</div>
-      <div class="ut-missed-n ${missedCls}">${missed||0}</div>
+      <div class="ut-missed-n ${missed>0?'has-miss':''}">${missed||0}</div>
     </div>`;
   }).join('');
-
-  setContent(`
-    <div class="ut-tabs">
-      <button class="ut-tab" onclick="_utTab('overall',this)">Overall</button>
-      <button class="ut-tab active" onclick="_utTab('blocks',this)">Blocks</button>
-      <button class="ut-tab" onclick="_utTab('customize',this)">Customize</button>
-    </div>
-    <input class="ut-filter" id="utFilter" placeholder="Keywords to filter validators"
-      oninput="filterValidators(this.value)" />
-    <div class="ut-grid" id="utGrid">${cards}</div>
-    <div class="ut-legend">
-      <span class="ut-leg"><span class="ut-leg-dot c"></span> Committed</span>
-      <span class="ut-leg"><span class="ut-leg-dot p"></span> Precommitted</span>
-      <span class="ut-leg"><span class="ut-leg-dot m"></span> Missed</span>
-    </div>`);
 }
 
-function renderUptimeOverall(){
-  const items=_utItems();
-  const rows=items.map((info,i)=>{
+function _buildOverallGrid(){
+  return _utItems().map((info,i)=>{
     const missed=parseInt(info.missed_blocks_counter||0);
     const offset=parseInt(info.index_offset||_utWin);
     const pct=Math.min(100,Math.max(0,((offset-missed)/Math.max(offset,1))*100));
-    const name=(_utVals[i]?.description?.moniker||info.address?.slice(0,20)||'#'+(i+1));
+    const name=_utVals[i]?.description?.moniker||info.address?.slice(0,20)||'#'+(i+1);
     const color=pct>=98?'#22c55e':pct>=90?'#f59e0b':'#ef4444';
     return `<div class="uto-row" data-name="${name.toLowerCase()}">
       <span class="uto-rank">${i+1}</span>
@@ -1823,7 +1889,28 @@ function renderUptimeOverall(){
       <span class="uto-missed">${missed} missed</span>
     </div>`;
   }).join('');
+}
 
+function renderUptimeBlocks(){
+  _utActiveTab='blocks';
+  setContent(`
+    <div class="ut-tabs">
+      <button class="ut-tab" onclick="_utTab('overall',this)">Overall</button>
+      <button class="ut-tab active" onclick="_utTab('blocks',this)">Blocks</button>
+      <button class="ut-tab" onclick="_utTab('customize',this)">Customize</button>
+    </div>
+    <input class="ut-filter" id="utFilter" placeholder="Keywords to filter validators"
+      oninput="filterValidators(this.value)" />
+    <div class="ut-grid" id="utGrid">${_buildBlocksGrid()}</div>
+    <div class="ut-legend">
+      <span class="ut-leg"><span class="ut-leg-dot c"></span> Committed</span>
+      <span class="ut-leg"><span class="ut-leg-dot p"></span> Precommitted</span>
+      <span class="ut-leg"><span class="ut-leg-dot m"></span> Missed</span>
+    </div>`);
+}
+
+function renderUptimeOverall(){
+  _utActiveTab='overall';
   setContent(`
     <div class="ut-tabs">
       <button class="ut-tab active" onclick="_utTab('overall',this)">Overall</button>
@@ -1832,7 +1919,58 @@ function renderUptimeOverall(){
     </div>
     <input class="ut-filter" id="utFilter" placeholder="Keywords to filter validators"
       oninput="filterValidators(this.value)" />
-    <div class="ut-overall" id="utGrid">${rows}</div>`);
+    <div class="ut-overall" id="utGrid">${_buildOverallGrid()}</div>`);
+}
+
+async function _refreshUptimeData(){
+  if(view!=='uptime') return;
+  const c=chain();
+  try {
+    const [siR,vsR]=await Promise.allSettled([
+      apiFetch(c.rest+'/cosmos/slashing/v1beta1/signing_infos?pagination.limit=200'),
+      apiFetch(c.rest+'/cosmos/base/tendermint/v1beta1/validatorsets/latest?pagination.limit=200'),
+    ]);
+    const allInfos=siR.value?.info||[];
+    const tmVals=(vsR.value?.validators||[]).sort((a,b)=>Number(b.voting_power)-Number(a.voting_power));
+    const prevInfos=_utInfos;
+    if(tmVals.length){
+      const infoByAddr={};
+      allInfos.forEach(info=>{infoByAddr[info.address]=info;});
+      _utInfos=tmVals.map(tmv=>infoByAddr[tmv.address]||{address:tmv.address,missed_blocks_counter:'0',index_offset:String(_utWin)});
+    } else {
+      _utInfos=allInfos.slice(0,_utVals.length);
+    }
+    const grid=$('utGrid');
+    if(!grid) return;
+    const SHOW=100;
+    if(_utActiveTab==='blocks'){
+      const cards=grid.querySelectorAll('.ut-card');
+      _utInfos.forEach((info,i)=>{
+        if(prevInfos[i]?.missed_blocks_counter===info.missed_blocks_counter) return;
+        if(!cards[i]) return;
+        const missed=parseInt(info.missed_blocks_counter||0);
+        const offset=parseInt(info.index_offset||_utWin);
+        const name=_utVals[i]?.description?.moniker||info.address?.slice(0,16)||'#'+(i+1);
+        const scaledMiss=Math.round((missed/Math.max(offset,1))*SHOW);
+        const blksHtml=_genBlocks(SHOW,scaledMiss,i).map(t=>`<span class="ut-blk ut-blk-${t}"></span>`).join('');
+        cards[i].innerHTML=`<div class="ut-vname">${i+1}.${name}</div><div class="ut-blkrow">${blksHtml}</div><div class="ut-missed-n ${missed>0?'has-miss':''}">${missed||0}</div>`;
+      });
+    } else if(_utActiveTab==='overall'){
+      const rows=grid.querySelectorAll('.uto-row');
+      _utInfos.forEach((info,i)=>{
+        if(prevInfos[i]?.missed_blocks_counter===info.missed_blocks_counter) return;
+        if(!rows[i]) return;
+        const missed=parseInt(info.missed_blocks_counter||0);
+        const offset=parseInt(info.index_offset||_utWin);
+        const pct=Math.min(100,Math.max(0,((offset-missed)/Math.max(offset,1))*100));
+        const name=_utVals[i]?.description?.moniker||info.address?.slice(0,20)||'#'+(i+1);
+        const color=pct>=98?'#22c55e':pct>=90?'#f59e0b':'#ef4444';
+        rows[i].innerHTML=`<span class="uto-rank">${i+1}</span><span class="uto-name">${name}</span><div class="uto-bar-bg"><div class="uto-bar-fill" style="width:${pct}%;background:${color}"></div></div><span class="uto-pct" style="color:${color}">${pct.toFixed(2)}%</span><span class="uto-missed">${missed} missed</span>`;
+      });
+    }
+    const q=($('utFilter')||{}).value||'';
+    if(q) filterValidators(q);
+  } catch(e){}
 }
 
 function _genBlocks(total,missedCount,seed){
@@ -1849,6 +1987,7 @@ function _genBlocks(total,missedCount,seed){
 }
 
 function _utTab(tab,btn){
+  _utActiveTab=tab;
   document.querySelectorAll('.ut-tab').forEach(b=>b.classList.remove('active'));
   btn.classList.add('active');
   const q=($('utFilter')||{}).value||'';
