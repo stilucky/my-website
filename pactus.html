@@ -263,6 +263,12 @@
       margin: 1.5rem 0 0.6rem;
     }
 
+    .cmd-desc {
+      font-size: 0.82rem;
+      color: var(--muted);
+      margin: 0.2rem 0 0.35rem 0.2rem;
+    }
+
     .step-desc {
       font-size: 0.9rem;
       color: var(--muted);
@@ -581,14 +587,33 @@ sudo systemctl start pactusd</pre>
     <div class="section-label">Operations</div>
     <div class="section-title">Wallet & Validator Commands</div>
 
+    <div class="step-label">Service management</div>
+    <div class="cmd-desc">Xem log node</div>
+    <div class="code-block"><button class="copy-btn" onclick="copyCode(this)">COPY</button><pre>sudo journalctl -u pactusd -f</pre></div>
+    <div class="cmd-desc">Khởi động / dừng / khởi động lại</div>
+    <div class="code-block"><button class="copy-btn" onclick="copyCode(this)">COPY</button><pre>sudo systemctl start pactusd</pre></div>
+    <div class="code-block"><button class="copy-btn" onclick="copyCode(this)">COPY</button><pre>sudo systemctl stop pactusd</pre></div>
+    <div class="code-block"><button class="copy-btn" onclick="copyCode(this)">COPY</button><pre>sudo systemctl restart pactusd</pre></div>
+
+    <div class="step-label">Wallet</div>
+    <div class="cmd-desc">Xem tất cả địa chỉ trong ví</div>
     <div class="code-block"><button class="copy-btn" onclick="copyCode(this)">COPY</button><pre>./pactus-wallet address all</pre></div>
+    <div class="cmd-desc">Kiểm tra số dư của một địa chỉ</div>
     <div class="code-block"><button class="copy-btn" onclick="copyCode(this)">COPY</button><pre>./pactus-wallet address balance &lt;ADDRESS&gt;</pre></div>
+    <div class="cmd-desc">Xem seed phrase (mnemonic) — giữ bí mật</div>
     <div class="code-block"><button class="copy-btn" onclick="copyCode(this)">COPY</button><pre>./pactus-wallet seed</pre></div>
+    <div class="cmd-desc">Tạo địa chỉ BLS mới cho validator</div>
     <div class="code-block"><button class="copy-btn" onclick="copyCode(this)">COPY</button><pre>./pactus-wallet --path ~/pactus/wallets/default_wallet address new --type bls_account</pre></div>
-    <div class="code-block"><button class="copy-btn" onclick="copyCode(this)">COPY</button><pre>./pactus-wallet tx bond &lt;reward&gt; &lt;validator&gt; &lt;amount&gt;</pre></div>
+
+    <div class="step-label">Validator / Staking</div>
+    <div class="cmd-desc">Stake token vào validator (bond)</div>
+    <div class="code-block"><button class="copy-btn" onclick="copyCode(this)">COPY</button><pre>./pactus-wallet tx bond &lt;reward_address&gt; &lt;validator_address&gt; &lt;amount&gt;</pre></div>
+    <div class="cmd-desc">Hủy stake khỏi validator (unbond)</div>
     <div class="code-block"><button class="copy-btn" onclick="copyCode(this)">COPY</button><pre>./pactus-wallet tx unbond &lt;validator_address&gt;</pre></div>
-    <div class="code-block"><button class="copy-btn" onclick="copyCode(this)">COPY</button><pre>./pactus-wallet tx withdraw &lt;validator&gt; &lt;reward&gt; &lt;amount&gt;</pre></div>
-    <div class="code-block"><button class="copy-btn" onclick="copyCode(this)">COPY</button><pre>./pactus-wallet tx transfer &lt;reward&gt; &lt;receiver&gt; &lt;amount&gt;</pre></div>
+    <div class="cmd-desc">Rút phần thưởng từ validator về ví</div>
+    <div class="code-block"><button class="copy-btn" onclick="copyCode(this)">COPY</button><pre>./pactus-wallet tx withdraw &lt;validator_address&gt; &lt;reward_address&gt; &lt;amount&gt;</pre></div>
+    <div class="cmd-desc">Chuyển token sang địa chỉ khác</div>
+    <div class="code-block"><button class="copy-btn" onclick="copyCode(this)">COPY</button><pre>./pactus-wallet tx transfer &lt;sender_address&gt; &lt;receiver_address&gt; &lt;amount&gt;</pre></div>
   </div>
 
   <!-- RESOURCES -->
