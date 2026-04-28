@@ -1,0 +1,794 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Stilucky.eth — Staking Provider</title>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&family=Fira+Sans:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #040a14;
+      --surface: #071020;
+      --card: #0b1a2e;
+      --border: #1a3a5c;
+      --accent: #00d4ff;
+      --accent2: #7b2fff;
+      --accent3: #00ff9d;
+      --text: #cde4f5;
+      --muted: #5a80a0;
+      --white: #ffffff;
+      --heading: #ffffff;
+      --nav-bg: rgba(4, 10, 20, 0.85);
+      --feature-hover: #0e2040;
+      --noise-opacity: 0.35;
+    }
+
+    [data-theme="light"] {
+      --bg: #f2f6fc;
+      --surface: #e4eef8;
+      --card: #ffffff;
+      --border: #c2d4eb;
+      --accent: #0088bb;
+      --accent2: #6b1fe0;
+      --accent3: #00966a;
+      --text: #1a2e4a;
+      --muted: #5a7898;
+      --white: #ffffff;
+      --heading: #0d1e32;
+      --nav-bg: rgba(242, 246, 252, 0.92);
+      --feature-hover: #ddeeff;
+      --noise-opacity: 0;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Inter', sans-serif;
+      font-weight: 300;
+      overflow-x: hidden;
+      transition: background 0.25s, color 0.25s;
+    }
+
+    /* ── NOISE OVERLAY ── */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+      pointer-events: none;
+      z-index: 999;
+      opacity: var(--noise-opacity);
+      transition: opacity 0.25s;
+    }
+
+    /* ── NAVBAR ── */
+    nav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1.2rem 4rem;
+      background: var(--nav-bg);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid rgba(0, 212, 255, 0.12);
+      transition: background 0.25s;
+    }
+
+    .nav-logo {
+      font-family: 'Orbitron', monospace;
+      font-weight: 900;
+      font-size: 1.3rem;
+      color: var(--heading);
+      text-decoration: none;
+      letter-spacing: 0.05em;
+    }
+
+    .nav-logo span { color: var(--accent); }
+
+    .nav-links { display: flex; gap: 2rem; list-style: none; }
+    .nav-links a {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 0.8rem;
+      color: var(--muted);
+      text-decoration: none;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      transition: color 0.2s;
+    }
+    .nav-links a:hover { color: var(--accent); }
+
+    /* ── HERO ── */
+    .hero {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      padding: 8rem 4rem 4rem;
+      overflow: hidden;
+    }
+
+    /* Grid background */
+    .hero::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(0,212,255,0.04) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0,212,255,0.04) 1px, transparent 1px);
+      background-size: 60px 60px;
+    }
+
+    /* Radial glow */
+    .hero::after {
+      content: '';
+      position: absolute;
+      top: 20%;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 800px;
+      height: 500px;
+      background: radial-gradient(ellipse, rgba(123,47,255,0.18) 0%, rgba(0,212,255,0.08) 50%, transparent 70%);
+      pointer-events: none;
+    }
+
+    .hero-content {
+      position: relative;
+      z-index: 1;
+      text-align: center;
+      max-width: 780px;
+    }
+
+    .hero-tag {
+      display: inline-block;
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 0.72rem;
+      letter-spacing: 0.2em;
+      color: var(--accent);
+      text-transform: uppercase;
+      border: 1px solid rgba(0,212,255,0.3);
+      padding: 0.4rem 1rem;
+      margin-bottom: 2rem;
+      animation: fadeUp 0.8s ease both;
+    }
+
+    .hero h1 {
+      font-family: 'Orbitron', monospace;
+      font-weight: 900;
+      font-size: clamp(2.4rem, 5vw, 4.2rem);
+      line-height: 1.1;
+      color: var(--heading);
+      margin-bottom: 1.4rem;
+      animation: fadeUp 0.9s ease 0.1s both;
+    }
+
+    .hero h1 .highlight {
+      background: linear-gradient(90deg, var(--accent), var(--accent2));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .hero p {
+      font-size: 1.05rem;
+      color: var(--muted);
+      line-height: 1.7;
+      margin-bottom: 2.4rem;
+      animation: fadeUp 1s ease 0.2s both;
+    }
+
+    .hero-badges {
+      display: flex;
+      justify-content: center;
+      gap: 1rem;
+      flex-wrap: wrap;
+      margin-bottom: 2.4rem;
+      animation: fadeUp 1s ease 0.3s both;
+    }
+
+    .badge {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 0.72rem;
+      padding: 0.4rem 0.9rem;
+      border: 1px solid var(--border);
+      color: var(--accent3);
+      letter-spacing: 0.1em;
+      background: rgba(0,255,157,0.04);
+    }
+
+    .hero-cta {
+      display: flex;
+      justify-content: center;
+      gap: 1rem;
+      animation: fadeUp 1s ease 0.4s both;
+    }
+
+    .btn {
+      display: inline-block;
+      padding: 0.85rem 2rem;
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 0.8rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      text-decoration: none;
+      cursor: pointer;
+      border: none;
+      transition: all 0.25s;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      color: var(--bg);
+      font-weight: 700;
+    }
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 32px rgba(0,212,255,0.35);
+    }
+
+    .btn-outline {
+      background: transparent;
+      color: var(--accent);
+      border: 1px solid var(--accent);
+    }
+    .btn-outline:hover {
+      background: rgba(0,212,255,0.08);
+      transform: translateY(-2px);
+    }
+
+    /* ── FEATURES ── */
+    section { padding: 6rem 4rem; }
+
+    .section-label {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 0.72rem;
+      letter-spacing: 0.2em;
+      color: var(--accent);
+      text-transform: uppercase;
+      margin-bottom: 0.8rem;
+    }
+
+    .section-title {
+      font-family: 'Orbitron', monospace;
+      font-weight: 700;
+      font-size: clamp(1.6rem, 3vw, 2.4rem);
+      color: var(--heading);
+      margin-bottom: 3.5rem;
+    }
+
+    #features { background: var(--surface); }
+
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 1.5px;
+      background: var(--border);
+      border: 1px solid var(--border);
+    }
+
+    .feature-card {
+      background: var(--card);
+      padding: 2.4rem;
+      position: relative;
+      overflow: hidden;
+      transition: background 0.3s;
+    }
+
+    .feature-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0;
+      width: 3px;
+      height: 0;
+      background: linear-gradient(180deg, var(--accent), var(--accent2));
+      transition: height 0.4s ease;
+    }
+
+    .feature-card:hover { background: var(--feature-hover); }
+    .feature-card:hover::before { height: 100%; }
+
+    .feature-icon {
+      font-size: 1.8rem;
+      margin-bottom: 1.2rem;
+    }
+
+    .feature-card h3 {
+      font-family: 'Orbitron', monospace;
+      font-size: 0.9rem;
+      font-weight: 700;
+      color: var(--heading);
+      letter-spacing: 0.05em;
+      margin-bottom: 0.8rem;
+    }
+
+    .feature-card p {
+      font-size: 0.88rem;
+      color: var(--muted);
+      line-height: 1.65;
+    }
+
+    /* ── CHAINS ── */
+    .chain-section { border-top: 1px solid var(--border); }
+
+    .chain-tabs {
+      display: flex;
+      gap: 0;
+      margin-bottom: 2.5rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .chain-tab {
+      padding: 0.9rem 1.8rem;
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 0.78rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--muted);
+      cursor: pointer;
+      border: none;
+      background: transparent;
+      border-bottom: 2px solid transparent;
+      margin-bottom: -1px;
+      transition: all 0.2s;
+    }
+
+    .chain-tab.active {
+      color: var(--accent);
+      border-bottom-color: var(--accent);
+    }
+
+    .chain-tab:hover:not(.active) { color: var(--text); }
+
+    .chain-panel { display: none; }
+    .chain-panel.active { display: block; }
+
+    /* ── CHAIN CARDS ── */
+    .chains-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 1rem;
+    }
+
+    .chain-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      padding: 1.8rem 1rem 1.4rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 1rem;
+      transition: all 0.22s;
+      cursor: default;
+    }
+
+    .chain-card:hover {
+      border-color: var(--accent);
+      transform: translateY(-3px);
+      box-shadow: 0 8px 28px rgba(0,212,255,0.12);
+    }
+
+    .chain-card-link {
+      text-decoration: none;
+      cursor: pointer;
+    }
+
+    .chain-card-link:hover {
+      border-color: var(--accent2);
+      box-shadow: 0 8px 28px rgba(123,47,255,0.18);
+    }
+
+    [data-theme="light"] .chain-card {
+      box-shadow: 0 2px 10px rgba(0,0,0,0.07);
+    }
+
+    [data-theme="light"] .chain-card:hover {
+      box-shadow: 0 8px 28px rgba(0,100,180,0.14);
+      border-color: var(--accent);
+    }
+
+    .chain-logo-wrap {
+      width: 80px; height: 80px;
+      border-radius: 14px;
+      overflow: visible;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+      background: #111;
+      position: relative;
+    }
+
+    .chain-logo-wrap img {
+      width: 100%; height: 100%;
+      object-fit: cover;
+      display: block;
+      border-radius: 14px;
+    }
+
+    .chain-logo-fb {
+      width: 80px; height: 80px;
+      border-radius: 14px;
+      display: flex; align-items: center; justify-content: center;
+      font-family: 'Orbitron', monospace;
+      font-size: 1.8rem; font-weight: 900;
+      color: #fff;
+      flex-shrink: 0;
+      position: relative;
+    }
+
+    .chain-card-name {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 0.82rem;
+      font-weight: 700;
+      color: var(--heading);
+      display: flex; align-items: center; gap: 0.45rem;
+      text-align: center; line-height: 1.3;
+    }
+
+    /* ── STATUS DOT ── */
+    .chain-dot {
+      --dot-color: #22c55e;
+      width: 13px; height: 13px;
+      border-radius: 50%;
+      background: var(--dot-color);
+      flex-shrink: 0;
+      position: relative;
+      animation: dotPulse 2s ease-in-out infinite;
+    }
+
+    .chain-dot::after {
+      content: '';
+      position: absolute;
+      inset: -3px;
+      border-radius: 50%;
+      background: var(--dot-color);
+      opacity: 0.45;
+      animation: dotRipple 2s ease-in-out infinite;
+    }
+
+    .chain-dot--static,
+    .chain-dot--static::after {
+      animation: none;
+    }
+
+    @keyframes dotPulse {
+      0%, 100% { box-shadow: 0 0 4px var(--dot-color); }
+      50%       { box-shadow: 0 0 10px var(--dot-color), 0 0 20px var(--dot-color); }
+    }
+
+    @keyframes dotRipple {
+      0%   { transform: scale(1);   opacity: 0.45; }
+      70%  { transform: scale(2.6); opacity: 0; }
+      100% { transform: scale(2.6); opacity: 0; }
+    }
+
+    /* ── STATS ── */
+    .stats-section {
+      background: var(--surface);
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 2rem;
+      text-align: center;
+    }
+
+    .stat-item {}
+    .stat-value {
+      font-family: 'Orbitron', monospace;
+      font-size: 2.4rem;
+      font-weight: 900;
+      background: linear-gradient(90deg, var(--accent), var(--accent2));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .stat-label {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 0.72rem;
+      letter-spacing: 0.18em;
+      color: var(--muted);
+      text-transform: uppercase;
+      margin-top: 0.4rem;
+    }
+
+    /* ── FOOTER ── */
+    footer {
+      background: var(--surface);
+      border-top: 1px solid var(--border);
+      padding: 3rem 4rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 1.5rem;
+    }
+
+    .footer-logo {
+      font-family: 'Orbitron', monospace;
+      font-weight: 900;
+      font-size: 1.1rem;
+      color: var(--heading);
+      text-decoration: none;
+    }
+
+    .footer-logo span { color: var(--accent); }
+
+    .footer-links {
+      display: flex;
+      gap: 1.5rem;
+      list-style: none;
+    }
+
+    .footer-links a {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 0.72rem;
+      letter-spacing: 0.12em;
+      color: var(--muted);
+      text-decoration: none;
+      text-transform: uppercase;
+      transition: color 0.2s;
+    }
+
+    .footer-links a:hover { color: var(--accent); }
+
+    .footer-copy {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 0.7rem;
+      color: var(--muted);
+      letter-spacing: 0.08em;
+    }
+
+    /* ── THEME TOGGLE ── */
+    .theme-btn {
+      width: 34px; height: 34px;
+      display: flex; align-items: center; justify-content: center;
+      background: rgba(0, 212, 255, 0.07);
+      border: 1px solid rgba(0, 212, 255, 0.25);
+      color: var(--muted);
+      cursor: pointer; font-size: 1rem;
+      transition: all 0.2s; flex-shrink: 0;
+      margin-left: 0.5rem;
+    }
+    .theme-btn:hover { color: var(--accent); border-color: var(--accent); background: rgba(0, 212, 255, 0.14); }
+
+    /* ── LIGHT MODE OVERRIDES ── */
+    [data-theme="light"] .hero::before {
+      background-image:
+        linear-gradient(rgba(0,100,180,0.06) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0,100,180,0.06) 1px, transparent 1px);
+    }
+    [data-theme="light"] .hero::after {
+      background: radial-gradient(ellipse, rgba(107,31,224,0.1) 0%, rgba(0,136,187,0.05) 50%, transparent 70%);
+    }
+    [data-theme="light"] .hero-tag { border-color: rgba(0,136,187,0.3); }
+    [data-theme="light"] .badge { background: rgba(0,150,106,0.07); }
+    [data-theme="light"] .btn-primary { color: #fff; }
+    [data-theme="light"] .btn-outline { color: var(--accent); border-color: var(--accent); }
+    [data-theme="light"] .btn-outline:hover { background: rgba(0,136,187,0.08); }
+    [data-theme="light"] .feature-card::before { background: linear-gradient(180deg, var(--accent), var(--accent2)); }
+    [data-theme="light"] .chain-chip:hover { border-color: var(--accent); color: var(--accent); background: rgba(0,136,187,0.06); }
+    [data-theme="light"] nav { border-bottom-color: rgba(0,136,187,0.18); }
+
+    /* ── ANIMATIONS ── */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(24px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 768px) {
+      nav { padding: 1rem 1.5rem; }
+      .nav-links { display: none; }
+      section { padding: 4rem 1.5rem; }
+      .hero { padding: 7rem 1.5rem 3rem; }
+      footer { padding: 2rem 1.5rem; flex-direction: column; align-items: flex-start; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- NAVBAR -->
+  <nav>
+    <a href="#" class="nav-logo">Stilucky<span>.</span>eth</a>
+    <ul class="nav-links">
+      <li><a href="explorer.html" target="_blank">Explorer</a></li>
+      <li><a href="#chains">Mainnet</a></li>
+      <li><a href="#chains">Testnet</a></li>
+      <li><a href="https://github.com/vinjan23" target="_blank">GitHub</a></li>
+    </ul>
+    <button class="theme-btn" id="themeBtn" onclick="toggleTheme()" title="Toggle light/dark">
+      <span id="themeIcon">☀</span>
+    </button>
+  </nav>
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="hero-content">
+      <div class="hero-tag">⬡ Cosmos Ecosystem Node Operator</div>
+      <h1>Staking Provider &<br/><span class="highlight">Node Operator</span></h1>
+      <p>Trusted & Security Provider — Stake and Earn Rewards.<br/>Low Fees, Highly Secured, and 24/7 Monitored.</p>
+      <div class="hero-badges">
+        <span class="badge">✦ Low Commission</span>
+        <span class="badge">✦ 0 Slashing Record</span>
+        <span class="badge">✦ 24/7 Uptime</span>
+        <span class="badge">✦ Public Endpoints</span>
+      </div>
+      <div class="hero-cta">
+        <a href="#features" class="btn btn-primary">Learn More</a>
+        <a href="explorer.html" target="_blank" class="btn btn-outline">Explorer →</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- STATS -->
+  <section class="stats-section" style="padding: 3.5rem 4rem;">
+    <div class="stats-grid">
+      <div class="stat-item">
+        <div class="stat-value">20+</div>
+        <div class="stat-label">Mainnet Chains</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-value">14+</div>
+        <div class="stat-label">Testnet Chains</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-value">0</div>
+        <div class="stat-label">Slashing Events</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FEATURES -->
+  <section id="features">
+    <div class="section-label">// Services</div>
+    <div class="section-title">What You Need to Know About Us</div>
+    <div class="features-grid">
+      <div class="feature-card">
+        <div class="feature-icon">🛡️</div>
+        <h3>Trusted Service</h3>
+        <p>Professional Staking Provider & Node Operator with proven reliability across multiple Cosmos chains.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">🔭</div>
+        <h3>Interchain Explorer</h3>
+        <p>Fast and reliable block explorer bridging multiple chains for seamless on-chain visibility.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">⚡</div>
+        <h3>Public Endpoints</h3>
+        <p>Open API, RPC, and gRPC endpoints provided freely to the Cosmos developer community.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">💎</div>
+        <h3>Low Fees & Commission</h3>
+        <p>Competitive validator commission with impressive uptime and a spotless zero-slashing record.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">🌐</div>
+        <h3>Testnet Labs</h3>
+        <p>Supporting emerging networks from the testnet stage, helping secure tomorrow's Cosmos chains today.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- CHAINS -->
+  <section id="chains" class="chain-section">
+    <div class="section-label">// Networks</div>
+    <div class="section-title">Active Deployments</div>
+
+    <div class="chain-tabs">
+      <button class="chain-tab active" onclick="switchTab('mainnet', this)">Mainnet</button>
+      <button class="chain-tab" onclick="switchTab('testnet', this)">Testnet</button>
+    </div>
+
+    <div id="mainnet-panel" class="chain-panel active">
+      <div class="chains-grid" id="mainnet-grid"></div>
+    </div>
+
+    <div id="testnet-panel" class="chain-panel">
+      <div class="chains-grid" id="testnet-grid"></div>
+    </div>
+
+  </section>
+
+  <!-- FOOTER -->
+  <footer>
+    <a href="#" class="footer-logo">Stilucky<span>.</span>eth</a>
+    <ul class="footer-links">
+      <li><a href="explorer.html" target="_blank">Explorer</a></li>
+      <li><a href="https://github.com/vinjan23" target="_blank">GitHub</a></li>
+      <li><a href="mailto:contact@indonode.net">Contact</a></li>
+      <li><a href="#">Terms</a></li>
+      <li><a href="#">Privacy</a></li>
+    </ul>
+    <div class="footer-copy">© 2024 Stilucky.eth · All rights reserved</div>
+  </footer>
+
+  <script>
+    /* ── CHAIN DATA ── */
+    const REG = 'https://raw.githubusercontent.com/cosmos/chain-registry/master';
+
+    const MAINNET = [
+      { name:'Arkeo',          logo:`${REG}/arkeo/images/arkeo.svg`,                  color:'#1e40af', dot:'#22c55e', page:'arkeo.html' },
+      { name:'BitBadges',      logo:`${REG}/bitbadges/images/badge_logo.svg`,          color:'#2d0040', dot:'#22c55e', page:'bitbadges.html' },
+      { name:'Lava',           logo:`${REG}/lava/images/lava.png`,                   color:'#2d0e00', dot:'#22c55e' },
+      { name:'Paxi',           logo:`${REG}/paxi/images/paxi.png`,                   color:'#2e1065', dot:'#22c55e', page:'paxi.html' },
+      { name:'Sunrise',        logo:`${REG}/sunrise/images/sunrise.png`,             color:'#1c0a00', dot:'#22c55e', page:'sunrise.html' },
+      { name:'Pactus',         logo:'https://s3.coinmarketcap.com/static-gravity/image/dcfd2aeed249488b916f0cef2d3fa849.png', color:'#0a1f0f', dot:'#22c55e', page:'pactus.html' },
+      { name:'Muon Network',   logo:'https://images.seeklogo.com/logo-png/44/1/muon-network-logo-png_seeklogo-442126.png', color:'#0d1b3e', dot:'#22c55e' },
+      { name:'Tanssi',         logo:'https://media.licdn.com/dms/image/v2/D4D0BAQEOEXC3hz2VKA/company-logo_200_200/company-logo_200_200/0/1683143708969/tanssi_logo?e=2147483647&v=beta&t=zA1jllXRwntE365TDLGgJXGeBVhWrRxSzwhJMPIEXMA', color:'#1a0a2e', dot:'#22c55e' },
+      { name:'ar.io',          logo:'https://pbs.twimg.com/profile_images/2013701957312012288/BXqkxrHL_400x400.jpg',         color:'#0a0a0a', dot:'#22c55e' },
+    ];
+
+    const TESTNET = [
+      { name:'Atomone',         logo:`${REG}/atomone/images/atomone.svg`,             color:'#1a1a2e', dot:'#22c55e' },
+      { name:'KiiChain',        logo:`${REG}/kiichain/images/kii.png`,          color:'#0c1a2e', dot:'#ef4444' },
+      { name:'Safrochain',      logo:'https://raw.githubusercontent.com/stilucky/my-web/0dfb22b24f88d584caf9fe6b8b29c72c99b06b1d/san.jpg', color:'#064e3b', dot:'#22c55e' },
+    ];
+
+    function logoErr(el, color, letter) {
+      const fb = document.createElement('div');
+      fb.className = 'chain-logo-fb';
+      fb.style.background = color;
+      fb.textContent = letter;
+      el.parentNode.replaceWith(fb);
+    }
+
+    function makeCard(c) {
+      const delay = (Math.random() * 2).toFixed(2);
+      const isGreen = c.dot === '#22c55e';
+      const dot = `<span class="chain-dot${isGreen ? '' : ' chain-dot--static'}" style="--dot-color:${c.dot};animation-delay:${delay}s"></span>`;
+      const logo = c.logo
+        ? `<div class="chain-logo-wrap"><img src="${c.logo}" alt="${c.name}" onerror="logoErr(this,'${c.color}','${c.name[0]}')" /></div>`
+        : `<div class="chain-logo-fb" style="background:${c.color}">${c.name[0]}</div>`;
+      const inner = `${logo}<div class="chain-card-name">${c.name}${dot}</div>`;
+      return c.page
+        ? `<a class="chain-card chain-card-link" href="${c.page}">${inner}</a>`
+        : `<div class="chain-card">${inner}</div>`;
+    }
+
+    function renderChains() {
+      document.getElementById('mainnet-grid').innerHTML = MAINNET.map(makeCard).join('');
+      document.getElementById('testnet-grid').innerHTML = TESTNET.map(makeCard).join('');
+    }
+
+    function switchTab(tab, el) {
+      document.querySelectorAll('.chain-panel').forEach(p => p.classList.remove('active'));
+      document.querySelectorAll('.chain-tab').forEach(t => t.classList.remove('active'));
+      document.getElementById(tab + '-panel').classList.add('active');
+      el.classList.add('active');
+    }
+
+    function toggleTheme() {
+      const isLight = document.documentElement.dataset.theme === 'light';
+      const next = isLight ? 'dark' : 'light';
+      document.documentElement.dataset.theme = next;
+      localStorage.setItem('stilucky-theme', next);
+      document.getElementById('themeIcon').textContent = next === 'light' ? '☾' : '☀';
+    }
+
+    // Init theme from localStorage (shared with explorer.html)
+    (function () {
+      const saved = localStorage.getItem('stilucky-theme') || 'dark';
+      if (saved === 'light') {
+        document.documentElement.dataset.theme = 'light';
+        const icon = document.getElementById('themeIcon');
+        if (icon) icon.textContent = '☾';
+      }
+    })();
+
+    // Render chain cards on load
+    renderChains();
+  </script>
+
+</body>
+</html>

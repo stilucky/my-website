@@ -1,0 +1,644 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Pactus — Node Setup | Stilucky.eth</title>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&family=Fira+Sans:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #040a14;
+      --surface: #071020;
+      --card: #0b1a2e;
+      --border: #1a3a5c;
+      --accent: #00d4ff;
+      --accent2: #7b2fff;
+      --accent3: #00ff9d;
+      --text: #cde4f5;
+      --muted: #5a80a0;
+      --heading: #ffffff;
+      --nav-bg: rgba(4, 10, 20, 0.85);
+      --code-bg: #050d1a;
+      --code-border: #1a3a5c;
+      --noise-opacity: 0.35;
+    }
+
+    [data-theme="light"] {
+      --bg: #f2f6fc;
+      --surface: #e4eef8;
+      --card: #ffffff;
+      --border: #c2d4eb;
+      --accent: #0088bb;
+      --accent2: #6b1fe0;
+      --accent3: #00966a;
+      --text: #1a2e4a;
+      --muted: #5a7898;
+      --heading: #0d1e32;
+      --nav-bg: rgba(242, 246, 252, 0.92);
+      --code-bg: #e8f0fa;
+      --code-border: #b0c8e8;
+      --noise-opacity: 0;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Inter', sans-serif;
+      font-weight: 300;
+      overflow-x: hidden;
+      transition: background 0.25s, color 0.25s;
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+      pointer-events: none;
+      z-index: 999;
+      opacity: var(--noise-opacity);
+      transition: opacity 0.25s;
+    }
+
+    /* ── NAV ── */
+    nav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1.2rem 4rem;
+      background: var(--nav-bg);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid rgba(0, 212, 255, 0.12);
+      transition: background 0.25s;
+    }
+
+    .nav-left { display: flex; align-items: center; gap: 1.5rem; }
+
+    .nav-back {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 0.78rem;
+      color: var(--muted);
+      text-decoration: none;
+      letter-spacing: 0.1em;
+      transition: color 0.2s;
+      display: flex; align-items: center; gap: 0.4rem;
+    }
+    .nav-back:hover { color: var(--accent); }
+
+    .nav-logo {
+      font-family: 'Orbitron', monospace;
+      font-weight: 900;
+      font-size: 1.1rem;
+      color: var(--heading);
+      text-decoration: none;
+    }
+    .nav-logo span { color: var(--accent); }
+
+    .theme-btn {
+      background: none;
+      border: 1px solid var(--border);
+      color: var(--text);
+      width: 36px; height: 36px;
+      border-radius: 50%;
+      cursor: pointer;
+      font-size: 1rem;
+      display: flex; align-items: center; justify-content: center;
+      transition: border-color 0.2s, color 0.2s;
+    }
+    .theme-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+    /* ── HERO BANNER ── */
+    .chain-hero {
+      margin-top: 72px;
+      padding: 4rem 4rem 3rem;
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .chain-hero::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(0,212,255,0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0,212,255,0.03) 1px, transparent 1px);
+      background-size: 60px 60px;
+    }
+
+    .chain-hero-inner {
+      position: relative;
+      z-index: 1;
+      display: flex;
+      align-items: center;
+      gap: 2rem;
+      max-width: 900px;
+    }
+
+    .chain-hero-logo {
+      width: 80px; height: 80px;
+      border-radius: 16px;
+      object-fit: contain;
+      background: #111;
+      padding: 8px;
+      flex-shrink: 0;
+    }
+
+    .chain-hero-info { flex: 1; }
+
+    .chain-hero-tag {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 0.7rem;
+      letter-spacing: 0.2em;
+      color: var(--accent);
+      text-transform: uppercase;
+      margin-bottom: 0.5rem;
+    }
+
+    .chain-hero-title {
+      font-family: 'Orbitron', monospace;
+      font-weight: 900;
+      font-size: clamp(1.8rem, 4vw, 2.8rem);
+      color: var(--heading);
+      margin-bottom: 0.6rem;
+    }
+
+    .chain-hero-desc {
+      font-size: 0.95rem;
+      color: var(--muted);
+      line-height: 1.6;
+      max-width: 600px;
+    }
+
+    .chain-badges {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.6rem;
+      margin-top: 1rem;
+    }
+
+    .chain-badge {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 0.7rem;
+      padding: 0.3rem 0.8rem;
+      border: 1px solid var(--border);
+      color: var(--accent3);
+      letter-spacing: 0.08em;
+      background: rgba(0,255,157,0.04);
+    }
+
+    /* ── MAIN CONTENT ── */
+    .content {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 3rem 4rem 6rem;
+    }
+
+    /* ── REQUIREMENTS ── */
+    .req-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 1rem;
+      margin-bottom: 3rem;
+    }
+
+    .req-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      padding: 1.2rem;
+      text-align: center;
+    }
+
+    .req-card .req-val {
+      font-family: 'Orbitron', monospace;
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--accent);
+      margin-bottom: 0.3rem;
+    }
+
+    .req-card .req-label {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 0.7rem;
+      color: var(--muted);
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+    }
+
+    /* ── SECTION ── */
+    .section-label {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 0.7rem;
+      letter-spacing: 0.2em;
+      color: var(--accent);
+      text-transform: uppercase;
+      margin-bottom: 0.5rem;
+    }
+
+    .section-title {
+      font-family: 'Orbitron', monospace;
+      font-weight: 700;
+      font-size: 1.3rem;
+      color: var(--heading);
+      margin-bottom: 1.5rem;
+      padding-bottom: 0.7rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .guide-section { margin-bottom: 3rem; }
+
+    .step-label {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 0.75rem;
+      color: var(--accent2);
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      margin: 1.5rem 0 0.6rem;
+    }
+
+    .step-desc {
+      font-size: 0.9rem;
+      color: var(--muted);
+      line-height: 1.6;
+      margin-bottom: 0.7rem;
+    }
+
+    /* ── CODE BLOCK ── */
+    .code-block {
+      position: relative;
+      background: var(--code-bg);
+      border: 1px solid var(--code-border);
+      border-left: 3px solid var(--accent);
+      padding: 1.2rem 1rem 1.2rem 1.2rem;
+      margin-bottom: 1rem;
+      overflow-x: auto;
+    }
+
+    .code-block pre {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 0.82rem;
+      color: var(--accent3);
+      line-height: 1.7;
+      white-space: pre-wrap;
+      word-break: break-all;
+    }
+
+    .copy-btn {
+      position: absolute;
+      top: 0.6rem; right: 0.6rem;
+      background: none;
+      border: 1px solid var(--border);
+      color: var(--muted);
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 0.65rem;
+      padding: 0.25rem 0.6rem;
+      cursor: pointer;
+      letter-spacing: 0.08em;
+      transition: all 0.2s;
+    }
+    .copy-btn:hover { border-color: var(--accent); color: var(--accent); }
+    .copy-btn.copied { border-color: var(--accent3); color: var(--accent3); }
+
+    /* ── TABLE ── */
+    .cmd-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 1.5rem;
+    }
+
+    .cmd-table th {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 0.72rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--accent);
+      padding: 0.7rem 1rem;
+      text-align: left;
+      border-bottom: 1px solid var(--border);
+      background: var(--code-bg);
+    }
+
+    .cmd-table td {
+      padding: 0.7rem 1rem;
+      font-size: 0.85rem;
+      border-bottom: 1px solid rgba(26,58,92,0.4);
+      vertical-align: top;
+    }
+
+    .cmd-table td:first-child {
+      color: var(--text);
+      white-space: nowrap;
+      width: 30%;
+    }
+
+    .cmd-table td:last-child {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 0.78rem;
+      color: var(--accent3);
+    }
+
+    .cmd-table tr:hover td { background: rgba(0,212,255,0.03); }
+
+    /* ── LINKS ── */
+    .link-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.8rem;
+      margin-top: 0.8rem;
+    }
+
+    .ext-link {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 0.75rem;
+      padding: 0.5rem 1.2rem;
+      border: 1px solid var(--border);
+      color: var(--accent);
+      text-decoration: none;
+      letter-spacing: 0.08em;
+      transition: all 0.2s;
+    }
+    .ext-link:hover {
+      background: rgba(0,212,255,0.08);
+      border-color: var(--accent);
+      transform: translateY(-1px);
+    }
+
+    /* ── TABS ── */
+    .tab-row {
+      display: flex;
+      gap: 0;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 1rem;
+    }
+
+    .tab-btn {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 0.75rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      padding: 0.6rem 1.4rem;
+      background: none;
+      border: none;
+      border-bottom: 2px solid transparent;
+      color: var(--muted);
+      cursor: pointer;
+      transition: all 0.2s;
+      margin-bottom: -1px;
+    }
+    .tab-btn.active { color: var(--accent); border-bottom-color: var(--accent); }
+    .tab-btn:hover { color: var(--text); }
+
+    .tab-panel { display: none; }
+    .tab-panel.active { display: block; }
+
+    @media (max-width: 768px) {
+      nav { padding: 1rem 1.5rem; }
+      .chain-hero { padding: 3rem 1.5rem 2rem; }
+      .content { padding: 2rem 1.5rem 4rem; }
+      .chain-hero-inner { flex-direction: column; gap: 1.2rem; }
+    }
+  </style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-left">
+    <a href="vinjan-inc.html" class="nav-back">← Back</a>
+    <a href="vinjan-inc.html" class="nav-logo">Stilucky<span>.eth</span></a>
+  </div>
+  <button class="theme-btn" onclick="toggleTheme()" id="themeBtn">☾</button>
+</nav>
+
+<!-- HERO -->
+<div class="chain-hero">
+  <div class="chain-hero-inner">
+    <img class="chain-hero-logo"
+         src="https://s3.coinmarketcap.com/static-gravity/image/dcfd2aeed249488b916f0cef2d3fa849.png"
+         alt="Pactus"
+         onerror="this.style.display='none'" />
+    <div class="chain-hero-info">
+      <div class="chain-hero-tag">Mainnet · Node Setup</div>
+      <div class="chain-hero-title">Pactus Blockchain</div>
+      <div class="chain-hero-desc">
+        A community-run blockchain with a revolutionary, secure, Solid State Proof of Stake consensus mechanism.
+      </div>
+      <div class="chain-badges">
+        <span class="chain-badge">Ubuntu 22.04</span>
+        <span class="chain-badge">Port 21888</span>
+        <span class="chain-badge">1 CPU · 1GB RAM · 20GB SSD</span>
+        <span class="chain-badge">v1.13.0</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- CONTENT -->
+<div class="content">
+
+  <!-- REQUIREMENTS -->
+  <div class="guide-section">
+    <div class="section-label">Hardware</div>
+    <div class="section-title">System Requirements</div>
+    <div class="req-grid">
+      <div class="req-card"><div class="req-val">1 vCPU</div><div class="req-label">Processor</div></div>
+      <div class="req-card"><div class="req-val">1 GB</div><div class="req-label">RAM</div></div>
+      <div class="req-card"><div class="req-val">20 GB</div><div class="req-label">SSD Storage</div></div>
+      <div class="req-card"><div class="req-val">21888</div><div class="req-label">TCP / UDP Port</div></div>
+      <div class="req-card"><div class="req-val">Ubuntu</div><div class="req-label">22.04 LTS</div></div>
+    </div>
+  </div>
+
+  <!-- INSTALLATION -->
+  <div class="guide-section">
+    <div class="section-label">Setup</div>
+    <div class="section-title">Installation</div>
+
+    <div class="step-label">Step 1 — Server Preparation</div>
+    <div class="step-desc">Update system packages and install required dependencies.</div>
+    <div class="code-block">
+      <button class="copy-btn" onclick="copyCode(this)">COPY</button>
+      <pre>sudo apt update && sudo apt upgrade -y && sudo apt install tmux git curl -y && sudo apt install make clang pkg-config libssl-dev build-essential -y</pre>
+    </div>
+
+    <div class="step-label">Step 2 — Download Binary</div>
+    <div class="step-desc">Choose your architecture.</div>
+
+    <div class="tab-row">
+      <button class="tab-btn active" onclick="switchTab('amd64', this)">amd64</button>
+      <button class="tab-btn" onclick="switchTab('arm64', this)">arm64</button>
+    </div>
+
+    <div class="tab-panel active" id="tab-amd64">
+      <div class="code-block">
+        <button class="copy-btn" onclick="copyCode(this)">COPY</button>
+        <pre>ver="1.13.0" && \
+cd $HOME && rm -rf node_pactus && \
+wget https://github.com/pactus-project/pactus/releases/download/v${ver}/pactus-cli_${ver}_linux_amd64.tar.gz && \
+tar -xzf pactus-cli_${ver}_linux_amd64.tar.gz && \
+rm -rf pactus-cli_${ver}_linux_amd64.tar.gz && \
+mv pactus-cli_${ver} node_pactus && cd node_pactus</pre>
+      </div>
+    </div>
+
+    <div class="tab-panel" id="tab-arm64">
+      <div class="code-block">
+        <button class="copy-btn" onclick="copyCode(this)">COPY</button>
+        <pre>ver="1.13.0" && \
+cd $HOME && rm -rf node_pactus && \
+wget https://github.com/pactus-project/pactus/releases/download/v${ver}/pactus-cli_${ver}_linux_arm64.tar.gz && \
+tar -xzf pactus-cli_${ver}_linux_arm64.tar.gz && \
+rm -rf pactus-cli_${ver}_linux_arm64.tar.gz && \
+mv pactus-cli_${ver} node_pactus && cd node_pactus</pre>
+      </div>
+    </div>
+
+    <div class="step-label">Step 3 — Create / Restore Wallet</div>
+    <div class="step-desc">Create a new wallet or restore from seed phrase. Save the seed and validator address securely.</div>
+    <div class="code-block">
+      <button class="copy-btn" onclick="copyCode(this)">COPY</button>
+      <pre># New wallet
+./pactus-daemon init
+
+# Restore existing wallet
+./pactus-daemon init --restore "&lt;your-seed&gt;"</pre>
+    </div>
+
+    <div class="step-label">Step 4 — Sync Blockchain</div>
+    <div class="step-desc">Remove lock files and data, then import to sync with the network.</div>
+    <div class="code-block">
+      <button class="copy-btn" onclick="copyCode(this)">COPY</button>
+      <pre>rm -rf $HOME/pactus/.pactus.lock
+rm -rf $HOME/pactus/data
+cd $HOME/node_pactus
+./pactus-daemon import</pre>
+    </div>
+  </div>
+
+  <!-- RUNNING -->
+  <div class="guide-section">
+    <div class="section-label">Run</div>
+    <div class="section-title">Running the Node</div>
+
+    <div class="tab-row">
+      <button class="tab-btn active" onclick="switchTab('tmux', this)">tmux</button>
+      <button class="tab-btn" onclick="switchTab('systemd', this)">systemd</button>
+    </div>
+
+    <div class="tab-panel active" id="tab-tmux">
+      <div class="code-block">
+        <button class="copy-btn" onclick="copyCode(this)">COPY</button>
+        <pre>tmux new -s pactus
+cd $HOME/node_pactus
+sudo ./pactus-daemon start</pre>
+      </div>
+    </div>
+
+    <div class="tab-panel" id="tab-systemd">
+      <div class="step-desc">Create environment file with wallet password:</div>
+      <div class="code-block">
+        <button class="copy-btn" onclick="copyCode(this)">COPY</button>
+        <pre>cd $HOME
+mkdir -p .env && cd .env
+echo "PACTUS_PASSWORD=your-secure-password" > pactusd.env</pre>
+      </div>
+
+      <div class="step-desc">Create and enable the systemd service:</div>
+      <div class="code-block">
+        <button class="copy-btn" onclick="copyCode(this)">COPY</button>
+        <pre>sudo tee /etc/systemd/system/pactusd.service > /dev/null &lt;&lt;EOF
+[Unit]
+Description=Pactus Node
+After=network-online.target
+StartLimitIntervalSec=0
+
+[Service]
+User=$USER
+EnvironmentFile=$HOME/.env/pactusd.env
+ExecStart=/root/node_pactus/pactus-daemon start -w /root/pactus --password "$PACTUS_PASSWORD"
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+sudo systemctl daemon-reload
+sudo systemctl enable pactusd
+sudo systemctl start pactusd</pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- COMMANDS -->
+  <div class="guide-section">
+    <div class="section-label">Operations</div>
+    <div class="section-title">Wallet & Validator Commands</div>
+
+    <div class="code-block"><button class="copy-btn" onclick="copyCode(this)">COPY</button><pre>./pactus-wallet address all</pre></div>
+    <div class="code-block"><button class="copy-btn" onclick="copyCode(this)">COPY</button><pre>./pactus-wallet address balance &lt;ADDRESS&gt;</pre></div>
+    <div class="code-block"><button class="copy-btn" onclick="copyCode(this)">COPY</button><pre>./pactus-wallet seed</pre></div>
+    <div class="code-block"><button class="copy-btn" onclick="copyCode(this)">COPY</button><pre>./pactus-wallet --path ~/pactus/wallets/default_wallet address new --type bls_account</pre></div>
+    <div class="code-block"><button class="copy-btn" onclick="copyCode(this)">COPY</button><pre>./pactus-wallet tx bond &lt;reward&gt; &lt;validator&gt; &lt;amount&gt;</pre></div>
+    <div class="code-block"><button class="copy-btn" onclick="copyCode(this)">COPY</button><pre>./pactus-wallet tx unbond &lt;validator_address&gt;</pre></div>
+    <div class="code-block"><button class="copy-btn" onclick="copyCode(this)">COPY</button><pre>./pactus-wallet tx withdraw &lt;validator&gt; &lt;reward&gt; &lt;amount&gt;</pre></div>
+    <div class="code-block"><button class="copy-btn" onclick="copyCode(this)">COPY</button><pre>./pactus-wallet tx transfer &lt;reward&gt; &lt;receiver&gt; &lt;amount&gt;</pre></div>
+  </div>
+
+  <!-- RESOURCES -->
+  <div class="guide-section">
+    <div class="section-label">Resources</div>
+    <div class="section-title">Useful Links</div>
+    <div class="link-row">
+      <a class="ext-link" href="https://pactus.org" target="_blank" rel="noopener">🌐 Website</a>
+      <a class="ext-link" href="https://pacviewer.com" target="_blank" rel="noopener">🔍 Explorer</a>
+      <a class="ext-link" href="https://github.com/pactus-project/pactus" target="_blank" rel="noopener">💻 GitHub</a>
+      <a class="ext-link" href="https://discord.gg/52Wx7Nmc" target="_blank" rel="noopener">💬 Discord</a>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  // ── THEME ──
+  const stored = localStorage.getItem('stilucky-theme');
+  if (stored) document.documentElement.setAttribute('data-theme', stored);
+  const btn = document.getElementById('themeBtn');
+  btn.textContent = (localStorage.getItem('stilucky-theme') === 'light') ? '☾' : '☀';
+
+  function toggleTheme() {
+    const cur = document.documentElement.getAttribute('data-theme');
+    const next = cur === 'light' ? 'dark' : 'light';
+    document.documentElement.setAttribute('data-theme', next === 'dark' ? '' : 'light');
+    localStorage.setItem('stilucky-theme', next === 'dark' ? '' : 'light');
+    btn.textContent = next === 'dark' ? '☀' : '☾';
+  }
+
+  // ── TABS ──
+  function switchTab(id, el) {
+    const group = el.closest('.guide-section') || el.parentNode.parentNode;
+    group.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    group.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+    el.classList.add('active');
+    const panel = group.querySelector('#tab-' + id);
+    if (panel) panel.classList.add('active');
+  }
+
+  // ── COPY ──
+  function copyCode(btn) {
+    const pre = btn.nextElementSibling;
+    navigator.clipboard.writeText(pre.innerText).then(() => {
+      btn.textContent = 'COPIED';
+      btn.classList.add('copied');
+      setTimeout(() => { btn.textContent = 'COPY'; btn.classList.remove('copied'); }, 2000);
+    });
+  }
+</script>
+</body>
+</html>

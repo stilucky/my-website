@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "WebSearch",
+      "WebFetch(domain:ping.pub)",
+      "PowerShell($response = Invoke-WebRequest -Uri \"https://ping.pub/\" -UseBasicParsing; $response.Content | Select-Object -First 500)",
+      "PowerShell($indexCss = Invoke-WebRequest -Uri \"https://ping.pub/assets/index-48ab5dac.css\" -UseBasicParsing; $indexCss.Content | Select-String -Pattern \"color|rgb|hex|var\\\\\\(|--\" | Select-Object -First 50)",
+      "PowerShell($js = Invoke-WebRequest -Uri \"https://ping.pub/assets/index-8d1df19b.js\" -UseBasicParsing; $jsText = $js.Content; $jsText | Select-String -Pattern \"\\(fetch|axios|api|endpoint|/cosmos/|/comet|block_height|validators|apr|inflation|bonded\\)\" -AllMatches | Select-Object -First 100)"
+    ]
+  }
+}

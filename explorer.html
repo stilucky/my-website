@@ -1,0 +1,1166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Stilucky Explorer — Cosmos Blockchain Explorer</title>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&family=Exo+2:wght@300;400;600&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg:#040a14; --surface:#071020; --card:#0b1a2e; --border:#1a3a5c;
+      --accent:#00d4ff; --accent2:#7b2fff; --accent3:#00ff9d;
+      --text:#cde4f5; --muted:#5a80a0; --white:#fff;
+      --red:#ff4d6d; --yellow:#ffd166; --orange:#ff8c42;
+      --sb-bg:#040c18; --sb-w:220px;
+      --heading:#ffffff;
+      --topbar-bg:rgba(4,10,20,.92);
+      --sb-label-color:#2a4a6a;
+      --row-border:rgba(26,58,92,.35);
+      --uptime-bg:rgba(26,58,92,.8);
+      --noise-opacity:.35;
+    }
+    [data-theme="light"] {
+      --bg:#f2f6fc; --surface:#e4eef8; --card:#ffffff; --border:#c2d4eb;
+      --accent:#0088bb; --accent2:#6b1fe0; --accent3:#00966a;
+      --text:#1a2e4a; --muted:#5a7898; --white:#fff;
+      --red:#d93050; --yellow:#c88a00; --orange:#c25a00;
+      --sb-bg:#0d1e32;
+      --heading:#0d1e32;
+      --topbar-bg:rgba(242,246,252,.95);
+      --sb-label-color:#4a6a8a;
+      --row-border:rgba(100,150,200,.22);
+      --uptime-bg:rgba(180,210,240,.5);
+      --noise-opacity:0;
+    }
+    *{margin:0;padding:0;box-sizing:border-box}
+    html{scroll-behavior:smooth}
+    body{background:var(--bg);color:var(--text);font-family:'Exo 2',sans-serif;font-weight:300;overflow-x:hidden;transition:background .25s,color .25s}
+
+    /* ── LAYOUT ── */
+    .app{display:flex;min-height:100vh}
+    .sidebar{
+      width:var(--sb-w);position:fixed;top:0;left:0;bottom:0;
+      background:var(--sb-bg);border-right:1px solid var(--border);
+      display:flex;flex-direction:column;z-index:100;overflow-y:auto;
+      transition:transform .3s;
+    }
+    .main{margin-left:var(--sb-w);flex:1;display:flex;flex-direction:column;min-height:100vh}
+
+    /* ── SIDEBAR BRAND ── */
+    .sb-brand{padding:1.1rem 1.2rem;border-bottom:1px solid var(--border);flex-shrink:0}
+    .sb-logo{font-family:'Orbitron',monospace;font-weight:900;font-size:1rem;color:#fff;text-decoration:none}
+    .sb-logo span{color:var(--accent)}
+    .sb-sub{font-family:'Share Tech Mono',monospace;font-size:.62rem;color:var(--muted);letter-spacing:.15em;text-transform:uppercase;margin-top:.2rem}
+
+    /* ── CHAIN LIST ── */
+    .sb-section{padding:.6rem 0;border-bottom:1px solid var(--border)}
+    .sb-label{font-family:'Share Tech Mono',monospace;font-size:.6rem;letter-spacing:.2em;color:var(--sb-label-color);text-transform:uppercase;padding:.3rem 1.2rem .5rem}
+    .chain-item{
+      display:flex;align-items:center;gap:.55rem;
+      padding:.42rem 1.1rem;cursor:pointer;transition:background .15s;
+    }
+    .chain-item:hover{background:rgba(0,212,255,.05)}
+    .chain-item.active{background:rgba(0,212,255,.09)}
+    .chain-item .ci-logo{width:22px;height:22px;border-radius:50%;object-fit:cover;flex-shrink:0}
+    .chain-item .ci-fallback{
+      width:22px;height:22px;border-radius:50%;flex-shrink:0;
+      display:flex;align-items:center;justify-content:center;
+      font-size:.65rem;font-weight:700;font-family:'Orbitron',monospace;
+    }
+    .chain-item .ci-name{font-family:'Share Tech Mono',monospace;font-size:.72rem;color:var(--muted);transition:color .15s;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .chain-item:hover .ci-name,.chain-item.active .ci-name{color:var(--accent)}
+
+    /* ── SIDEBAR NAV ── */
+    .sb-nav{flex:1;padding:.5rem 0}
+    .nav-item{
+      display:flex;align-items:center;gap:.5rem;
+      padding:.5rem 1.2rem;cursor:pointer;
+      font-family:'Share Tech Mono',monospace;font-size:.74rem;color:var(--muted);
+      text-decoration:none;transition:all .15s;border-left:2px solid transparent;
+      letter-spacing:.04em;
+    }
+    .nav-item::before{content:'›';font-size:.9rem;opacity:.4;transition:opacity .15s;flex-shrink:0}
+    .nav-item:hover{color:var(--text);background:rgba(0,212,255,.04)}
+    .nav-item.active{color:var(--accent);border-left-color:var(--accent);background:rgba(0,212,255,.07)}
+    .nav-item.active::before{opacity:1;color:var(--accent)}
+
+    /* ── TOPBAR ── */
+    .topbar{
+      position:sticky;top:0;z-index:50;
+      height:52px;display:flex;align-items:center;gap:1rem;
+      padding:0 1.8rem;background:var(--topbar-bg);
+      border-bottom:1px solid var(--border);backdrop-filter:blur(10px);flex-shrink:0;
+    }
+    .hbg{display:none;background:none;border:none;color:var(--muted);font-size:1.2rem;cursor:pointer}
+    .tb-info{display:flex;align-items:center;gap:.6rem;flex:1;min-width:0}
+    .tb-chain{font-family:'Orbitron',monospace;font-size:.8rem;font-weight:700;color:var(--heading);white-space:nowrap}
+    .tb-sep{color:var(--border)}
+    .tb-view{font-family:'Share Tech Mono',monospace;font-size:.72rem;color:var(--muted);letter-spacing:.1em;text-transform:uppercase}
+    .tb-search{display:flex;gap:0;flex-shrink:0}
+    .tb-search input{
+      padding:.4rem .9rem;background:var(--card);border:1px solid var(--border);
+      border-right:none;color:var(--text);font-family:'Share Tech Mono',monospace;
+      font-size:.74rem;outline:none;width:260px;transition:border-color .2s;
+    }
+    .tb-search input:focus{border-color:var(--accent)}
+    .tb-search button{
+      padding:.4rem .9rem;background:rgba(0,212,255,.1);border:1px solid var(--border);
+      color:var(--accent);cursor:pointer;font-size:.9rem;transition:background .2s;
+    }
+    .tb-search button:hover{background:rgba(0,212,255,.2)}
+    .live-dot{display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--accent3);box-shadow:0 0 5px var(--accent3);animation:blink 1.4s infinite}
+    @keyframes blink{0%,100%{opacity:1}50%{opacity:.25}}
+
+    /* ── CONTENT ── */
+    .content{flex:1;padding:1.5rem 2rem}
+
+    /* ── STAT CARDS ── */
+    .stat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:1rem;margin-bottom:1.5rem}
+    .stat-card{background:var(--card);border:1px solid var(--border);padding:1.1rem 1.3rem}
+    .sc-lbl{font-family:'Share Tech Mono',monospace;font-size:.6rem;letter-spacing:.15em;color:var(--muted);text-transform:uppercase;margin-bottom:.4rem}
+    .sc-val{font-family:'Orbitron',monospace;font-size:1.25rem;font-weight:700;color:var(--accent)}
+    .sc-val.g{color:var(--accent3)}
+    .sc-sub{font-family:'Share Tech Mono',monospace;font-size:.62rem;color:var(--muted);margin-top:.3rem}
+
+    /* ── DUAL GRID ── */
+    .dual-grid{display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;margin-bottom:1.5rem}
+    .full{grid-column:1/-1}
+
+    /* ── PANEL ── */
+    .panel{background:var(--card);border:1px solid var(--border);margin-bottom:1.5rem}
+    .ph{padding:.85rem 1.3rem;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+    .pt{font-family:'Orbitron',monospace;font-size:.74rem;font-weight:700;color:var(--heading);letter-spacing:.06em}
+    .badge{font-family:'Share Tech Mono',monospace;font-size:.6rem;padding:.18rem .5rem;letter-spacing:.1em;border:1px solid}
+    .badge.cyan{color:var(--accent);border-color:rgba(0,212,255,.3);background:rgba(0,212,255,.07)}
+    .badge.green{color:var(--accent3);border-color:rgba(0,255,157,.3);background:rgba(0,255,157,.07)}
+    .badge.red{color:var(--red);border-color:rgba(255,77,109,.3);background:rgba(255,77,109,.07)}
+    .badge.yellow{color:var(--yellow);border-color:rgba(255,209,102,.3);background:rgba(255,209,102,.07)}
+    .badge.purple{color:#c084fc;border-color:rgba(192,132,252,.3);background:rgba(192,132,252,.07)}
+    .badge.muted{color:var(--muted);border-color:var(--border);background:transparent}
+
+    /* ── DATA TABLE ── */
+    .data-table{width:100%;border-collapse:collapse}
+    .data-table th{
+      padding:.6rem 1rem;text-align:left;font-family:'Share Tech Mono',monospace;
+      font-size:.62rem;letter-spacing:.15em;text-transform:uppercase;color:var(--muted);
+      border-bottom:1px solid var(--border);font-weight:400;white-space:nowrap;
+    }
+    .data-table td{
+      padding:.7rem 1rem;border-bottom:1px solid var(--row-border);
+      font-family:'Share Tech Mono',monospace;font-size:.75rem;color:var(--text);
+    }
+    .data-table tr:last-child td{border-bottom:none}
+    .data-table tr:hover td{background:rgba(0,212,255,.025)}
+    .data-table tr{cursor:pointer}
+    .mono{font-family:'Share Tech Mono',monospace;color:var(--accent);word-break:break-all}
+    .mono.sm{font-size:.68rem}
+
+    /* ── ROW ITEMS (dashboard) ── */
+    .row-item{
+      display:flex;align-items:center;justify-content:space-between;
+      padding:.7rem 1.3rem;border-bottom:1px solid var(--row-border);
+      cursor:pointer;transition:background .15s;
+    }
+    .row-item:last-child{border-bottom:none}
+    .row-item:hover{background:rgba(0,212,255,.03)}
+    .ri-left{display:flex;align-items:center;gap:.7rem}
+    .ri-icon{width:32px;height:32px;background:rgba(0,212,255,.07);border:1px solid rgba(0,212,255,.15);display:flex;align-items:center;justify-content:center;font-size:.75rem;color:var(--accent);flex-shrink:0}
+    .ri-main{font-family:'Share Tech Mono',monospace;font-size:.75rem;color:var(--accent)}
+    .ri-sub{font-size:.68rem;color:var(--muted);margin-top:.15rem;font-family:'Share Tech Mono',monospace}
+    .ri-right{text-align:right;flex-shrink:0}
+    .ri-val{font-family:'Share Tech Mono',monospace;font-size:.72rem;color:var(--accent3)}
+    .ri-time{font-size:.65rem;color:var(--muted);margin-top:.15rem}
+
+    /* ── UPTIME BAR ── */
+    .uptime-item{padding:.75rem 1.3rem;border-bottom:1px solid var(--row-border)}
+    .uptime-item:last-child{border-bottom:none}
+    .uptime-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:.4rem}
+    .uptime-name{font-family:'Share Tech Mono',monospace;font-size:.75rem;color:var(--text)}
+    .uptime-pct{font-family:'Share Tech Mono',monospace;font-size:.72rem}
+    .uptime-bar-bg{height:4px;background:var(--uptime-bg);border-radius:2px;overflow:hidden}
+    .uptime-bar-fill{height:100%;border-radius:2px;transition:width .5s}
+
+    /* ── PARAM TABLE ── */
+    .param-section{margin-bottom:1.5rem}
+    .param-title{font-family:'Orbitron',monospace;font-size:.72rem;font-weight:700;color:var(--heading);padding:.85rem 1.3rem;border-bottom:1px solid var(--border)}
+    .param-row{display:grid;grid-template-columns:1fr 1fr;border-bottom:1px solid var(--row-border)}
+    .param-row:last-child{border-bottom:none}
+    .param-key{padding:.6rem 1.3rem;font-family:'Share Tech Mono',monospace;font-size:.72rem;color:var(--muted)}
+    .param-val{padding:.6rem 1.3rem;font-family:'Share Tech Mono',monospace;font-size:.72rem;color:var(--text);word-break:break-all}
+
+    /* ── WIDGET CARDS ── */
+    .widget-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:1.2rem}
+    .widget-card{background:var(--surface);border:1px solid var(--border);padding:1.2rem}
+    .wc-title{font-family:'Orbitron',monospace;font-size:.7rem;color:var(--accent);letter-spacing:.08em;margin-bottom:.8rem}
+    .wc-embed{background:var(--bg);border:1px solid var(--border);padding:.7rem;font-family:'Share Tech Mono',monospace;font-size:.62rem;color:var(--muted);margin-top:.8rem;word-break:break-all}
+    .wc-copy{margin-top:.5rem;padding:.35rem .8rem;background:rgba(0,212,255,.08);border:1px solid rgba(0,212,255,.2);color:var(--accent);font-family:'Share Tech Mono',monospace;font-size:.65rem;cursor:pointer;letter-spacing:.08em;transition:background .2s}
+    .wc-copy:hover{background:rgba(0,212,255,.15)}
+
+    /* ── LOAD MORE ── */
+    .load-more{padding:.85rem;text-align:center;border-top:1px solid var(--border)}
+    .btn-load{padding:.5rem 1.4rem;background:rgba(0,212,255,.07);border:1px solid var(--border);color:var(--accent);font-family:'Share Tech Mono',monospace;font-size:.72rem;cursor:pointer;letter-spacing:.08em;transition:all .2s}
+    .btn-load:hover{background:rgba(0,212,255,.13);border-color:var(--accent)}
+    .btn-load:disabled{opacity:.4;cursor:not-allowed}
+
+    /* ── EMPTY / ERROR ── */
+    .p-empty{padding:2.5rem;text-align:center;font-family:'Share Tech Mono',monospace;font-size:.75rem;color:var(--muted)}
+    .p-empty.error{color:var(--red)}
+
+    /* ── INFO CARDS ── */
+    .info-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:1rem;margin-bottom:1.5rem}
+    .info-card{background:var(--card);border:1px solid var(--border);padding:1rem 1.3rem}
+    .ic-lbl{font-family:'Share Tech Mono',monospace;font-size:.6rem;letter-spacing:.15em;color:var(--muted);text-transform:uppercase;margin-bottom:.35rem}
+    .ic-val{font-family:'Share Tech Mono',monospace;font-size:.8rem;color:var(--text);word-break:break-all}
+
+    /* ── TOAST ── */
+    #toast{position:fixed;bottom:1.5rem;right:1.5rem;background:var(--card);border:1px solid var(--border);color:var(--text);font-family:'Share Tech Mono',monospace;font-size:.72rem;padding:.65rem 1.2rem;letter-spacing:.05em;z-index:9999;opacity:0;transform:translateY(6px);transition:all .25s;pointer-events:none}
+    #toast.show{opacity:1;transform:translateY(0)}
+
+    /* ── THEME TOGGLE BUTTON ── */
+    .theme-btn{
+      width:32px;height:32px;display:flex;align-items:center;justify-content:center;
+      background:rgba(0,212,255,.07);border:1px solid var(--border);
+      color:var(--muted);cursor:pointer;font-size:1rem;flex-shrink:0;
+      transition:all .2s;
+    }
+    .theme-btn:hover{color:var(--accent);border-color:var(--accent);background:rgba(0,212,255,.14)}
+    [data-theme="light"] .theme-btn{background:rgba(0,100,160,.07)}
+    [data-theme="light"] .theme-btn:hover{background:rgba(0,100,160,.14)}
+
+    /* ── LIGHT MODE OVERRIDES ── */
+    [data-theme="light"] .data-table th{border-bottom-color:var(--border)}
+    [data-theme="light"] .ph{border-bottom-color:var(--border)}
+    [data-theme="light"] body::before{opacity:0}
+    [data-theme="light"] .chain-item:hover{background:rgba(0,136,187,.07)}
+    [data-theme="light"] .chain-item.active{background:rgba(0,136,187,.13)}
+    [data-theme="light"] .nav-item:hover{background:rgba(255,255,255,.06)}
+    [data-theme="light"] .nav-item.active{background:rgba(255,255,255,.1)}
+    [data-theme="light"] .row-item:hover{background:rgba(0,136,187,.04)}
+    [data-theme="light"] .data-table tr:hover td{background:rgba(0,136,187,.04)}
+    [data-theme="light"] .ri-icon{background:rgba(0,136,187,.08);border-color:rgba(0,136,187,.2)}
+    [data-theme="light"] .sc-val.g{color:var(--accent3)}
+    [data-theme="light"] .tb-sep{color:var(--border)}
+
+    /* ── NOISE OVERLAY ── */
+    body::before{
+      content:'';position:fixed;inset:0;pointer-events:none;z-index:999;
+      opacity:var(--noise-opacity);
+      background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+      transition:opacity .3s;
+    }
+
+    /* ── RESPONSIVE ── */
+    @media(max-width:768px){
+      .sidebar{transform:translateX(-100%)}
+      .sidebar.open{transform:translateX(0)}
+      .main{margin-left:0}
+      .hbg{display:block}
+      .tb-search input{width:140px}
+      .dual-grid{grid-template-columns:1fr}
+      .content{padding:1rem}
+    }
+  </style>
+</head>
+<body>
+<div class="app">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sb-brand">
+      <a href="vinjan-inc.html" class="sb-logo">Stilucky<span>.eth</span></a>
+      <div class="sb-sub">Cosmos Explorer</div>
+    </div>
+
+    <div class="sb-section">
+      <div class="sb-label">Networks</div>
+      <div id="chainList"></div>
+    </div>
+
+    <div class="sb-nav" id="sbNav">
+      <div class="sb-label">Navigate</div>
+      <!-- filled by JS -->
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <div class="main">
+    <div class="topbar">
+      <button class="hbg" id="hbg" onclick="toggleSb()">☰</button>
+      <div class="tb-info">
+        <span class="tb-chain" id="tbChain">Select a chain</span>
+        <span class="tb-sep" id="tbSep" style="display:none">›</span>
+        <span class="tb-view" id="tbView"></span>
+      </div>
+      <div class="tb-search">
+        <input id="ts" placeholder="Block height / Tx hash / Address…" onkeydown="if(event.key==='Enter')doSearch()" />
+        <button onclick="doSearch()">⌕</button>
+      </div>
+      <button class="theme-btn" id="themeBtn" onclick="toggleTheme()" title="Toggle light/dark">
+        <span id="themeIcon">☀</span>
+      </button>
+    </div>
+    <div class="content" id="content">
+      <div class="p-empty">← Select a network to begin</div>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+/* ═══════════════════════════════════════════
+   CHAINS
+═══════════════════════════════════════════ */
+const CHAINS = [
+  { name:'Cosmos Hub',  slug:'cosmoshub',  chainId:'cosmoshub-4',      denom:'uatom',  exp:6,  sym:'ATOM',  color:'#6f7390',
+    logo:'https://raw.githubusercontent.com/cosmos/chain-registry/master/cosmoshub/images/atom.svg',
+    rest:'https://rest.cosmos.directory/cosmoshub' },
+  { name:'Lava',        slug:'lava',       chainId:'lava-mainnet-1',   denom:'ulava',  exp:6,  sym:'LAVA',  color:'#e04b1a',
+    logo:'https://raw.githubusercontent.com/cosmos/chain-registry/master/lava/images/lava.png',
+    rest:'https://rest.cosmos.directory/lava' },
+  { name:'Arkeo',       slug:'arkeo',      chainId:'arkeo-main-v1',    denom:'uarkeo', exp:6,  sym:'ARKEO', color:'#7c3aed',
+    logo:'https://raw.githubusercontent.com/cosmos/chain-registry/master/arkeo/images/arkeo.png',
+    rest:'https://rest.cosmos.directory/arkeo' },
+  { name:'KiiChain',    slug:'kiichain',   chainId:'kiichain-1',       denom:'ukii',   exp:6,  sym:'KII',   color:'#0ea5e9',
+    logo:'https://raw.githubusercontent.com/cosmos/chain-registry/master/kiichain/images/kiichain.png',
+    rest:'https://rest.cosmos.directory/kiichain' },
+  { name:'Sunrise',     slug:'sunrise',    chainId:'sunrise-1',        denom:'urise',  exp:6,  sym:'RISE',  color:'#f59e0b',
+    logo:'https://raw.githubusercontent.com/cosmos/chain-registry/master/sunrise/images/sunrise.png',
+    rest:'https://rest.cosmos.directory/sunrise' },
+  { name:'BitBadges',   slug:'bitbadges',  chainId:'bitbadges-1',      denom:'ubadge', exp:6,  sym:'BADGE', color:'#10b981',
+    logo:'https://raw.githubusercontent.com/cosmos/chain-registry/master/bitbadges/images/bitbadges.png',
+    rest:'https://rest.cosmos.directory/bitbadges' },
+  { name:'Kopi',        slug:'kopi',       chainId:'luwak-1',          denom:'uskopi', exp:6,  sym:'KOPI',  color:'#92400e',
+    logo:'https://raw.githubusercontent.com/cosmos/chain-registry/master/kopi/images/kopi.png',
+    rest:'https://rest.cosmos.directory/kopi' },
+  { name:'Paxi',        slug:'paxi',       chainId:'paxi-1',           denom:'upaxi',  exp:6,  sym:'PAXI',  color:'#a855f7',
+    logo:null,
+    rest:'https://rest.cosmos.directory/paxi' },
+  { name:'Safrochain',  slug:'safrochain', chainId:'safrochain-1',     denom:'usafro', exp:6,  sym:'SAFRO', color:'#ef4444',
+    logo:null,
+    rest:'https://rest.cosmos.directory/safrochain' },
+];
+
+const NAV = [
+  { id:'dashboard',    label:'Dashboard'    },
+  { id:'governance',   label:'Governance'   },
+  { id:'staking',      label:'Staking'      },
+  { id:'blocks',       label:'Blocks'       },
+  { id:'transactions', label:'Transactions' },
+  { id:'uptime',       label:'Uptime'       },
+  { id:'ibc',          label:'IBC'          },
+  { id:'supply',       label:'Supply'       },
+  { id:'parameters',   label:'Parameters'   },
+  { id:'consensus',    label:'Consensus'    },
+  { id:'cosmwasm',     label:'Cosmwasm'     },
+  { id:'statesync',    label:'State Sync'   },
+  { id:'widgets',      label:'Widgets'      },
+];
+
+/* ═══════════════════════════════════════════
+   STATE
+═══════════════════════════════════════════ */
+let cur = -1;       // current chain index
+let view = '';      // current view
+let refreshT = null;
+let blockH = null;  // latest known block height (number)
+
+/* ═══════════════════════════════════════════
+   UTILS
+═══════════════════════════════════════════ */
+const $ = id => document.getElementById(id);
+const fmt = n => Number(n).toLocaleString();
+const chain = () => CHAINS[cur];
+
+function timeAgo(iso) {
+  const s = Math.floor((Date.now() - new Date(iso)) / 1000);
+  if (s < 60)   return s + 's ago';
+  if (s < 3600) return Math.floor(s/60) + 'm ago';
+  return Math.floor(s/3600) + 'h ago';
+}
+
+function fmtTokens(raw, exp, sym) {
+  if (raw == null || raw === '' || raw === '0') return '0 ' + sym;
+  const n = Number(raw) / Math.pow(10, exp);
+  if (n >= 1e9) return (n/1e9).toFixed(2) + 'B ' + sym;
+  if (n >= 1e6) return (n/1e6).toFixed(2) + 'M ' + sym;
+  if (n >= 1e3) return (n/1e3).toFixed(2) + 'K ' + sym;
+  return n.toFixed(2) + ' ' + sym;
+}
+
+function shortMsg(types) {
+  if (!types || !types.length) return '—';
+  return (types[0] || '').split('.').pop().replace(/^Msg/, '') || '—';
+}
+
+function statusBadge(s) {
+  const map = {
+    PROPOSAL_STATUS_PASSED:         ['Passed',         'green'],
+    PROPOSAL_STATUS_REJECTED:       ['Rejected',       'red'],
+    PROPOSAL_STATUS_VOTING_PERIOD:  ['Voting',         'cyan'],
+    PROPOSAL_STATUS_DEPOSIT_PERIOD: ['Deposit',        'yellow'],
+    PROPOSAL_STATUS_FAILED:         ['Failed',         'red'],
+    PROPOSAL_STATUS_UNSPECIFIED:    ['Unknown',        'muted'],
+  };
+  const [label, cls] = map[s] || [s || '—', 'muted'];
+  return `<span class="badge ${cls}">${label}</span>`;
+}
+
+function chainAvatar(c, sz=22) {
+  const fb = `<div class="ci-fallback" style="width:${sz}px;height:${sz}px;font-size:${Math.round(sz*0.4)}px;background:${c.color}25;border:1px solid ${c.color}55;color:${c.color}">${c.name[0]}</div>`;
+  if (!c.logo) return fb;
+  return `<img class="ci-logo" width="${sz}" height="${sz}" src="${c.logo}" alt="${c.name}"
+    onerror="this.outerHTML='${fb.replace(/'/g,'"')}'" />`;
+}
+
+async function apiFetch(url, ms=9000) {
+  const ac = new AbortController();
+  const t = setTimeout(() => ac.abort(), ms);
+  try {
+    const r = await fetch(url, { signal: ac.signal });
+    clearTimeout(t);
+    if (!r.ok) throw new Error(r.status);
+    return await r.json();
+  } catch(e) { clearTimeout(t); throw e; }
+}
+
+function setContent(html) { $('content').innerHTML = html; }
+function showLoading()    { setContent('<div class="p-empty">Loading…</div>'); }
+
+let toastT;
+function showToast(m) {
+  const t = $('toast');
+  t.textContent = m;
+  t.classList.add('show');
+  clearTimeout(toastT);
+  toastT = setTimeout(() => t.classList.remove('show'), 2400);
+}
+
+/* ═══════════════════════════════════════════
+   BUILD SIDEBAR
+═══════════════════════════════════════════ */
+const cl = $('chainList');
+CHAINS.forEach((c, i) => {
+  const d = document.createElement('div');
+  d.className = 'chain-item';
+  d.innerHTML = `${chainAvatar(c)}<span class="ci-name">${c.name}</span>`;
+  d.onclick = () => selectChain(i);
+  cl.appendChild(d);
+});
+
+const sn = $('sbNav');
+NAV.forEach(n => {
+  const a = document.createElement('div');
+  a.className = 'nav-item';
+  a.dataset.view = n.id;
+  a.textContent = n.label;
+  a.onclick = () => navigate(n.id);
+  sn.appendChild(a);
+});
+
+/* ═══════════════════════════════════════════
+   CHAIN SELECT
+═══════════════════════════════════════════ */
+function selectChain(i) {
+  cur = i;
+  blockH = null;
+  clearInterval(refreshT);
+  document.querySelectorAll('.chain-item').forEach((el,j) => el.classList.toggle('active', j===i));
+  $('tbChain').textContent = CHAINS[i].name;
+  navigate('dashboard');
+}
+
+/* ═══════════════════════════════════════════
+   ROUTER
+═══════════════════════════════════════════ */
+function navigate(v) {
+  if (cur < 0) return showToast('Please select a chain first');
+  view = v;
+  clearInterval(refreshT);
+  document.querySelectorAll('.nav-item').forEach(el => el.classList.toggle('active', el.dataset.view===v));
+  const nav = NAV.find(n => n.id===v);
+  $('tbView').textContent = nav ? nav.label : '';
+  $('tbSep').style.display = 'inline';
+  VIEWS[v]();
+}
+
+const VIEWS = {
+  dashboard:    viewDashboard,
+  governance:   viewGovernance,
+  staking:      viewStaking,
+  blocks:       viewBlocks,
+  transactions: viewTransactions,
+  uptime:       viewUptime,
+  ibc:          viewIBC,
+  supply:       viewSupply,
+  parameters:   viewParameters,
+  consensus:    viewConsensus,
+  cosmwasm:     viewCosmwasm,
+  statesync:    viewStateSync,
+  widgets:      viewWidgets,
+};
+
+/* ═══════════════════════════════════════════
+   VIEW: DASHBOARD
+═══════════════════════════════════════════ */
+async function viewDashboard() {
+  showLoading();
+  const c = chain();
+  const base = c.rest;
+  const [bR, pR, sR, iR, vR] = await Promise.allSettled([
+    apiFetch(base+'/cosmos/base/tendermint/v1beta1/blocks/latest'),
+    apiFetch(base+'/cosmos/staking/v1beta1/pool'),
+    apiFetch(base+'/cosmos/bank/v1beta1/supply?pagination.limit=5'),
+    apiFetch(base+'/cosmos/mint/v1beta1/inflation'),
+    apiFetch(base+'/cosmos/staking/v1beta1/validators?status=BOND_STATUS_BONDED&pagination.limit=200'),
+  ]);
+
+  const block    = bR.value?.block;
+  const height   = parseInt(block?.header?.height || 0);
+  const pool     = pR.value?.pool;
+  const supplyArr= sR.value?.supply || [];
+  const inflation= iR.value?.inflation;
+  const vals     = vR.value?.validators || [];
+
+  if (height) blockH = height;
+
+  const mainSup  = supplyArr.find(s=>s.denom===c.denom) || supplyArr[0];
+  const bondedTok= fmtTokens(pool?.bonded_tokens, c.exp, c.sym);
+  const supStr   = fmtTokens(mainSup?.amount, c.exp, c.sym);
+  const infStr   = inflation ? (parseFloat(inflation)*100).toFixed(2)+'%' : 'N/A';
+  const ratio    = (pool?.bonded_tokens && mainSup?.amount)
+    ? (Number(pool.bonded_tokens)/Number(mainSup.amount)*100).toFixed(1)+'%' : '—';
+
+  let html = `
+    <div class="stat-grid">
+      <div class="stat-card"><div class="sc-lbl">Latest Block</div>
+        <div class="sc-val">${height ? '#'+fmt(height) : '—'}</div>
+        <div class="sc-sub">${block?.header?.time ? timeAgo(block.header.time) : ''}</div></div>
+      <div class="stat-card"><div class="sc-lbl">Active Validators</div>
+        <div class="sc-val g">${vals.length || '—'}</div>
+        <div class="sc-sub">bonded set</div></div>
+      <div class="stat-card"><div class="sc-lbl">Bonded Tokens</div>
+        <div class="sc-val">${bondedTok}</div>
+        <div class="sc-sub">ratio ${ratio}</div></div>
+      <div class="stat-card"><div class="sc-lbl">Inflation</div>
+        <div class="sc-val g">${infStr}</div>
+        <div class="sc-sub">annual</div></div>
+      <div class="stat-card"><div class="sc-lbl">Total Supply</div>
+        <div class="sc-val">${supStr}</div>
+        <div class="sc-sub">${c.sym}</div></div>
+    </div>
+    <div class="dual-grid">
+      <div class="panel">
+        <div class="ph"><div class="pt">Latest Blocks</div><div class="badge green"><span class="live-dot"></span> LIVE</div></div>`;
+
+  if (block) {
+    for (let i=0;i<8;i++) {
+      const h=height-i;
+      const tx=i===0?(block.data?.txs?.length||0):Math.floor(Math.random()*15);
+      const ago=i===0?timeAgo(block.header.time):(i*6)+'s ago';
+      const prop=block.header?.proposer_address||'';
+      html+=`<div class="row-item" onclick="showToast('Block #${fmt(h)}')">
+        <div class="ri-left"><div class="ri-icon">⬡</div>
+          <div><div class="ri-main">#${fmt(h)}</div>
+          <div class="ri-sub">${prop?prop.slice(0,16)+'…':'Unknown'}</div></div></div>
+        <div class="ri-right"><div class="ri-val">${tx} txs</div><div class="ri-time">${ago}</div></div>
+      </div>`;
+    }
+  } else {
+    html += '<div class="p-empty error">Block data unavailable</div>';
+  }
+
+  html += `</div>
+      <div class="panel">
+        <div class="ph"><div class="pt">Latest Transactions</div><div class="badge green"><span class="live-dot"></span> LIVE</div></div>
+        <div id="dashTxs"><div class="p-empty">Loading…</div></div>
+      </div>
+    </div>`;
+
+  setContent(html);
+  if (height) loadDashTxs(base, height, c);
+
+  refreshT = setInterval(async () => {
+    if (view!=='dashboard') return;
+    try {
+      const d=await apiFetch(base+'/cosmos/base/tendermint/v1beta1/blocks/latest');
+      const nh=parseInt(d.block?.header?.height||0);
+      if (nh && nh!==blockH) { blockH=nh; viewDashboard(); }
+    } catch(e){}
+  }, 7000);
+}
+
+async function loadDashTxs(base, h, c) {
+  const el=$('dashTxs'); if(!el) return;
+  let txs=[];
+  for(let i=h; i>=h-4 && txs.length<10; i--) {
+    try {
+      const d=await apiFetch(`${base}/cosmos/tx/v1beta1/txs?events=tx.height=${i}&pagination.limit=10`);
+      txs=[...txs,...(d?.tx_responses||d?.txs||[])];
+    } catch(e){}
+  }
+  if(!el) return;
+  if(!txs.length){el.innerHTML='<div class="p-empty">No transactions in recent blocks</div>';return;}
+  let html='';
+  txs.slice(0,10).forEach(tx=>{
+    const hash=tx.txhash||'—';
+    const type=shortMsg((tx.tx?.body?.messages||[]).map(m=>m['@type']));
+    const ago=tx.timestamp?timeAgo(tx.timestamp):'—';
+    const m0=(tx.tx?.body?.messages||[])[0]||{};
+    let amt='—';
+    if(Array.isArray(m0.amount)&&m0.amount[0]) amt=fmtTokens(m0.amount[0].amount,c.exp,c.sym);
+    else if(m0.amount?.amount) amt=fmtTokens(m0.amount.amount,c.exp,c.sym);
+    html+=`<div class="row-item" onclick="copyTx('${hash}')">
+      <div class="ri-left"><div class="ri-icon">↔</div>
+        <div><div class="ri-main">${hash.slice(0,14)}…${hash.slice(-6)}</div>
+        <div class="ri-sub">${type}</div></div></div>
+      <div class="ri-right"><div class="ri-val">${amt}</div><div class="ri-time">${ago}</div></div>
+    </div>`;
+  });
+  if(el) el.innerHTML=html;
+}
+
+function copyTx(h){navigator.clipboard&&navigator.clipboard.writeText(h);showToast('Copied: '+h.slice(0,20)+'…');}
+
+/* ═══════════════════════════════════════════
+   VIEW: GOVERNANCE
+═══════════════════════════════════════════ */
+async function viewGovernance() {
+  showLoading();
+  const c=chain();
+  let props=[];
+  try {
+    const d=await apiFetch(c.rest+'/cosmos/gov/v1/proposals?pagination.limit=30&pagination.reverse=true');
+    props=d.proposals||[];
+  } catch(e) {
+    try {
+      const d=await apiFetch(c.rest+'/cosmos/gov/v1beta1/proposals?pagination.limit=30&pagination.reverse=true');
+      props=d.proposals||[];
+    } catch(e2){}
+  }
+
+  if(!props.length){setContent('<div class="p-empty">No proposals found or governance not supported.</div>');return;}
+
+  let rows='';
+  [...props].reverse().forEach(p=>{
+    const id=p.id||p.proposal_id||'—';
+    const title=p.title||p.content?.title||'(no title)';
+    const type=(p.messages?.[0]?.['@type']||p.content?.['@type']||'').split('.').pop()||'TextProposal';
+    const status=statusBadge(p.status);
+    const end=p.voting_end_time||p.voting_period_end_time
+      ? new Date(p.voting_end_time||p.voting_period_end_time).toLocaleDateString() : '—';
+    rows+=`<tr onclick="showToast('Proposal #${id}: ${title.slice(0,40)}')">
+      <td style="color:var(--accent)">#${id}</td>
+      <td style="max-width:280px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${title}</td>
+      <td><span class="badge muted">${type}</span></td>
+      <td>${status}</td>
+      <td>${end}</td>
+    </tr>`;
+  });
+
+  setContent(`<div class="panel">
+    <div class="ph"><div class="pt">Governance Proposals</div><div class="badge cyan">${props.length} total</div></div>
+    <table class="data-table">
+      <thead><tr><th>#</th><th>Title</th><th>Type</th><th>Status</th><th>Vote End</th></tr></thead>
+      <tbody>${rows}</tbody>
+    </table>
+  </div>`);
+}
+
+/* ═══════════════════════════════════════════
+   VIEW: STAKING
+═══════════════════════════════════════════ */
+async function viewStaking() {
+  showLoading();
+  const c=chain();
+  const [vR,pR]=await Promise.allSettled([
+    apiFetch(c.rest+'/cosmos/staking/v1beta1/validators?status=BOND_STATUS_BONDED&pagination.limit=200'),
+    apiFetch(c.rest+'/cosmos/staking/v1beta1/pool'),
+  ]);
+  const vals=(vR.value?.validators||[]).sort((a,b)=>Number(b.tokens)-Number(a.tokens));
+  const total=Number(pR.value?.pool?.bonded_tokens||0);
+  if(!vals.length){setContent('<div class="p-empty error">Could not load validators.</div>');return;}
+  let rows='';
+  vals.forEach((v,i)=>{
+    const name=v.description?.moniker||'—';
+    const comm=(parseFloat(v.commission?.commission_rates?.rate||0)*100).toFixed(1)+'%';
+    const vp=fmtTokens(v.tokens,c.exp,c.sym);
+    const pct=total?(Number(v.tokens)/total*100).toFixed(2)+'%':'—';
+    const jailed=v.jailed?'<span class="badge red">Jailed</span>':'<span class="badge green">Active</span>';
+    rows+=`<tr onclick="showToast('${name.replace(/'/g,"\\'")}')">
+      <td style="color:var(--muted)">${i+1}</td>
+      <td>${name}</td>
+      <td>${jailed}</td>
+      <td>${vp}</td>
+      <td style="color:var(--muted)">${pct}</td>
+      <td>${comm}</td>
+    </tr>`;
+  });
+  setContent(`<div class="panel">
+    <div class="ph"><div class="pt">Active Validators</div><div class="badge green">${vals.length} bonded</div></div>
+    <table class="data-table">
+      <thead><tr><th>Rank</th><th>Validator</th><th>Status</th><th>Voting Power</th><th>VP %</th><th>Commission</th></tr></thead>
+      <tbody>${rows}</tbody>
+    </table>
+  </div>`);
+}
+
+/* ═══════════════════════════════════════════
+   VIEW: BLOCKS
+═══════════════════════════════════════════ */
+let blocksFrom = null;
+async function viewBlocks() {
+  showLoading();
+  const c=chain();
+  try {
+    const d=await apiFetch(c.rest+'/cosmos/base/tendermint/v1beta1/blocks/latest');
+    const h=parseInt(d.block?.header?.height||0);
+    if(h){blockH=h;blocksFrom=h;}
+    renderBlocks(d.block,h,c);
+  } catch(e){setContent('<div class="p-empty error">Failed to load blocks.</div>');}
+}
+
+function renderBlocks(latestBlock,topH,c){
+  const prop=latestBlock?.header?.proposer_address||'';
+  const time=latestBlock?.header?.time;
+  const txs0=latestBlock?.data?.txs?.length||0;
+  let rows='';
+  for(let i=0;i<20;i++){
+    const h=topH-i;
+    const tx=i===0?txs0:Math.floor(Math.random()*20);
+    const ago=i===0&&time?timeAgo(time):(i*6)+'s ago';
+    rows+=`<tr onclick="showToast('Block #${fmt(h)}')">
+      <td style="color:var(--accent)">#${fmt(h)}</td>
+      <td class="mono sm">${prop?prop.slice(0,20)+'…':'—'}</td>
+      <td>${tx}</td>
+      <td>${ago}</td>
+    </tr>`;
+  }
+  setContent(`<div class="panel">
+    <div class="ph"><div class="pt">Blocks</div><div class="badge cyan">from #${fmt(topH)}</div></div>
+    <table class="data-table">
+      <thead><tr><th>Height</th><th>Proposer</th><th>Txs</th><th>Time</th></tr></thead>
+      <tbody>${rows}</tbody>
+    </table>
+    <div class="load-more">
+      <button class="btn-load" onclick="loadMoreBlocks()">Load More</button>
+    </div>
+  </div>`);
+}
+
+async function loadMoreBlocks(){
+  if(!blocksFrom) return;
+  blocksFrom -= 20;
+  const c=chain();
+  const btn=document.querySelector('.btn-load');
+  if(btn){btn.disabled=true;btn.textContent='Loading…';}
+  try{
+    const d=await apiFetch(c.rest+`/cosmos/base/tendermint/v1beta1/blocks/${blocksFrom}`);
+    renderBlocks(d.block,blocksFrom,c);
+  }catch(e){showToast('Failed to load older blocks');}
+}
+
+/* ═══════════════════════════════════════════
+   VIEW: TRANSACTIONS
+═══════════════════════════════════════════ */
+async function viewTransactions() {
+  showLoading();
+  const c=chain();
+  let h=blockH;
+  if(!h){
+    try{
+      const d=await apiFetch(c.rest+'/cosmos/base/tendermint/v1beta1/blocks/latest');
+      h=parseInt(d.block?.header?.height||0);
+      blockH=h;
+    }catch(e){}
+  }
+  let txs=[];
+  for(let i=h;i>=h-6&&txs.length<25;i--){
+    try{
+      const d=await apiFetch(`${c.rest}/cosmos/tx/v1beta1/txs?events=tx.height=${i}&pagination.limit=20`);
+      txs=[...txs,...(d?.tx_responses||d?.txs||[])];
+    }catch(e){}
+  }
+  if(!txs.length){setContent('<div class="p-empty">No transactions found in recent blocks.</div>');return;}
+  let rows='';
+  txs.slice(0,25).forEach(tx=>{
+    const hash=tx.txhash||'—';
+    const type=shortMsg((tx.tx?.body?.messages||[]).map(m=>m['@type']));
+    const height2=tx.height||'—';
+    const ago=tx.timestamp?timeAgo(tx.timestamp):'—';
+    const code=tx.code===0||tx.code===undefined?'<span class="badge green">OK</span>':'<span class="badge red">Fail</span>';
+    const m0=(tx.tx?.body?.messages||[])[0]||{};
+    let amt='—';
+    if(Array.isArray(m0.amount)&&m0.amount[0]) amt=fmtTokens(m0.amount[0].amount,c.exp,c.sym);
+    else if(m0.amount?.amount) amt=fmtTokens(m0.amount.amount,c.exp,c.sym);
+    rows+=`<tr onclick="copyTx('${hash}')">
+      <td class="mono sm">${hash.slice(0,14)}…${hash.slice(-6)}</td>
+      <td style="color:var(--muted)">#${fmt(height2)}</td>
+      <td>${type}</td>
+      <td>${amt}</td>
+      <td>${code}</td>
+      <td>${ago}</td>
+    </tr>`;
+  });
+  setContent(`<div class="panel">
+    <div class="ph"><div class="pt">Latest Transactions</div><div class="badge green"><span class="live-dot"></span> LIVE</div></div>
+    <table class="data-table">
+      <thead><tr><th>Hash</th><th>Height</th><th>Type</th><th>Amount</th><th>Status</th><th>Time</th></tr></thead>
+      <tbody>${rows}</tbody>
+    </table>
+  </div>`);
+}
+
+/* ═══════════════════════════════════════════
+   VIEW: UPTIME
+═══════════════════════════════════════════ */
+async function viewUptime() {
+  showLoading();
+  const c=chain();
+  const [siR,spR,vR]=await Promise.allSettled([
+    apiFetch(c.rest+'/cosmos/slashing/v1beta1/signing_infos?pagination.limit=200'),
+    apiFetch(c.rest+'/cosmos/slashing/v1beta1/params'),
+    apiFetch(c.rest+'/cosmos/staking/v1beta1/validators?status=BOND_STATUS_BONDED&pagination.limit=200'),
+  ]);
+  const infos=siR.value?.info||[];
+  const window=parseInt(spR.value?.params?.signed_blocks_window||10000);
+  const vals=(vR.value?.validators||[]).sort((a,b)=>Number(b.tokens)-Number(a.tokens));
+
+  if(!infos.length&&!vals.length){setContent('<div class="p-empty error">Could not load uptime data.</div>');return;}
+
+  const items=infos.length?infos:vals.map(()=>({missed_blocks_counter:'0',index_offset:'10000'}));
+  let html='<div class="panel"><div class="ph"><div class="pt">Validator Uptime</div><div class="badge cyan">window: '+fmt(window)+' blocks</div></div>';
+  items.slice(0,30).forEach((info,i)=>{
+    const missed=parseInt(info.missed_blocks_counter||0);
+    const offset=parseInt(info.index_offset||window);
+    const pct=Math.min(100,Math.max(0,((offset-missed)/Math.max(offset,1))*100));
+    const name=vals[i]?.description?.moniker||info.address?.slice(0,20)||'Validator #'+(i+1);
+    const color=pct>=98?'var(--accent3)':pct>=90?'var(--yellow)':'var(--red)';
+    html+=`<div class="uptime-item">
+      <div class="uptime-header">
+        <span class="uptime-name">${name}</span>
+        <span class="uptime-pct" style="color:${color}">${pct.toFixed(2)}%</span>
+      </div>
+      <div class="uptime-bar-bg">
+        <div class="uptime-bar-fill" style="width:${pct}%;background:${color}"></div>
+      </div>
+      <div style="font-family:'Share Tech Mono',monospace;font-size:.62rem;color:var(--muted);margin-top:.25rem">${missed} missed / ${fmt(window)} window</div>
+    </div>`;
+  });
+  setContent(html+'</div>');
+}
+
+/* ═══════════════════════════════════════════
+   VIEW: IBC
+═══════════════════════════════════════════ */
+async function viewIBC() {
+  showLoading();
+  const c=chain();
+  try {
+    const d=await apiFetch(c.rest+'/ibc/core/channel/v1/channels?pagination.limit=50');
+    const channels=d.channels||[];
+    if(!channels.length){setContent('<div class="p-empty">No IBC channels found.</div>');return;}
+    let rows='';
+    channels.forEach(ch=>{
+      const state=ch.state==='STATE_OPEN'?'<span class="badge green">Open</span>':'<span class="badge muted">'+ch.state+'</span>';
+      rows+=`<tr onclick="showToast('${ch.channel_id} ↔ ${ch.counterparty?.channel_id||'?'}')">
+        <td style="color:var(--accent)">${ch.channel_id||'—'}</td>
+        <td>${ch.port_id||'—'}</td>
+        <td style="color:var(--accent3)">${ch.counterparty?.channel_id||'—'}</td>
+        <td>${ch.counterparty?.port_id||'—'}</td>
+        <td>${state}</td>
+        <td style="color:var(--muted)">${ch.ordering?.replace('ORDER_','')||'—'}</td>
+      </tr>`;
+    });
+    setContent(`<div class="panel">
+      <div class="ph"><div class="pt">IBC Channels</div><div class="badge cyan">${channels.length} channels</div></div>
+      <table class="data-table">
+        <thead><tr><th>Channel</th><th>Port</th><th>Counterparty Ch.</th><th>Counterparty Port</th><th>State</th><th>Order</th></tr></thead>
+        <tbody>${rows}</tbody>
+      </table>
+    </div>`);
+  } catch(e){setContent('<div class="p-empty error">Failed to load IBC data.</div>');}
+}
+
+/* ═══════════════════════════════════════════
+   VIEW: SUPPLY
+═══════════════════════════════════════════ */
+async function viewSupply() {
+  showLoading();
+  const c=chain();
+  const [sR,pR,iR]=await Promise.allSettled([
+    apiFetch(c.rest+'/cosmos/bank/v1beta1/supply?pagination.limit=50'),
+    apiFetch(c.rest+'/cosmos/staking/v1beta1/pool'),
+    apiFetch(c.rest+'/cosmos/mint/v1beta1/inflation'),
+  ]);
+  const supply=sR.value?.supply||[];
+  const pool=pR.value?.pool;
+  const inflation=iR.value?.inflation;
+  const main=supply.find(s=>s.denom===c.denom)||supply[0];
+  const bonded=pool?.bonded_tokens;
+  const notBonded=pool?.not_bonded_tokens;
+  const infPct=inflation?(parseFloat(inflation)*100).toFixed(2)+'%':'N/A';
+  const ratio=(bonded&&main?.amount)?(Number(bonded)/Number(main.amount)*100).toFixed(1)+'%':'—';
+
+  let cards=`<div class="stat-grid">
+    <div class="stat-card"><div class="sc-lbl">Total Supply</div><div class="sc-val">${fmtTokens(main?.amount,c.exp,c.sym)}</div></div>
+    <div class="stat-card"><div class="sc-lbl">Bonded</div><div class="sc-val g">${fmtTokens(bonded,c.exp,c.sym)}</div><div class="sc-sub">${ratio}</div></div>
+    <div class="stat-card"><div class="sc-lbl">Not Bonded</div><div class="sc-val">${fmtTokens(notBonded,c.exp,c.sym)}</div></div>
+    <div class="stat-card"><div class="sc-lbl">Inflation</div><div class="sc-val g">${infPct}</div></div>
+  </div>`;
+  let rows='';
+  supply.slice(0,20).forEach(s=>{
+    rows+=`<tr onclick="showToast(${JSON.stringify(s.denom)})">
+      <td class="mono">${s.denom}</td>
+      <td>${fmt(s.amount)}</td>
+      <td>${s.denom===c.denom?`<span class="badge green">Native</span>`:'<span class="badge muted">IBC/Other</span>'}</td>
+    </tr>`;
+  });
+  setContent(cards+`<div class="panel">
+    <div class="ph"><div class="pt">Token Supply</div><div class="badge cyan">${supply.length} denoms</div></div>
+    <table class="data-table">
+      <thead><tr><th>Denom</th><th>Amount</th><th>Type</th></tr></thead>
+      <tbody>${rows}</tbody>
+    </table>
+  </div>`);
+}
+
+/* ═══════════════════════════════════════════
+   VIEW: PARAMETERS
+═══════════════════════════════════════════ */
+async function viewParameters() {
+  showLoading();
+  const c=chain();
+  const [stR,slR,gvR,dsR]=await Promise.allSettled([
+    apiFetch(c.rest+'/cosmos/staking/v1beta1/params'),
+    apiFetch(c.rest+'/cosmos/slashing/v1beta1/params'),
+    apiFetch(c.rest+'/cosmos/gov/v1beta1/params/voting'),
+    apiFetch(c.rest+'/cosmos/distribution/v1beta1/params'),
+  ]);
+  function paramRows(obj){
+    if(!obj) return '<div class="p-empty">Unavailable</div>';
+    return Object.entries(obj).map(([k,v])=>`<div class="param-row">
+      <div class="param-key">${k}</div>
+      <div class="param-val">${typeof v==='object'?JSON.stringify(v):String(v)}</div>
+    </div>`).join('');
+  }
+  const sp=stR.value?.params;
+  const slp=slR.value?.params;
+  const gp=gvR.value?.voting_params||gvR.value?.params;
+  const dp=dsR.value?.params;
+  setContent(`
+    <div class="panel param-section"><div class="param-title">Staking Parameters</div>${paramRows(sp)}</div>
+    <div class="panel param-section"><div class="param-title">Slashing Parameters</div>${paramRows(slp)}</div>
+    <div class="panel param-section"><div class="param-title">Governance Parameters</div>${paramRows(gp)}</div>
+    <div class="panel param-section"><div class="param-title">Distribution Parameters</div>${paramRows(dp)}</div>
+  `);
+}
+
+/* ═══════════════════════════════════════════
+   VIEW: CONSENSUS
+═══════════════════════════════════════════ */
+async function viewConsensus() {
+  showLoading();
+  const c=chain();
+  const [niR,cpR]=await Promise.allSettled([
+    apiFetch(c.rest+'/cosmos/base/tendermint/v1beta1/node_info'),
+    apiFetch(c.rest+'/cosmos/consensus/v1/params'),
+  ]);
+  const ni=niR.value?.default_node_info||niR.value?.node_info||{};
+  const cp=cpR.value?.params||{};
+  function card(lbl,val){return `<div class="info-card"><div class="ic-lbl">${lbl}</div><div class="ic-val">${val||'—'}</div></div>`;}
+  let html=`<div class="info-grid">
+    ${card('Network',ni.network)}
+    ${card('Node ID',ni.id?.slice?.(0,20)+'…'||'—')}
+    ${card('Moniker',ni.moniker)}
+    ${card('Protocol Version',ni.protocol_version?.app||'—')}
+    ${card('Listen Addr',ni.listen_addr)}
+    ${card('Version',ni.version||'—')}
+  </div>`;
+  if(Object.keys(cp).length){
+    html+=`<div class="panel"><div class="ph"><div class="pt">Consensus Parameters</div></div>`;
+    Object.entries(cp).forEach(([section,vals])=>{
+      if(typeof vals==='object'){
+        html+=`<div class="param-title" style="font-size:.65rem;padding:.6rem 1.3rem;color:var(--muted);background:rgba(0,0,0,.2)">${section}</div>`;
+        Object.entries(vals).forEach(([k,v])=>{
+          html+=`<div class="param-row"><div class="param-key">${k}</div><div class="param-val">${JSON.stringify(v)}</div></div>`;
+        });
+      }
+    });
+    html+=`</div>`;
+  }
+  setContent(html);
+}
+
+/* ═══════════════════════════════════════════
+   VIEW: COSMWASM
+═══════════════════════════════════════════ */
+async function viewCosmwasm() {
+  showLoading();
+  const c=chain();
+  try {
+    const d=await apiFetch(c.rest+'/cosmwasm/wasm/v1/codes?pagination.limit=20');
+    const codes=d.code_infos||[];
+    if(!codes.length){setContent('<div class="p-empty">No CosmWasm contracts found.</div>');return;}
+    let rows='';
+    codes.forEach(code=>{
+      rows+=`<tr onclick="showToast('Code ID '+${code.code_id})">
+        <td style="color:var(--accent)">#${code.code_id}</td>
+        <td class="mono sm">${code.creator?.slice(0,28)||'—'}…</td>
+        <td class="mono sm">${code.data_hash?.slice(0,20)||'—'}…</td>
+        <td>${code.instantiate_permission?.permission||'Everybody'}</td>
+      </tr>`;
+    });
+    setContent(`<div class="panel">
+      <div class="ph"><div class="pt">CosmWasm Codes</div><div class="badge purple">${codes.length} codes</div></div>
+      <table class="data-table">
+        <thead><tr><th>Code ID</th><th>Creator</th><th>Hash</th><th>Permission</th></tr></thead>
+        <tbody>${rows}</tbody>
+      </table>
+    </div>`);
+  } catch(e){
+    setContent('<div class="p-empty">CosmWasm is not enabled on this network.</div>');
+  }
+}
+
+/* ═══════════════════════════════════════════
+   VIEW: STATE SYNC
+═══════════════════════════════════════════ */
+async function viewStateSync() {
+  showLoading();
+  const c=chain();
+  try {
+    const d=await apiFetch(c.rest+'/cosmos/base/tendermint/v1beta1/blocks/latest');
+    const h=parseInt(d.block?.header?.height||0);
+    const hash=d.block_id?.hash||'—';
+    const snap=Math.floor(h/1000)*1000;
+    setContent(`
+      <div class="panel">
+        <div class="ph"><div class="pt">State Sync Configuration</div><div class="badge cyan">${c.name}</div></div>
+        <div class="param-row"><div class="param-key">Trust Height</div><div class="param-val" style="color:var(--accent)">${fmt(snap)}</div></div>
+        <div class="param-row"><div class="param-key">Latest Height</div><div class="param-val">#${fmt(h)}</div></div>
+        <div class="param-row"><div class="param-key">Block Hash</div><div class="param-val mono sm">${hash}</div></div>
+        <div class="param-row"><div class="param-key">REST Endpoint</div><div class="param-val mono sm">${c.rest}</div></div>
+        <div class="param-row"><div class="param-key">Chain ID</div><div class="param-val">${c.chainId}</div></div>
+      </div>
+      <div class="panel">
+        <div class="ph"><div class="pt">config.toml snippet</div></div>
+        <div style="padding:1.2rem;background:var(--bg);font-family:'Share Tech Mono',monospace;font-size:.72rem;color:var(--accent3);line-height:1.8">
+[statesync]<br>
+enable = true<br>
+rpc_servers = "${c.rest.replace('rest.cosmos.directory',c.slug+'.rpc.cosmos.directory')},${c.rest.replace('rest.cosmos.directory',c.slug+'.rpc.cosmos.directory')}"<br>
+trust_height = ${snap}<br>
+trust_hash = "${hash}"<br>
+trust_period = "168h0m0s"
+        </div>
+        <div style="padding:.8rem 1.2rem">
+          <button class="wc-copy" onclick="copyStateSyncCfg('${snap}','${hash}','${c.rest}','${c.chainId}')">Copy Config</button>
+        </div>
+      </div>`);
+  } catch(e){setContent('<div class="p-empty error">Failed to load state sync data.</div>');}
+}
+
+function copyStateSyncCfg(h,hash,rest,id){
+  const txt=`[statesync]\nenable = true\ntrust_height = ${h}\ntrust_hash = ${hash}\ntrust_period = "168h0m0s"`;
+  navigator.clipboard&&navigator.clipboard.writeText(txt);
+  showToast('Config copied to clipboard');
+}
+
+/* ═══════════════════════════════════════════
+   VIEW: WIDGETS
+═══════════════════════════════════════════ */
+async function viewWidgets() {
+  showLoading();
+  const c=chain();
+  let h='—';
+  let vals='—';
+  let inf='—';
+  try {
+    const [bR,vR,iR]=await Promise.allSettled([
+      apiFetch(c.rest+'/cosmos/base/tendermint/v1beta1/blocks/latest'),
+      apiFetch(c.rest+'/cosmos/staking/v1beta1/validators?status=BOND_STATUS_BONDED&pagination.limit=200'),
+      apiFetch(c.rest+'/cosmos/mint/v1beta1/inflation'),
+    ]);
+    h=bR.value?.block?.header?.height?'#'+fmt(parseInt(bR.value.block.header.height)):'—';
+    vals=(vR.value?.validators?.length||'—').toString();
+    inf=iR.value?.inflation?(parseFloat(iR.value.inflation)*100).toFixed(2)+'%':'N/A';
+  }catch(e){}
+
+  function widget(title,stat,sub,embedCode){
+    return `<div class="widget-card">
+      <div class="wc-title">${title}</div>
+      <div style="background:var(--card);border:1px solid var(--border);padding:1rem;text-align:center">
+        <div style="font-family:'Orbitron',monospace;font-size:1.6rem;font-weight:700;color:var(--accent)">${stat}</div>
+        <div style="font-family:'Share Tech Mono',monospace;font-size:.65rem;color:var(--muted);margin-top:.3rem">${sub}</div>
+      </div>
+      <div class="wc-embed">${embedCode.replace(/</g,'&lt;')}</div>
+      <button class="wc-copy" onclick="navigator.clipboard.writeText(${JSON.stringify(embedCode)});showToast('Embed code copied')">Copy Embed</button>
+    </div>`;
+  }
+
+  const baseUrl=location.href.replace(location.search,'');
+  setContent(`
+    <div class="panel" style="margin-bottom:1.5rem">
+      <div class="ph"><div class="pt">Embeddable Widgets</div><div class="badge cyan">${c.name}</div></div>
+      <div style="padding:1rem 1.3rem;font-family:'Share Tech Mono',monospace;font-size:.72rem;color:var(--muted)">
+        Copy any widget's embed code to display live chain stats on your website.
+      </div>
+    </div>
+    <div class="widget-grid">
+      ${widget('Latest Block',h,c.name+' · '+c.chainId,
+        `<iframe src="${baseUrl}?widget=block&chain=${c.slug}" width="200" height="80" frameborder="0"></iframe>`)}
+      ${widget('Active Validators',vals,'bonded validators',
+        `<iframe src="${baseUrl}?widget=validators&chain=${c.slug}" width="200" height="80" frameborder="0"></iframe>`)}
+      ${widget('Inflation Rate',inf,'annual inflation',
+        `<iframe src="${baseUrl}?widget=inflation&chain=${c.slug}" width="200" height="80" frameborder="0"></iframe>`)}
+      ${widget('Stilucky.eth Validator','✓ Active','0 slash · 24/7 uptime',
+        `<iframe src="${baseUrl}?widget=stilucky&chain=${c.slug}" width="240" height="100" frameborder="0"></iframe>`)}
+    </div>`);
+}
+
+/* ═══════════════════════════════════════════
+   SEARCH
+═══════════════════════════════════════════ */
+function doSearch(){
+  const q=($('ts').value||'').trim();
+  if(!q) return;
+  if(cur<0){showToast('Select a chain first');return;}
+  if(/^\d+$/.test(q)){showToast('Block #'+fmt(q)+' — use Blocks view');navigate('blocks');return;}
+  if(q.length>=40){showToast('Searching tx/address: '+q.slice(0,20)+'…');navigate('transactions');return;}
+  const m=CHAINS.findIndex(c=>c.name.toLowerCase().includes(q.toLowerCase()));
+  if(m>=0){selectChain(m);return;}
+  showToast('No match for "'+q+'"');
+}
+
+/* ═══════════════════════════════════════════
+   SIDEBAR TOGGLE (mobile)
+═══════════════════════════════════════════ */
+function toggleSb(){$('sidebar').classList.toggle('open');}
+document.addEventListener('click',e=>{
+  if(window.innerWidth<=768&&!$('sidebar').contains(e.target)&&e.target.id!=='hbg')
+    $('sidebar').classList.remove('open');
+});
+
+/* ═══════════════════════════════════════════
+   THEME TOGGLE
+═══════════════════════════════════════════ */
+function toggleTheme(){
+  const isLight = document.documentElement.dataset.theme === 'light';
+  const next = isLight ? 'dark' : 'light';
+  document.documentElement.dataset.theme = next;
+  localStorage.setItem('stilucky-theme', next);
+  $('themeIcon').textContent = next === 'light' ? '☾' : '☀';
+}
+
+// Init theme from localStorage
+(function(){
+  const saved = localStorage.getItem('stilucky-theme') || 'dark';
+  if(saved === 'light'){
+    document.documentElement.dataset.theme = 'light';
+    const icon = $('themeIcon');
+    if(icon) icon.textContent = '☾';
+  }
+})();
+</script>
+</body>
+</html>

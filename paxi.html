@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Paxi — Node Setup | Stilucky.eth</title>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&family=Fira+Sans:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    :root{--bg:#111318;--surface:#1a1d24;--card:#21242d;--border:#2d3040;--accent:#60a5fa;--accent2:#a78bfa;--accent3:#34d399;--text:#d1d5db;--muted:#6b7280;--heading:#f3f4f6;--nav-bg:rgba(17,19,24,0.9);--code-bg:#0d0f14;--code-border:#2d3040;--noise-opacity:0.2}
+    [data-theme="light"]{--bg:#faf7f2;--surface:#f0ebe3;--card:#ffffff;--border:#ddd8cf;--accent:#2563eb;--accent2:#7c3aed;--accent3:#059669;--text:#374151;--muted:#6b7280;--heading:#111827;--nav-bg:rgba(250,247,242,0.92);--code-bg:#f5f0e8;--code-border:#ddd8cf;--noise-opacity:0}
+    *{margin:0;padding:0;box-sizing:border-box}html{scroll-behavior:smooth}
+    body{background:var(--bg);color:var(--text);font-family:'Fira Sans',sans-serif;font-weight:300;overflow-x:hidden;transition:background .25s,color .25s}
+    body::before{content:'';position:fixed;inset:0;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");pointer-events:none;z-index:999;opacity:var(--noise-opacity);transition:opacity .25s}
+    nav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:center;justify-content:space-between;padding:1.2rem 4rem;background:var(--nav-bg);backdrop-filter:blur(12px);border-bottom:1px solid rgba(0,212,255,.12);transition:background .25s}
+    .nav-left{display:flex;align-items:center;gap:1.5rem}
+    .nav-back{font-family:'Share Tech Mono',monospace;font-size:.78rem;color:var(--muted);text-decoration:none;letter-spacing:.1em;transition:color .2s}
+    .nav-back:hover{color:var(--accent)}
+    .nav-logo{font-family:'Orbitron',monospace;font-weight:900;font-size:1.1rem;color:var(--heading);text-decoration:none}
+    .nav-logo span{color:var(--accent)}
+    .theme-btn{background:none;border:1px solid var(--border);color:var(--text);width:36px;height:36px;border-radius:50%;cursor:pointer;font-size:1rem;display:flex;align-items:center;justify-content:center;transition:border-color .2s,color .2s}
+    .theme-btn:hover{border-color:var(--accent);color:var(--accent)}
+    .chain-hero{margin-top:72px;padding:4rem 4rem 3rem;background:var(--surface);border-bottom:1px solid var(--border);position:relative;overflow:hidden}
+    .chain-hero::before{content:'';position:absolute;inset:0;background-image:linear-gradient(rgba(0,212,255,.03) 1px,transparent 1px),linear-gradient(90deg,rgba(0,212,255,.03) 1px,transparent 1px);background-size:60px 60px}
+    .chain-hero-inner{position:relative;z-index:1;display:flex;align-items:center;gap:2rem;max-width:900px}
+    .chain-hero-logo{width:80px;height:80px;border-radius:16px;object-fit:contain;background:#111;padding:8px;flex-shrink:0}
+    .chain-hero-tag{font-family:'Share Tech Mono',monospace;font-size:.7rem;letter-spacing:.2em;color:var(--accent);text-transform:uppercase;margin-bottom:.5rem}
+    .chain-hero-title{font-family:'Orbitron',monospace;font-weight:900;font-size:clamp(1.8rem,4vw,2.8rem);color:var(--heading);margin-bottom:.6rem}
+    .chain-hero-desc{font-size:.95rem;color:var(--muted);line-height:1.6;max-width:600px}
+    .chain-badges{display:flex;flex-wrap:wrap;gap:.6rem;margin-top:1rem}
+    .chain-badge{font-family:'Share Tech Mono',monospace;font-size:.7rem;padding:.3rem .8rem;border:1px solid var(--border);color:var(--accent3);letter-spacing:.08em;background:rgba(0,255,157,.04)}
+    .page-tabs{background:var(--surface);border-bottom:1px solid var(--border);padding:0 4rem;display:flex;gap:0}
+    .page-tab{font-family:'Share Tech Mono',monospace;font-size:.75rem;letter-spacing:.1em;text-transform:uppercase;padding:.9rem 1.6rem;background:none;border:none;border-bottom:2px solid transparent;color:var(--muted);cursor:pointer;transition:all .2s;margin-bottom:-1px}
+    .page-tab.active{color:var(--accent);border-bottom-color:var(--accent)}
+    .page-tab:hover{color:var(--text)}
+    .page-panel{display:none}
+    .page-panel.active{display:block}
+    .content{max-width:900px;margin:0 auto;padding:3rem 4rem 6rem}
+    .section-label{font-family:'Share Tech Mono',monospace;font-size:.7rem;letter-spacing:.2em;color:var(--accent);text-transform:uppercase;margin-bottom:.5rem}
+    .section-title{font-family:'Orbitron',monospace;font-weight:700;font-size:1.3rem;color:var(--heading);margin-bottom:1.5rem;padding-bottom:.7rem;border-bottom:1px solid var(--border)}
+    .guide-section{margin-bottom:2.5rem}
+    .step-label{font-family:'Share Tech Mono',monospace;font-size:.75rem;color:var(--accent2);letter-spacing:.12em;text-transform:uppercase;margin:1.5rem 0 .6rem}
+    .code-block{position:relative;background:var(--code-bg);border:1px solid var(--code-border);border-left:3px solid var(--accent);padding:1.2rem 1rem 1.2rem 1.2rem;margin-bottom:1rem;overflow-x:auto}
+    .code-block pre{font-family:'Share Tech Mono',monospace;font-size:.82rem;color:var(--accent3);line-height:1.7;white-space:pre-wrap;word-break:break-all}
+    .copy-btn{position:absolute;top:.6rem;right:.6rem;background:none;border:1px solid var(--border);color:var(--muted);font-family:'Share Tech Mono',monospace;font-size:.65rem;padding:.25rem .6rem;cursor:pointer;letter-spacing:.08em;transition:all .2s}
+    .copy-btn:hover{border-color:var(--accent);color:var(--accent)}
+    .copy-btn.copied{border-color:var(--accent3);color:var(--accent3)}
+    .cmd-table{width:100%;border-collapse:collapse;margin-bottom:1.5rem}
+    .cmd-table th{font-family:'Share Tech Mono',monospace;font-size:.72rem;letter-spacing:.1em;text-transform:uppercase;color:var(--accent);padding:.7rem 1rem;text-align:left;border-bottom:1px solid var(--border);background:var(--code-bg)}
+    .cmd-table td{padding:.7rem 1rem;font-size:.85rem;border-bottom:1px solid rgba(26,58,92,.4);vertical-align:top}
+    .cmd-table td:first-child{color:var(--text);white-space:nowrap;width:35%}
+    .cmd-table td:last-child{font-family:'Share Tech Mono',monospace;font-size:.78rem;color:var(--accent3)}
+    .cmd-table tr:hover td{background:rgba(0,212,255,.03)}
+    .link-row{display:flex;flex-wrap:wrap;gap:.8rem;margin-top:.8rem}
+    .ext-link{font-family:'Share Tech Mono',monospace;font-size:.75rem;padding:.5rem 1.2rem;border:1px solid var(--border);color:var(--accent);text-decoration:none;letter-spacing:.08em;transition:all .2s}
+    .ext-link:hover{background:rgba(0,212,255,.08);border-color:var(--accent);transform:translateY(-1px)}
+    .info-box{background:var(--code-bg);border:1px solid var(--code-border);border-left:3px solid var(--accent2);padding:1rem 1.2rem;margin-bottom:1rem;font-size:.88rem;color:var(--text);line-height:1.6}
+    @media(max-width:768px){nav{padding:1rem 1.5rem}.chain-hero{padding:3rem 1.5rem 2rem}.content{padding:2rem 1.5rem 4rem}.page-tabs{padding:0 1.5rem}.chain-hero-inner{flex-direction:column;gap:1.2rem}}
+  </style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-left">
+    <a href="vinjan-inc.html" class="nav-back">← Back</a>
+    <a href="vinjan-inc.html" class="nav-logo">Stilucky<span>.eth</span></a>
+  </div>
+  <button class="theme-btn" onclick="toggleTheme()" id="themeBtn">☾</button>
+</nav>
+
+<div class="chain-hero">
+  <div class="chain-hero-inner">
+    <img class="chain-hero-logo"
+         src="https://raw.githubusercontent.com/cosmos/chain-registry/master/paxi/images/paxi.png"
+         alt="Paxi" onerror="this.style.display='none'" />
+    <div class="chain-hero-info">
+      <div class="chain-hero-tag">Mainnet · Node Setup</div>
+      <div class="chain-hero-title">Paxi</div>
+      <div class="chain-hero-desc">A Cosmos SDK blockchain providing decentralized infrastructure and staking services.</div>
+      <div class="chain-badges">
+        <span class="chain-badge">paxi-mainnet</span>
+        <span class="chain-badge">v1.0.6</span>
+        <span class="chain-badge">Gas: 0.05upaxi</span>
+        <span class="chain-badge">Port prefix: 40</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="page-tabs">
+  <button class="page-tab active" onclick="showPanel('installation', this)">Installation</button>
+  <button class="page-tab" onclick="showPanel('upgrade', this)">Upgrade</button>
+  <button class="page-tab" onclick="showPanel('commands', this)">Useful Commands</button>
+</div>
+
+<!-- INSTALLATION -->
+<div class="page-panel active" id="panel-installation">
+<div class="content">
+  <div class="guide-section">
+    <div class="section-label">Step 1</div>
+    <div class="section-title">Install Dependencies & Go</div>
+    <div class="code-block"><button class="copy-btn" onclick="copyCode(this)">COPY</button>
+<pre>sudo apt update && sudo apt upgrade -y
+sudo apt-get install git curl build-essential make jq gcc snapd chrony lz4 tmux unzip make bc -y</pre></div>
+    <div class="step-label">Install Go 1.24.6 (amd64)</div>
+    <div class="code-block"><button class="copy-btn" onclick="copyCode(this)">COPY</button>
+<pre>sudo rm -rf $HOME/go && sudo rm -rf /usr/local/go
+cd $HOME
+curl https://dl.google.com/go/go1.24.6.linux-amd64.tar.gz | sudo tar -C /usr/local -zxvf -
+cat <<'EOF' >> $HOME/.bashrc
+export GOROOT=/usr/local/go
+export GOPATH=$HOME/go
+export PATH=$PATH:/usr/local/go/bin:$HOME/go/bin
+export GOPROXY=https://proxy.golang.org,direct
+EOF
+source $HOME/.bashrc
+go version</pre></div>
+  </div>
+
+  <div class="guide-section">
+    <div class="section-label">Step 2</div>
+    <div class="section-title">Set Variables & Install Binary</div>
+    <div class="code-block"><button class="copy-btn" onclick="copyCode(this)">COPY</button>
+<pre>echo "export PAXI_PORT="40"" >> $HOME/.bash_profile
+source $HOME/.bash_profile</pre></div>
+    <div class="step-label">Build from source (v1.0.6)</div>
+    <div class="code-block"><button class="copy-btn" onclick="copyCode(this)">COPY</button>
+<pre>cd $HOME
+git clone https://github.com/paxi-web3/paxi
+cd paxi
+git checkout v1.0.6
+make install
+paxid version</pre></div>
+  </div>
+
+  <div class="guide-section">
+    <div class="section-label">Step 3</div>
+    <div class="section-title">Configure Node</div>
+    <div class="step-label">Initialize & client config</div>
+    <div class="code-block"><button class="copy-btn" onclick="copyCode(this)">COPY</button>
+<pre>paxid init Stilucky-node --chain-id paxi-mainnet
+sed -i "s/chain-id = .*/chain-id = \"paxi-mainnet\"/" $(dirname $(which paxid))/paxi/config/client.toml
+sed -i "s/keyring-backend = .*/keyring-backend = \"os\"/" $(dirname $(which paxid))/paxi/config/client.toml
+sed -i "s/node = .*/node = \"tcp:\/\/localhost:${PAXI_PORT}657\"/" $(dirname $(which paxid))/paxi/config/client.toml</pre></div>
+    <div class="step-label">Custom ports</div>
+    <div class="code-block"><button class="copy-btn" onclick="copyCode(this)">COPY</button>
+<pre>sed -i.bak -e "s%:1317%:${PAXI_PORT}317%g;s%:8080%:${PAXI_PORT}080%g;s%:9090%:${PAXI_PORT}090%g;s%:9091%:${PAXI_PORT}091%g;s%:8545%:${PAXI_PORT}545%g;s%:8546%:${PAXI_PORT}546%g;s%:6065%:${PAXI_PORT}065%g" $(dirname $(which paxid))/paxi/config/app.toml
+sed -i.bak -e "s%:26658%:${PAXI_PORT}658%g;s%:26657%:${PAXI_PORT}657%g;s%:6060%:${PAXI_PORT}060%g;s%:26656%:${PAXI_PORT}656%g;s%^external_address = \"\"%external_address = \"$(wget -qO- eth0.me):${PAXI_PORT}656\"%;s%:26660%:${PAXI_PORT}660%g" $(dirname $(which paxid))/paxi/config/config.toml</pre></div>
+    <div class="step-label">Gas, indexer, pruning & DB</div>
+    <div class="code-block"><button class="copy-btn" onclick="copyCode(this)">COPY</button>
+<pre>sed -i "s/minimum-gas-prices = .*/minimum-gas-prices = \"0.05upaxi\"/" $(dirname $(which paxid))/paxi/config/app.toml
+sed -i -e "s/^indexer *=.*/indexer = \"null\"/" $(dirname $(which paxid))/paxi/config/config.toml
+sed -i -e "s/^pruning *=.*/pruning = \"custom\"/" $(dirname $(which paxid))/paxi/config/app.toml
+sed -i -e "s/^pruning-keep-recent *=.*/pruning-keep-recent = \"100\"/" $(dirname $(which paxid))/paxi/config/app.toml
+sed -i -e "s/^pruning-interval *=.*/pruning-interval = \"50\"/" $(dirname $(which paxid))/paxi/config/app.toml
+sed -i "s|db_backend =.*|db_backend=\"goleveldb\"|g" "$(dirname $(which paxid))/paxi/config/config.toml"
+sed -i "s|app-db-backend =.*|app-db-backend=\"goleveldb\"|g" "$(dirname $(which paxid))/paxi/config/app.toml"</pre></div>
+    <div class="step-label">Genesis & address book</div>
+    <div class="code-block"><button class="copy-btn" onclick="copyCode(this)">COPY</button>
+<pre>curl -Ls https://file2.node39.top/Mainnet/Paxi/genesis.json > $(dirname $(which paxid))/paxi/config/genesis.json
+curl -Ls https://file2.node39.top/Mainnet/Paxi/addrbook.json > $(dirname $(which paxid))/paxi/config/addrbook.json</pre></div>
+    <div class="step-label">Peers</div>
+    <div class="code-block"><button class="copy-btn" onclick="copyCode(this)">COPY</button>
+<pre>peers="[email protected]:17656"
+sed -i.bak -e "s/^persistent_peers *=.*/persistent_peers = \"$peers\"/" $(dirname $(which paxid))/paxi/config/config.toml</pre></div>
+  </div>
+
+  <div class="guide-section">
+    <div class="section-label">Step 4</div>
+    <div class="section-title">Create Service & Start</div>
+    <div class="code-block"><button class="copy-btn" onclick="copyCode(this)">COPY</button>
+<pre>sudo tee /etc/systemd/system/paxid.service > /dev/null <<EOF
+[Unit]
+Description=Paxi Node
+After=network-online.target
+
+[Service]
+User=$USER
+WorkingDirectory=$(which paxid)
+ExecStart=$(which paxid) start
+Restart=always
+RestartSec=3
+LimitNOFILE=65535
+
+[Install]
+WantedBy=multi-user.target
+EOF
+sudo systemctl daemon-reload
+sudo systemctl enable paxid
+sudo systemctl start paxid</pre></div>
+    <div class="step-label">Check sync status</div>
+    <div class="code-block"><button class="copy-btn" onclick="copyCode(this)">COPY</button>
+<pre>paxid status 2>&1 | jq .SyncInfo</pre></div>
+  </div>
+</div>
+</div>
+
+</div>
+
+<!-- UPGRADE -->
+<div class="page-panel" id="panel-upgrade">
+<div class="content">
+  <div class="guide-section">
+    <div class="section-label">Binary Update</div>
+    <div class="section-title">Upgrade Node</div>
+    <div class="info-box">Thay <code style="color:var(--accent3)">NEW_VERSION</code> bằng tag phiên bản mới nhất từ GitHub.</div>
+    <div class="step-label">Stop & build new version</div>
+    <div class="code-block"><button class="copy-btn" onclick="copyCode(this)">COPY</button>
+<pre>sudo systemctl stop paxid
+cd $HOME/paxi
+git pull
+git checkout NEW_VERSION
+make install
+paxid version</pre></div>
+    <div class="step-label">Restart & verify</div>
+    <div class="code-block"><button class="copy-btn" onclick="copyCode(this)">COPY</button>
+<pre>sudo systemctl restart paxid
+sudo journalctl -u paxid -f</pre></div>
+  </div>
+</div>
+</div>
+
+<!-- USEFUL COMMANDS -->
+<div class="page-panel" id="panel-commands">
+<div class="content">
+  <div class="guide-section">
+    <div class="section-label">Operations</div>
+    <div class="section-title">Useful Commands</div>
+    <div class="step-label">Service management</div>
+    <div class="code-block"><button class="copy-btn" onclick="copyCode(this)">COPY</button><pre>sudo journalctl -u paxid -f</pre></div>
+    <div class="code-block"><button class="copy-btn" onclick="copyCode(this)">COPY</button><pre>sudo systemctl start paxid</pre></div>
+    <div class="code-block"><button class="copy-btn" onclick="copyCode(this)">COPY</button><pre>sudo systemctl stop paxid</pre></div>
+    <div class="code-block"><button class="copy-btn" onclick="copyCode(this)">COPY</button><pre>sudo systemctl restart paxid</pre></div>
+    <div class="code-block"><button class="copy-btn" onclick="copyCode(this)">COPY</button><pre>paxid status 2>&1 | jq .SyncInfo</pre></div>
+
+    <div class="step-label">Wallet</div>
+    <div class="code-block"><button class="copy-btn" onclick="copyCode(this)">COPY</button><pre>paxid keys add &lt;wallet&gt;</pre></div>
+    <div class="code-block"><button class="copy-btn" onclick="copyCode(this)">COPY</button><pre>paxid keys add &lt;wallet&gt; --recover</pre></div>
+    <div class="code-block"><button class="copy-btn" onclick="copyCode(this)">COPY</button><pre>paxid keys list</pre></div>
+    <div class="code-block"><button class="copy-btn" onclick="copyCode(this)">COPY</button><pre>paxid query bank balances &lt;address&gt;</pre></div>
+
+    <div class="step-label">Validator</div>
+    <div class="code-block"><button class="copy-btn" onclick="copyCode(this)">COPY</button><pre>paxid tx staking create-validator validator.json --from &lt;wallet&gt; --chain-id paxi-mainnet --gas auto --gas-adjustment 1.5 --fees 5000upaxi -y</pre></div>
+    <div class="code-block"><button class="copy-btn" onclick="copyCode(this)">COPY</button><pre>paxid tx staking delegate &lt;valoper&gt; &lt;amount&gt;upaxi --from &lt;wallet&gt; --chain-id paxi-mainnet --fees 5000upaxi -y</pre></div>
+    <div class="code-block"><button class="copy-btn" onclick="copyCode(this)">COPY</button><pre>paxid tx distribution withdraw-rewards &lt;valoper&gt; --from &lt;wallet&gt; --chain-id paxi-mainnet --fees 5000upaxi -y</pre></div>
+    <div class="code-block"><button class="copy-btn" onclick="copyCode(this)">COPY</button><pre>paxid tx slashing unjail --from &lt;wallet&gt; --chain-id paxi-mainnet --fees 5000upaxi -y</pre></div>
+    <div class="code-block"><button class="copy-btn" onclick="copyCode(this)">COPY</button><pre>paxid tx gov vote &lt;id&gt; yes --from &lt;wallet&gt; --chain-id paxi-mainnet --fees 5000upaxi -y</pre></div>
+    <div class="link-row">
+      <a class="ext-link" href="https://node39.top/docs/Mainnet/Paxi/Installation" target="_blank" rel="noopener">📄 Full Docs</a>
+    </div>
+  </div>
+</div>
+</div>
+
+<script>
+  const stored = localStorage.getItem('stilucky-theme');
+  if (stored) document.documentElement.setAttribute('data-theme', stored);
+  const btn = document.getElementById('themeBtn');
+  btn.textContent = localStorage.getItem('stilucky-theme') === 'light' ? '☾' : '☀';
+  function toggleTheme() {
+    const cur = document.documentElement.getAttribute('data-theme');
+    const next = cur === 'light' ? '' : 'light';
+    document.documentElement.setAttribute('data-theme', next);
+    localStorage.setItem('stilucky-theme', next);
+    btn.textContent = next === 'light' ? '☾' : '☀';
+  }
+  function showPanel(id, el) {
+    document.querySelectorAll('.page-tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.page-panel').forEach(p => p.classList.remove('active'));
+    el.classList.add('active');
+    document.getElementById('panel-' + id).classList.add('active');
+  }
+  function copyCode(btn) {
+    const pre = btn.nextElementSibling;
+    navigator.clipboard.writeText(pre.innerText).then(() => {
+      btn.textContent = 'COPIED'; btn.classList.add('copied');
+      setTimeout(() => { btn.textContent = 'COPY'; btn.classList.remove('copied'); }, 2000);
+    });
+  }
+</script>
+</body>
+</html>
