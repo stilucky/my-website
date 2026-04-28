@@ -107,7 +107,7 @@ sudo apt-get install git curl build-essential make jq gcc snapd chrony lz4 tmux 
 <pre>sudo rm -rf $HOME/go && sudo rm -rf /usr/local/go
 cd $HOME
 curl https://dl.google.com/go/go1.24.6.linux-amd64.tar.gz | sudo tar -C /usr/local -zxvf -
-cat <<'EOF' >> $HOME/.bashrc
+cat &lt;&lt;'EOF' >> $HOME/.bashrc
 export GOROOT=/usr/local/go
 export GOPATH=$HOME/go
 export PATH=$PATH:/usr/local/go/bin:$HOME/go/bin
@@ -167,13 +167,14 @@ sed -i.bak -e "s/^persistent_peers *=.*/persistent_peers = \"$peers\"/" $HOME/.s
     <div class="section-label">Step 4</div>
     <div class="section-title">Create Service & Start</div>
     <div class="code-block"><button class="copy-btn" onclick="copyCode(this)">COPY</button>
-<pre>sudo tee /etc/systemd/system/sunrised.service > /dev/null <<EOF
+<pre>sudo tee /etc/systemd/system/sunrised.service > /dev/null &lt;&lt;EOF
 [Unit]
 Description=Sunrised Service
 After=network-online.target
 
 [Service]
 User=$USER
+WorkingDirectory=$HOME
 ExecStart=$(which sunrised) start
 Restart=always
 RestartSec=3
@@ -242,10 +243,6 @@ sudo journalctl -u sunrised -f</pre></div>
     <div class="code-block"><button class="copy-btn" onclick="copyCode(this)">COPY</button><pre>sunrised tx distribution withdraw-rewards &lt;valoper&gt; --from &lt;wallet&gt; --chain-id sunrise-1 --fees 2500uusdrise -y</pre></div>
     <div class="code-block"><button class="copy-btn" onclick="copyCode(this)">COPY</button><pre>sunrised tx slashing unjail --from &lt;wallet&gt; --chain-id sunrise-1 --fees 2500uusdrise -y</pre></div>
     <div class="code-block"><button class="copy-btn" onclick="copyCode(this)">COPY</button><pre>sunrised tx gov vote &lt;id&gt; yes --from &lt;wallet&gt; --chain-id sunrise-1 --fees 2500uusdrise -y</pre></div>
-
-    <div class="link-row">
-      <a class="ext-link" href="https://node39.top/docs/Mainnet/Sunrise/Installation" target="_blank" rel="noopener">📄 Full Docs</a>
-    </div>
   </div>
 </div>
 </div>

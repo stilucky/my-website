@@ -100,7 +100,7 @@ sudo apt-get install git curl build-essential make jq gcc snapd chrony lz4 tmux 
 <pre>rm -rf $HOME/go && sudo rm -rf /usr/local/go
 cd $HOME
 curl https://dl.google.com/go/go1.23.4.linux-amd64.tar.gz | sudo tar -C /usr/local -zxvf -
-cat <<'EOF' >> $HOME/.bash_profile
+cat &lt;&lt;'EOF' >> $HOME/.bash_profile
 export GOROOT=/usr/local/go
 export GOPATH=$HOME/go
 export GO111MODULE=on
@@ -156,7 +156,7 @@ curl -Ls https://file3.node39.top/Testnet/Safro/addrbook.json > $HOME/.safrochai
     <div class="section-label">Step 4</div>
     <div class="section-title">Create Service & Start</div>
     <div class="code-block"><button class="copy-btn" onclick="copyCode(this)">COPY</button>
-<pre>sudo tee /etc/systemd/system/safrochaind.service > /dev/null <<EOF
+<pre>sudo tee /etc/systemd/system/safrochaind.service > /dev/null &lt;&lt;EOF
 [Unit]
 Description=safrochaind Service
 After=network-online.target
@@ -232,9 +232,6 @@ sudo journalctl -u safrochaind -f</pre></div>
     <div class="code-block"><button class="copy-btn" onclick="copyCode(this)">COPY</button><pre>safrochaind tx distribution withdraw-rewards &lt;valoper&gt; --from &lt;wallet&gt; --chain-id safro-testnet-1 --fees 1000usaf -y</pre></div>
     <div class="code-block"><button class="copy-btn" onclick="copyCode(this)">COPY</button><pre>safrochaind tx slashing unjail --from &lt;wallet&gt; --chain-id safro-testnet-1 --fees 1000usaf -y</pre></div>
     <div class="code-block"><button class="copy-btn" onclick="copyCode(this)">COPY</button><pre>safrochaind tx gov vote &lt;id&gt; yes --from &lt;wallet&gt; --chain-id safro-testnet-1 --fees 1000usaf -y</pre></div>
-    <div class="link-row">
-      <a class="ext-link" href="https://node39.top/docs/Testnet/Safro/Installation" target="_blank" rel="noopener">📄 Full Docs</a>
-    </div>
   </div>
 </div>
 </div>
