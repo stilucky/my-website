@@ -721,18 +721,18 @@
       { name:'Pactus',         logo:'https://s3.coinmarketcap.com/static-gravity/image/dcfd2aeed249488b916f0cef2d3fa849.png', color:'#0a1f0f', dot:'#22c55e', page:'pactus.html' },
       { name:'Arkeo',          logo:`${REG}/arkeo/images/arkeo.svg`,                  color:'#1e40af', dot:'#22c55e', page:'arkeo.html' },
       { name:'BitBadges',      logo:`${REG}/bitbadges/images/badge_logo.svg`,          color:'#2d0040', dot:'#22c55e', page:'bitbadges.html' },
-      { name:'Lava',           logo:`${REG}/lava/images/lava.png`,                   color:'#2d0e00', dot:'#22c55e' },
+      { name:'Lava',           logo:`${REG}/lava/images/lava.png`,                   color:'#2d0e00', dot:'#22c55e', page:'lava.html' },
       { name:'Paxi',           logo:`${REG}/paxi/images/paxi.png`,                   color:'#2e1065', dot:'#22c55e', page:'paxi.html' },
       { name:'Sunrise',        logo:`${REG}/sunrise/images/sunrise.png`,             color:'#1c0a00', dot:'#22c55e', page:'sunrise.html' },
-      { name:'Muon Network',   logo:'https://images.seeklogo.com/logo-png/44/1/muon-network-logo-png_seeklogo-442126.png', color:'#0d1b3e', dot:'#22c55e' },
-      { name:'Tanssi',         logo:'https://media.licdn.com/dms/image/v2/D4D0BAQEOEXC3hz2VKA/company-logo_200_200/company-logo_200_200/0/1683143708969/tanssi_logo?e=2147483647&v=beta&t=zA1jllXRwntE365TDLGgJXGeBVhWrRxSzwhJMPIEXMA', color:'#1a0a2e', dot:'#22c55e' },
-      { name:'ar.io',          logo:'https://pbs.twimg.com/profile_images/2013701957312012288/BXqkxrHL_400x400.jpg',         color:'#0a0a0a', dot:'#22c55e' },
+      { name:'Muon Network',   logo:'https://images.seeklogo.com/logo-png/44/1/muon-network-logo-png_seeklogo-442126.png', color:'#0d1b3e', dot:'#22c55e', page:'muon.html' },
+      { name:'Tanssi',         logo:'https://media.licdn.com/dms/image/v2/D4D0BAQEOEXC3hz2VKA/company-logo_200_200/company-logo_200_200/0/1683143708969/tanssi_logo?e=2147483647&v=beta&t=zA1jllXRwntE365TDLGgJXGeBVhWrRxSzwhJMPIEXMA', color:'#1a0a2e', dot:'#22c55e', page:'https://docs.tanssi.network/node-operators/' },
+      { name:'ar.io',          logo:'https://pbs.twimg.com/profile_images/2013701957312012288/BXqkxrHL_400x400.jpg',         color:'#0a0a0a', dot:'#22c55e', page:'https://docs.ar.io/build/run-a-gateway/quick-start/' },
     ];
 
     const TESTNET = [
-      { name:'Atomone',         logo:`${REG}/atomone/images/atomone.svg`,             color:'#1a1a2e', dot:'#22c55e' },
+      { name:'Atomone',         logo:`${REG}/atomone/images/atomone.svg`,             color:'#1a1a2e', dot:'#ef4444' },
       { name:'KiiChain',        logo:`${REG}/kiichain/images/kii.png`,          color:'#0c1a2e', dot:'#ef4444' },
-      { name:'Safrochain',      logo:'https://raw.githubusercontent.com/stilucky/my-web/0dfb22b24f88d584caf9fe6b8b29c72c99b06b1d/san.jpg', color:'#064e3b', dot:'#22c55e' },
+      { name:'Safrochain',      logo:'https://raw.githubusercontent.com/stilucky/my-web/0dfb22b24f88d584caf9fe6b8b29c72c99b06b1d/san.jpg', color:'#064e3b', dot:'#22c55e', page:'safro.html' },
     ];
 
     function logoErr(el, color, letter) {
@@ -751,9 +751,9 @@
         ? `<div class="chain-logo-wrap"><img src="${c.logo}" alt="${c.name}" onerror="logoErr(this,'${c.color}','${c.name[0]}')" /></div>`
         : `<div class="chain-logo-fb" style="background:${c.color}">${c.name[0]}</div>`;
       const inner = `${logo}<div class="chain-card-name">${c.name}${dot}</div>`;
-      return c.page
-        ? `<a class="chain-card chain-card-link" href="${c.page}">${inner}</a>`
-        : `<div class="chain-card">${inner}</div>`;
+      if (!c.page) return `<div class="chain-card">${inner}</div>`;
+      const isExt = c.page.startsWith('http');
+      return `<a class="chain-card chain-card-link" href="${c.page}"${isExt ? ' target="_blank" rel="noopener"' : ''}>${inner}</a>`;
     }
 
     function renderChains() {

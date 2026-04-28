@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Sunrise — Node Setup | Stilucky.eth</title>
+  <title>Muon Network — Node Setup | Stilucky.eth</title>
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&family=Fira+Sans:wght@300;400;500;600&display=swap" rel="stylesheet" />
   <style>
     :root{--bg:#111318;--surface:#1a1d24;--card:#21242d;--border:#2d3040;--accent:#60a5fa;--accent2:#a78bfa;--accent3:#34d399;--text:#d1d5db;--muted:#6b7280;--heading:#f3f4f6;--nav-bg:rgba(17,19,24,0.9);--code-bg:#0d0f14;--code-border:#2d3040;--noise-opacity:0.2}
@@ -39,22 +39,15 @@
     .section-title{font-family:'Orbitron',monospace;font-weight:700;font-size:1.3rem;color:var(--heading);margin-bottom:1.5rem;padding-bottom:.7rem;border-bottom:1px solid var(--border)}
     .guide-section{margin-bottom:2.5rem}
     .step-label{font-family:'Share Tech Mono',monospace;font-size:.75rem;color:var(--accent2);letter-spacing:.12em;text-transform:uppercase;margin:1.5rem 0 .6rem}
-    .step-desc{font-size:.9rem;color:var(--muted);line-height:1.6;margin-bottom:.7rem}
     .code-block{position:relative;background:var(--code-bg);border:1px solid var(--code-border);border-left:3px solid var(--accent);padding:1.2rem 1rem 1.2rem 1.2rem;margin-bottom:1rem;overflow-x:auto}
     .code-block pre{font-family:'Share Tech Mono',monospace;font-size:.82rem;color:var(--accent3);line-height:1.7;white-space:pre-wrap;word-break:break-all}
     .copy-btn{position:absolute;top:.6rem;right:.6rem;background:none;border:1px solid var(--border);color:var(--muted);font-family:'Share Tech Mono',monospace;font-size:.65rem;padding:.25rem .6rem;cursor:pointer;letter-spacing:.08em;transition:all .2s}
     .copy-btn:hover{border-color:var(--accent);color:var(--accent)}
     .copy-btn.copied{border-color:var(--accent3);color:var(--accent3)}
-    .cmd-table{width:100%;border-collapse:collapse;margin-bottom:1.5rem}
-    .cmd-table th{font-family:'Share Tech Mono',monospace;font-size:.72rem;letter-spacing:.1em;text-transform:uppercase;color:var(--accent);padding:.7rem 1rem;text-align:left;border-bottom:1px solid var(--border);background:var(--code-bg)}
-    .cmd-table td{padding:.7rem 1rem;font-size:.85rem;border-bottom:1px solid rgba(26,58,92,.4);vertical-align:top}
-    .cmd-table td:first-child{color:var(--text);white-space:nowrap;width:35%}
-    .cmd-table td:last-child{font-family:'Share Tech Mono',monospace;font-size:.78rem;color:var(--accent3)}
-    .cmd-table tr:hover td{background:rgba(0,212,255,.03)}
+    .info-box{background:var(--code-bg);border:1px solid var(--code-border);border-left:3px solid var(--accent2);padding:1rem 1.2rem;margin-bottom:1rem;font-size:.88rem;color:var(--text);line-height:1.6}
     .link-row{display:flex;flex-wrap:wrap;gap:.8rem;margin-top:.8rem}
     .ext-link{font-family:'Share Tech Mono',monospace;font-size:.75rem;padding:.5rem 1.2rem;border:1px solid var(--border);color:var(--accent);text-decoration:none;letter-spacing:.08em;transition:all .2s}
     .ext-link:hover{background:rgba(0,212,255,.08);border-color:var(--accent);transform:translateY(-1px)}
-    .info-box{background:var(--code-bg);border:1px solid var(--code-border);border-left:3px solid var(--accent2);padding:1rem 1.2rem;margin-bottom:1rem;font-size:.88rem;color:var(--text);line-height:1.6}
     @media(max-width:768px){nav{padding:1rem 1.5rem}.chain-hero{padding:3rem 1.5rem 2rem}.content{padding:2rem 1.5rem 4rem}.page-tabs{padding:0 1.5rem}.chain-hero-inner{flex-direction:column;gap:1.2rem}}
   </style>
 </head>
@@ -71,17 +64,17 @@
 <div class="chain-hero">
   <div class="chain-hero-inner">
     <img class="chain-hero-logo"
-         src="https://raw.githubusercontent.com/cosmos/chain-registry/master/sunrise/images/sunrise.png"
-         alt="Sunrise" onerror="this.style.display='none'" />
+         src="https://images.seeklogo.com/logo-png/44/1/muon-network-logo-png_seeklogo-442126.png"
+         alt="Muon Network" onerror="this.style.display='none'" />
     <div class="chain-hero-info">
       <div class="chain-hero-tag">Mainnet · Node Setup</div>
-      <div class="chain-hero-title">Sunrise</div>
-      <div class="chain-hero-desc">A modular blockchain focused on data availability for the Cosmos ecosystem.</div>
+      <div class="chain-hero-title">Muon Network</div>
+      <div class="chain-hero-desc">A decentralized oracle network enabling trustless cross-chain data access via Docker-based PION nodes.</div>
       <div class="chain-badges">
-        <span class="chain-badge">sunrise-1</span>
-        <span class="chain-badge">v1.2.0</span>
-        <span class="chain-badge">Gas: 0.0025uusdrise</span>
-        <span class="chain-badge">Port prefix: 40</span>
+        <span class="chain-badge">PION Node</span>
+        <span class="chain-badge">Docker-based</span>
+        <span class="chain-badge">Port: 8012 / 9012</span>
+        <span class="chain-badge">4 CPU · 8 GB RAM · 40 GB</span>
       </div>
     </div>
   </div>
@@ -98,120 +91,57 @@
 <div class="content">
   <div class="guide-section">
     <div class="section-label">Step 1</div>
-    <div class="section-title">Install Dependencies & Go</div>
+    <div class="section-title">Install Dependencies & Docker</div>
     <div class="code-block"><button class="copy-btn" onclick="copyCode(this)">COPY</button>
-<pre>sudo apt update && sudo apt upgrade -y
-sudo apt-get install git curl build-essential make jq gcc snapd chrony lz4 tmux unzip make bc -y</pre></div>
-    <div class="step-label">Install Go 1.24.6 (amd64)</div>
+<pre>sudo apt-get update && apt-get upgrade -y
+sudo apt-get install ca-certificates curl gnupg -y</pre></div>
+    <div class="step-label">Install Docker</div>
     <div class="code-block"><button class="copy-btn" onclick="copyCode(this)">COPY</button>
-<pre>sudo rm -rf $HOME/go && sudo rm -rf /usr/local/go
-cd $HOME
-curl https://dl.google.com/go/go1.24.6.linux-amd64.tar.gz | sudo tar -C /usr/local -zxvf -
-cat <<'EOF' >> $HOME/.bashrc
-export GOROOT=/usr/local/go
-export GOPATH=$HOME/go
-export PATH=$PATH:/usr/local/go/bin:$HOME/go/bin
-export GOPROXY=https://proxy.golang.org.direct
-EOF
-source $HOME/.bashrc
-go version</pre></div>
+<pre>sudo install -m 0755 -d /etc/apt/keyring
+curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
+sudo chmod a+r /etc/apt/keyrings/docker.gpg
+echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu $(. /etc/os-release && echo $VERSION_CODENAME) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+sudo apt-get update
+sudo apt-get install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin -y</pre></div>
   </div>
 
   <div class="guide-section">
     <div class="section-label">Step 2</div>
-    <div class="section-title">Set Variables & Install Binary</div>
+    <div class="section-title">Deploy Muon Node</div>
     <div class="code-block"><button class="copy-btn" onclick="copyCode(this)">COPY</button>
-<pre>echo "export SUNRISE_PORT="40"" >> $HOME/.bash_profile
-source $HOME/.bash_profile</pre></div>
-    <div class="step-label">Build from source (v1.2.0)</div>
+<pre>curl -o docker-compose.yml https://raw.githubusercontent.com/muon-protocol/muon-node-js/pion/docker-compose-pull.yml
+docker compose pull
+docker compose up -d</pre></div>
+    <div class="step-label">Verify node is running (wait ~5 minutes)</div>
     <div class="code-block"><button class="copy-btn" onclick="copyCode(this)">COPY</button>
-<pre>cd $HOME
-rm -rf sunrise
-git clone https://github.com/sunriselayer/sunrise
-cd sunrise
-git checkout v1.2.0
-make install</pre></div>
+<pre>curl http://localhost:8012/status</pre></div>
   </div>
 
   <div class="guide-section">
     <div class="section-label">Step 3</div>
-    <div class="section-title">Configure Node</div>
-    <div class="step-label">Initialize & client config</div>
+    <div class="section-title">Backup Keys</div>
+    <div class="info-box">Backup your keys immediately after deployment. Store the backup.json in a safe location.</div>
     <div class="code-block"><button class="copy-btn" onclick="copyCode(this)">COPY</button>
-<pre>sunrised init Stilucky-node --chain-id sunrise-1
-sed -i "s/chain-id = .*/chain-id = \"sunrise-1\"/" $HOME/.sunrise/config/client.toml
-sed -i "s/keyring-backend = .*/keyring-backend = \"os\"/" $HOME/.sunrise/config/client.toml
-sed -i "s/node = .*/node = \"tcp:\/\/localhost:${SUNRISE_PORT}657\"/" $HOME/.sunrise/config/client.toml</pre></div>
-    <div class="step-label">Custom ports</div>
-    <div class="code-block"><button class="copy-btn" onclick="copyCode(this)">COPY</button>
-<pre>sed -i.bak -e "s%:1317%:${SUNRISE_PORT}317%g;s%:8080%:${SUNRISE_PORT}080%g;s%:9090%:${SUNRISE_PORT}090%g;s%:9091%:${SUNRISE_PORT}091%g;s%:8545%:${SUNRISE_PORT}545%g;s%:8546%:${SUNRISE_PORT}546%g;s%:6065%:${SUNRISE_PORT}065%g" $HOME/.sunrise/config/app.toml
-sed -i.bak -e "s%:26658%:${SUNRISE_PORT}658%g;s%:26657%:${SUNRISE_PORT}657%g;s%:6060%:${SUNRISE_PORT}060%g;s%:26656%:${SUNRISE_PORT}656%g;s%^external_address = \"\"%external_address = \"$(wget -qO- eth0.me):${SUNRISE_PORT}656\"%;s%:26660%:${SUNRISE_PORT}660%g" $HOME/.sunrise/config/config.toml</pre></div>
-    <div class="step-label">Gas, indexer & pruning</div>
-    <div class="code-block"><button class="copy-btn" onclick="copyCode(this)">COPY</button>
-<pre>sed -i 's|minimum-gas-prices =.*|minimum-gas-prices = "0.0025uusdrise"|g' $HOME/.sunrise/config/app.toml
-sed -i -e "s/^indexer *=.*/indexer = \"null\"/" $HOME/.sunrise/config/config.toml
-sed -i -e "s/^pruning *=.*/pruning = \"custom\"/" $HOME/.sunrise/config/app.toml
-sed -i -e "s/^pruning-keep-recent *=.*/pruning-keep-recent = \"100\"/" $HOME/.sunrise/config/app.toml
-sed -i -e "s/^pruning-interval *=.*/pruning-interval = \"50\"/" $HOME/.sunrise/config/app.toml</pre></div>
-    <div class="step-label">Genesis & address book</div>
-    <div class="code-block"><button class="copy-btn" onclick="copyCode(this)">COPY</button>
-<pre>curl -Ls https://file2.node39.top/Mainnet/Sunrise/genesis.json > $HOME/.sunrise/config/genesis.json
-curl -Ls https://file2.node39.top/Mainnet/Sunrise/addrbook.json > $HOME/.sunrise/config/addrbook.json</pre></div>
-    <div class="step-label">Peers</div>
-    <div class="code-block"><button class="copy-btn" onclick="copyCode(this)">COPY</button>
-<pre>peers=""
-sed -i.bak -e "s/^persistent_peers *=.*/persistent_peers = \"$peers\"/" $HOME/.sunrise/config/config.toml</pre></div>
-  </div>
-
-  <div class="guide-section">
-    <div class="section-label">Step 4</div>
-    <div class="section-title">Create Service & Start</div>
-    <div class="code-block"><button class="copy-btn" onclick="copyCode(this)">COPY</button>
-<pre>sudo tee /etc/systemd/system/sunrised.service > /dev/null <<EOF
-[Unit]
-Description=Sunrised Service
-After=network-online.target
-
-[Service]
-User=$USER
-ExecStart=$(which sunrised) start
-Restart=always
-RestartSec=3
-LimitNOFILE=65535
-
-[Install]
-WantedBy=multi-user.target
-EOF
-sudo systemctl daemon-reload
-sudo systemctl enable sunrised
-sudo systemctl start sunrised</pre></div>
-    <div class="step-label">Check sync status</div>
-    <div class="code-block"><button class="copy-btn" onclick="copyCode(this)">COPY</button>
-<pre>sunrised status 2>&1 | jq .SyncInfo</pre></div>
+<pre>docker exec -it muon-node ./node_modules/.bin/ts-node ./src/cmd/index.ts keys backup > backup.json
+cat backup.json</pre></div>
   </div>
 </div>
 </div>
-
 
 <!-- UPGRADE -->
 <div class="page-panel" id="panel-upgrade">
 <div class="content">
   <div class="guide-section">
-    <div class="section-label">Binary Update</div>
-    <div class="section-title">Upgrade Node</div>
-    <div class="info-box">Thay <code style="color:var(--accent3)">NEW_VERSION</code> bằng tag phiên bản mới nhất từ GitHub.</div>
-    <div class="step-label">Stop & build new version</div>
+    <div class="section-label">Docker Update</div>
+    <div class="section-title">Update Node</div>
+    <div class="step-label">Pull latest image & restart</div>
     <div class="code-block"><button class="copy-btn" onclick="copyCode(this)">COPY</button>
-<pre>sudo systemctl stop sunrised
-cd $HOME/sunrise
-git pull
-git checkout NEW_VERSION
-make install
-sunrised version</pre></div>
-    <div class="step-label">Restart & verify</div>
+<pre>docker compose pull
+docker compose down
+docker compose up -d</pre></div>
+    <div class="step-label">Verify after update</div>
     <div class="code-block"><button class="copy-btn" onclick="copyCode(this)">COPY</button>
-<pre>sudo systemctl restart sunrised
-sudo journalctl -u sunrised -f</pre></div>
+<pre>curl http://localhost:8012/status</pre></div>
   </div>
 </div>
 </div>
@@ -222,29 +152,18 @@ sudo journalctl -u sunrised -f</pre></div>
   <div class="guide-section">
     <div class="section-label">Operations</div>
     <div class="section-title">Useful Commands</div>
+    <div class="step-label">Container management</div>
+    <div class="code-block"><button class="copy-btn" onclick="copyCode(this)">COPY</button><pre>docker compose up -d</pre></div>
+    <div class="code-block"><button class="copy-btn" onclick="copyCode(this)">COPY</button><pre>docker compose down</pre></div>
+    <div class="code-block"><button class="copy-btn" onclick="copyCode(this)">COPY</button><pre>docker compose restart</pre></div>
+    <div class="code-block"><button class="copy-btn" onclick="copyCode(this)">COPY</button><pre>docker compose logs -f --tail 100</pre></div>
+    <div class="code-block"><button class="copy-btn" onclick="copyCode(this)">COPY</button><pre>curl http://localhost:8012/status</pre></div>
 
-    <div class="step-label">Service management</div>
-    <div class="code-block"><button class="copy-btn" onclick="copyCode(this)">COPY</button><pre>sudo journalctl -u sunrised -f</pre></div>
-    <div class="code-block"><button class="copy-btn" onclick="copyCode(this)">COPY</button><pre>sudo systemctl start sunrised</pre></div>
-    <div class="code-block"><button class="copy-btn" onclick="copyCode(this)">COPY</button><pre>sudo systemctl stop sunrised</pre></div>
-    <div class="code-block"><button class="copy-btn" onclick="copyCode(this)">COPY</button><pre>sudo systemctl restart sunrised</pre></div>
-    <div class="code-block"><button class="copy-btn" onclick="copyCode(this)">COPY</button><pre>sunrised status 2>&1 | jq .SyncInfo</pre></div>
-
-    <div class="step-label">Wallet</div>
-    <div class="code-block"><button class="copy-btn" onclick="copyCode(this)">COPY</button><pre>sunrised keys add &lt;wallet&gt;</pre></div>
-    <div class="code-block"><button class="copy-btn" onclick="copyCode(this)">COPY</button><pre>sunrised keys add &lt;wallet&gt; --recover</pre></div>
-    <div class="code-block"><button class="copy-btn" onclick="copyCode(this)">COPY</button><pre>sunrised keys list</pre></div>
-    <div class="code-block"><button class="copy-btn" onclick="copyCode(this)">COPY</button><pre>sunrised query bank balances &lt;address&gt;</pre></div>
-
-    <div class="step-label">Validator</div>
-    <div class="code-block"><button class="copy-btn" onclick="copyCode(this)">COPY</button><pre>sunrised tx staking create-validator validator.json --from &lt;wallet&gt; --chain-id sunrise-1 --gas auto --gas-adjustment 1.5 --fees 2500uusdrise -y</pre></div>
-    <div class="code-block"><button class="copy-btn" onclick="copyCode(this)">COPY</button><pre>sunrised tx staking delegate &lt;valoper&gt; &lt;amount&gt;uusdrise --from &lt;wallet&gt; --chain-id sunrise-1 --fees 2500uusdrise -y</pre></div>
-    <div class="code-block"><button class="copy-btn" onclick="copyCode(this)">COPY</button><pre>sunrised tx distribution withdraw-rewards &lt;valoper&gt; --from &lt;wallet&gt; --chain-id sunrise-1 --fees 2500uusdrise -y</pre></div>
-    <div class="code-block"><button class="copy-btn" onclick="copyCode(this)">COPY</button><pre>sunrised tx slashing unjail --from &lt;wallet&gt; --chain-id sunrise-1 --fees 2500uusdrise -y</pre></div>
-    <div class="code-block"><button class="copy-btn" onclick="copyCode(this)">COPY</button><pre>sunrised tx gov vote &lt;id&gt; yes --from &lt;wallet&gt; --chain-id sunrise-1 --fees 2500uusdrise -y</pre></div>
-
+    <div class="step-label">Key management</div>
+    <div class="code-block"><button class="copy-btn" onclick="copyCode(this)">COPY</button><pre>docker exec -it muon-node ./node_modules/.bin/ts-node ./src/cmd/index.ts keys backup > backup.json</pre></div>
+    <div class="code-block"><button class="copy-btn" onclick="copyCode(this)">COPY</button><pre>docker exec -it muon-node ./node_modules/.bin/ts-node ./src/cmd/index.ts keys restore "$(cat backup.json)"</pre></div>
     <div class="link-row">
-      <a class="ext-link" href="https://node39.top/docs/Mainnet/Sunrise/Installation" target="_blank" rel="noopener">📄 Full Docs</a>
+      <a class="ext-link" href="https://node39.top/docs/Mainnet/Muon.net" target="_blank" rel="noopener">📄 Full Docs</a>
     </div>
   </div>
 </div>
