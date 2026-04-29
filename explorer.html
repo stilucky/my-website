@@ -244,30 +244,37 @@
     #toast.show{opacity:1;transform:translateY(0) scale(1)}
 
     /* ── UPTIME REDESIGN ── */
-    .ut-tabs{display:inline-flex;background:var(--surface);border:1px solid var(--border);border-radius:8px;overflow:hidden;margin-bottom:1rem;padding:.15rem}
+    .ut-topbar{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.6rem;margin-bottom:1rem}
+    .ut-tabs{display:inline-flex;background:var(--surface);border:1px solid var(--border);border-radius:8px;overflow:hidden;padding:.15rem}
     .ut-tab{padding:.32rem 1rem;background:transparent;border:none;color:var(--muted);font-size:.78rem;font-weight:500;cursor:pointer;transition:all .15s;font-family:'Inter',sans-serif;border-radius:6px}
     .ut-tab.active{background:var(--blue);color:#fff;box-shadow:0 1px 4px rgba(59,130,246,.3)}
     .ut-tab:hover:not(.active){background:var(--row-hover);color:var(--text)}
+    .ut-live{display:inline-flex;align-items:center;gap:.4rem;font-size:.72rem;color:var(--green);font-weight:600}
+    .ut-live-dot{width:7px;height:7px;border-radius:50%;background:var(--green);animation:ut-pulse 1.4s infinite}
+    @keyframes ut-pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.5;transform:scale(.85)}}
+    .ut-height{font-size:.72rem;color:var(--muted);font-weight:500}
     .ut-filter{padding:.38rem .9rem;background:var(--surface);border:1px solid var(--border);color:var(--text);font-size:.78rem;border-radius:8px;outline:none;width:280px;font-family:'Inter',sans-serif;margin-bottom:1rem;display:block;transition:border-color .2s,box-shadow .2s}
     .ut-filter:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-dim)}
-    .ut-grid{display:grid;grid-template-columns:repeat(8,1fr);gap:.5rem;margin-bottom:1.25rem}
-    .ut-card{background:var(--card);border:1px solid var(--border);border-radius:6px;padding:.5rem .55rem;min-width:0;overflow:hidden}
-    .ut-vname{font-size:.64rem;font-weight:500;color:var(--text2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:.28rem}
-    .ut-blkrow{display:flex;flex-wrap:nowrap;gap:1px;overflow:hidden;height:10px;margin-bottom:.22rem}
-    .ut-blk{flex-shrink:0;width:2px;height:10px;border-radius:.5px}
+    .ut-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:.55rem;margin-bottom:1.25rem}
+    .ut-card{background:var(--card);border:1px solid var(--border);border-radius:6px;padding:.55rem .6rem;min-width:0;overflow:hidden;transition:border-color .2s}
+    .ut-card:hover{border-color:var(--blue)}
+    .ut-vname-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:.32rem;gap:.3rem}
+    .ut-vname{font-size:.64rem;font-weight:500;color:var(--text2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .ut-blkrow{display:flex;flex-wrap:nowrap;gap:1.5px;overflow:hidden;height:18px;margin-bottom:0;align-items:stretch}
+    .ut-blk{flex-shrink:0;width:3px;height:18px;border-radius:1px;transition:background .3s}
     .ut-blk-c{background:#22c55e}
     .ut-blk-p{background:#f59e0b}
-    .ut-blk-m{background:#e5e7eb}
-    [data-theme="dark"] .ut-blk-m{background:#2d3a50}
-    .ut-missed-n{font-size:.63rem;font-weight:600;color:var(--muted);text-align:right}
+    .ut-blk-m{background:#ef4444}
+    .ut-blk-e{background:var(--border)}
+    .ut-missed-n{font-size:.6rem;font-weight:700;color:var(--muted);white-space:nowrap;flex-shrink:0}
     .ut-missed-n.has-miss{color:var(--red)}
-    .ut-legend{text-align:center;font-size:.72rem;color:var(--muted);margin-top:.25rem;display:flex;align-items:center;justify-content:center;gap:.75rem}
+    .ut-legend{text-align:center;font-size:.72rem;color:var(--muted);margin-top:.5rem;display:flex;align-items:center;justify-content:center;gap:.75rem}
     .ut-leg{display:inline-flex;align-items:center;gap:.3rem}
-    .ut-leg-dot{display:inline-block;width:10px;height:10px;border-radius:2px;flex-shrink:0}
+    .ut-leg-dot{display:inline-block;width:10px;height:14px;border-radius:2px;flex-shrink:0}
     .ut-leg-dot.c{background:#22c55e}
     .ut-leg-dot.p{background:#f59e0b}
-    .ut-leg-dot.m{background:#e5e7eb}
-    [data-theme="dark"] .ut-leg-dot.m{background:#2d3a50}
+    .ut-leg-dot.m{background:#ef4444}
+    .ut-leg-dot.e{background:var(--border)}
     /* overall tab */
     .ut-overall{display:flex;flex-direction:column;gap:.6rem}
     .uto-row{background:var(--card);border:1px solid var(--border);border-radius:6px;padding:.65rem 1rem;display:flex;align-items:center;gap:.85rem}
@@ -306,6 +313,25 @@
     .dlg-info-value{font-weight:600;color:var(--text);font-size:.82rem}
     .dlg-wallet-row{font-size:.75rem;color:var(--muted);text-align:center;padding:.5rem;background:var(--bg);border-radius:6px;margin-bottom:.75rem}
     .dlg-wallet-row b{color:var(--text)}
+
+    /* ── DELEGATION ROWS (portfolio) ── */
+    .del-list{display:flex;flex-direction:column;gap:.35rem}
+    .del-row{display:flex;align-items:center;gap:.6rem;padding:.5rem .65rem;background:var(--bg);border-radius:8px;border:1px solid var(--border);transition:border-color .15s}
+    .del-row:hover{border-color:var(--accent)}
+    .del-avatar{width:30px;height:30px;border-radius:50%;object-fit:cover;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.82rem;color:#fff}
+    .del-val-info{flex:1;min-width:0}
+    .del-val-name{font-size:.8rem;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:160px}
+    .del-val-addr{font-size:.62rem;color:var(--muted);margin-top:.06rem;font-family:monospace;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:160px}
+    .del-col{display:flex;flex-direction:column;gap:.06rem;min-width:78px}
+    .del-lbl{font-size:.58rem;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;font-weight:600}
+    .del-stat{font-size:.78rem;font-weight:600;color:var(--text)}
+    .del-rew{font-size:.78rem;font-weight:600;color:var(--yellow)}
+    .del-actions{display:flex;gap:.3rem;margin-left:auto;flex-shrink:0}
+    .del-btn-claim{padding:.24rem .6rem;background:var(--yellow-dim);border:1px solid var(--yellow);color:var(--yellow);font-size:.68rem;font-weight:600;border-radius:6px;cursor:pointer;transition:.15s;white-space:nowrap}
+    .del-btn-claim:hover{background:var(--yellow);color:var(--bg)}
+    .del-btn-claim:disabled{opacity:.45;cursor:not-allowed}
+    .del-btn-del{padding:.24rem .6rem;background:var(--blue-dim);border:1px solid var(--blue);color:var(--blue);font-size:.68rem;font-weight:600;border-radius:6px;cursor:pointer;transition:.15s;white-space:nowrap}
+    .del-btn-del:hover{background:var(--blue);color:#fff}
 
     /* ── PAGE LOAD BAR ── */
     #load-bar{position:fixed;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--accent),var(--blue));z-index:9999;transform-origin:left center;transform:scaleX(0);opacity:0;transition:opacity .2s}
@@ -960,10 +986,10 @@ async function viewDashboard() {
   /* ── wallet ── */
   let walletHtml = '';
   if (_walletAddr) {
-    const balances  = balR.value?.balances || [];
-    const mainBal   = balances.find(b=>b.denom===c.denom);
-    const availRaw  = BigInt(mainBal?.amount||'0');
-    const availStr  = fmtTokens(String(availRaw), c.exp, c.sym);
+    const balances     = balR.value?.balances || [];
+    const mainBal      = balances.find(b=>b.denom===c.denom);
+    const availRaw     = BigInt(mainBal?.amount||'0');
+    const availStr     = fmtTokens(String(availRaw), c.exp, c.sym);
 
     const delegations  = delR.value?.delegation_responses || [];
     const delegatedRaw = delegations.reduce((s,d)=>s+BigInt(d.balance?.amount||'0'), BigInt(0));
@@ -979,10 +1005,60 @@ async function viewDashboard() {
     const rewardsStr   = fmtTokens(String(rewardRaw), c.exp, c.sym);
     const hasRewards   = rewardRaw > 0;
 
-    const totalTokens  = (Number(availRaw)+Number(delegatedRaw)+Number(unbondingRaw)+rewardRaw) / Math.pow(10,c.exp);
-    const totalUSD     = usdPrice ? '$'+(totalTokens*usdPrice).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2}) : null;
+    /* per-validator rewards map */
+    const perValRew = {};
+    (rewR.value?.rewards || []).forEach(r => {
+      const coin = (r.reward||[]).find(rc=>rc.denom===c.denom);
+      perValRew[r.validator_address] = coin ? Math.floor(parseFloat(coin.amount)) : 0;
+    });
 
-    const addrShort = _walletAddr.slice(0,14)+'…'+_walletAddr.slice(-6);
+    /* validator name + identity map */
+    const valInfoMap = {};
+    vals.forEach(v => { valInfoMap[v.operator_address] = v; });
+
+    const totalTokens = (Number(availRaw)+Number(delegatedRaw)+Number(unbondingRaw)+rewardRaw) / Math.pow(10,c.exp);
+    const totalUSD    = usdPrice ? '$'+(totalTokens*usdPrice).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2}) : null;
+    const addrShort   = _walletAddr.slice(0,14)+'…'+_walletAddr.slice(-6);
+
+    /* delegation rows */
+    let delRows = '';
+    if (delegations.length) {
+      delegations.forEach(d => {
+        const va        = d.delegation.validator_address;
+        const info      = valInfoMap[va];
+        const moniker   = info?.description?.moniker || va.slice(0,20)+'…';
+        const identity  = info?.description?.identity || '';
+        const stakedStr = fmtTokens(d.balance?.amount||'0', c.exp, c.sym);
+        const valRew    = perValRew[va] || 0;
+        const valRewStr = fmtTokens(String(valRew), c.exp, c.sym);
+        const avatarUrl = identity && _kbCache[identity];
+        const avatarEl  = avatarUrl
+          ? `<img class="del-avatar" src="${avatarUrl}" alt="" />`
+          : `<div class="del-avatar" style="background:linear-gradient(135deg,${info?.color||'var(--blue)'},#7c3aed)">${moniker[0]?.toUpperCase()||'?'}</div>`;
+        const safeVa    = `'${va}'`;
+        delRows += `
+        <div class="del-row">
+          ${avatarEl}
+          <div class="del-val-info">
+            <div class="del-val-name">${moniker}</div>
+            <div class="del-val-addr">${va.slice(0,22)}…</div>
+          </div>
+          <div class="del-col">
+            <div class="del-lbl">Staked</div>
+            <div class="del-stat">${stakedStr}</div>
+          </div>
+          <div class="del-col">
+            <div class="del-lbl">Rewards</div>
+            <div class="del-rew">${valRewStr}</div>
+          </div>
+          <div class="del-actions">
+            <button class="del-btn-claim" ${valRew<=0?'disabled':''} onclick="claimSingle(this,${safeVa})">Claim</button>
+            <button class="del-btn-del" onclick="showDelegateModal(${safeVa})">Delegate</button>
+          </div>
+        </div>`;
+      });
+    }
+
     walletHtml = `
     <div class="panel" style="margin-bottom:1.25rem">
       <div class="ph" style="flex-wrap:wrap;gap:.5rem">
@@ -992,26 +1068,35 @@ async function viewDashboard() {
           <button onclick="navigator.clipboard.writeText('${_walletAddr}');showToast('Address copied')" style="background:none;border:none;cursor:pointer;color:var(--muted);font-size:.8rem;padding:.1rem .25rem;border-radius:4px" title="Copy address">⧉</button>
         </div>
       </div>
-      <div class="stat-grid" style="padding:.85rem 1rem .75rem;margin:0;gap:.6rem">
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:.5rem;padding:.75rem .9rem .6rem">
         <div class="stat-card" style="text-align:center">
           <div class="sc-lbl">Available</div>
-          <div class="sc-val">${availStr}</div>
+          <div class="sc-val" style="font-size:1rem">${availStr}</div>
         </div>
         <div class="stat-card" style="text-align:center">
           <div class="sc-lbl">Delegated</div>
-          <div class="sc-val g">${delegatedStr}</div>
+          <div class="sc-val g" style="font-size:1rem">${delegatedStr}</div>
         </div>
         <div class="stat-card" style="text-align:center">
           <div class="sc-lbl">Unbonding</div>
-          <div class="sc-val">${unbondingStr}</div>
+          <div class="sc-val" style="font-size:1rem">${unbondingStr}</div>
         </div>
         <div class="stat-card" style="text-align:center">
-          <div class="sc-lbl">Rewards</div>
-          <div class="sc-val" style="color:var(--yellow)">${rewardsStr}</div>
-          ${hasRewards?`<div class="sc-sub"><button id="claimBtn" onclick="claimRewards(document.getElementById('claimBtn'))" style="font-size:.7rem;color:var(--accent);background:none;border:none;cursor:pointer;font-weight:600;padding:0">Claim ↗</button></div>`:''}
+          <div class="sc-lbl">Total Rewards</div>
+          <div class="sc-val" style="font-size:1rem;color:var(--yellow)">${rewardsStr}</div>
         </div>
       </div>
-      ${totalUSD?`<div style="padding:0 1rem .75rem;font-size:.78rem;color:var(--muted);text-align:right">Total value: <b style="color:var(--text)">${totalUSD} USD</b></div>`:''}
+      ${delegations.length ? `
+      <div style="padding:0 .9rem .8rem">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.45rem">
+          <span style="font-size:.68rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.09em">
+            Staking on ${delegations.length} validator${delegations.length>1?'s':''}
+          </span>
+          ${hasRewards?`<button id="claimAllBtn" class="del-btn-claim" onclick="claimRewards(document.getElementById('claimAllBtn'))">Claim All Rewards</button>`:''}
+        </div>
+        <div class="del-list">${delRows}</div>
+      </div>` : ''}
+      ${totalUSD?`<div style="padding:0 .9rem .7rem;font-size:.78rem;color:var(--muted);text-align:right">Total value: <b style="color:var(--text)">${totalUSD} USD</b></div>`:''}
     </div>`;
   } else {
     walletHtml = `
@@ -1020,7 +1105,7 @@ async function viewDashboard() {
         <div style="font-weight:600;font-size:.88rem;margin-bottom:.2rem">My Portfolio</div>
         <div style="font-size:.78rem;color:var(--muted)">Connect your wallet to view balance, delegations and rewards</div>
       </div>
-      <button class="btn-primary" style="flex-shrink:0;padding:.42rem 1rem;font-size:.8rem;max-width:160px" onclick="connectWallet()">🔗 Connect Wallet</button>
+      <button class="btn-primary" style="flex-shrink:0;padding:.42rem 1rem;font-size:.8rem;max-width:160px" onclick="connectWallet()">⬡ Connect Wallet</button>
     </div>`;
   }
 
@@ -1465,27 +1550,99 @@ async function doDelegate(opAddr) {
   }
 }
 
-async function claimRewards(btn) {
+// Proper bech32 decode → re-encode with valoper prefix
+function _toValoperAddr(delegatorAddr) {
+  const CS = 'qpzry9x8gf2tvdw0s3jn54khce6mua7l';
+  const GEN = [0x3b6a57b2,0x26508e6d,0x1ea119fa,0x3d4233dd,0x2a1462b3];
+
+  function polymod(v) {
+    let c=1;
+    for (const d of v) { const b=c>>25; c=((c&0x1ffffff)<<5)^d; for(let i=0;i<5;i++) if((b>>i)&1) c^=GEN[i]; }
+    return c;
+  }
+  function hrpExpand(hrp) {
+    const r=[];
+    for (let i=0;i<hrp.length;i++) r.push(hrp.charCodeAt(i)>>5);
+    r.push(0);
+    for (let i=0;i<hrp.length;i++) r.push(hrp.charCodeAt(i)&31);
+    return r;
+  }
+  function createChecksum(hrp, data) {
+    const pm = polymod([...hrpExpand(hrp),...data,0,0,0,0,0,0])^1;
+    return Array.from({length:6},(_,i)=>(pm>>(5*(5-i)))&31);
+  }
+  function convertbits(data, from, to, pad=true) {
+    let acc=0,bits=0; const maxv=(1<<to)-1,r=[];
+    for (const v of data) { acc=(acc<<from)|v; bits+=from; while(bits>=to){bits-=to;r.push((acc>>bits)&maxv);} }
+    if(pad&&bits>0) r.push((acc<<(to-bits))&maxv);
+    return r;
+  }
+
+  try {
+    const s = delegatorAddr.toLowerCase();
+    const sep = s.lastIndexOf('1');
+    const hrp = s.slice(0, sep);
+    // strip 6-char checksum, decode data chars to 5-bit values
+    const d5 = Array.from(s.slice(sep+1, s.length-6), c=>CS.indexOf(c));
+    // 5-bit → 8-bit raw address bytes
+    const bytes = convertbits(d5, 5, 8, false);
+    // 8-bit → 5-bit for new prefix
+    const newHrp = hrp + 'valoper';
+    const newD5 = convertbits(bytes, 8, 5);
+    const checksum = createChecksum(newHrp, newD5);
+    return newHrp + '1' + [...newD5,...checksum].map(d=>CS[d]).join('');
+  } catch(e) {
+    // last-resort string replacement (wrong checksum but lets API return 404 cleanly)
+    return delegatorAddr.replace(/^([a-z]+)1/, '$1valoper1');
+  }
+}
+
+async function claimRewards(btn, specificValAddrs) {
   if(!_walletAddr) return connectWallet();
+  const origLabel = btn ? btn.textContent : 'Claim ↗';
   if(btn){btn.disabled=true;btn.textContent='Claiming…';}
   const c=chain();
   try {
-    const delRes=await apiFetch(c.rest+`/cosmos/staking/v1beta1/delegations/${_walletAddr}?pagination.limit=100`);
-    const valAddrs=(delRes?.delegation_responses||[]).map(d=>d.delegation.validator_address);
-    if(!valAddrs.length){
-      if(btn){btn.disabled=false;btn.textContent='Claim ↗';}
+    let valAddrs = specificValAddrs;
+    if(!valAddrs || !valAddrs.length) {
+      const delRes=await apiFetch(c.rest+`/cosmos/staking/v1beta1/delegations/${_walletAddr}?pagination.limit=100`);
+      valAddrs=(delRes?.delegation_responses||[]).map(d=>d.delegation.validator_address);
+    }
+    if(!valAddrs || !valAddrs.length){
+      if(btn){btn.disabled=false;btn.textContent=origLabel;}
       return showToast('No delegations found.');
     }
-    const msgs=valAddrs.map(va=>({typeUrl:'/cosmos.distribution.v1beta1.MsgWithdrawDelegatorReward',value:{delegatorAddress:_walletAddr,validatorAddress:va}}));
-    const txhash=await _signAndBroadcast(msgs,150000);
-    if(btn){btn.disabled=false;btn.textContent='Claim ↗';}
-    showToast('Rewards claimed! Tx: '+txhash.slice(0,16)+'…');
+
+    const msgs = [];
+    for (const va of valAddrs) {
+      msgs.push({typeUrl:'/cosmos.distribution.v1beta1.MsgWithdrawDelegatorReward',value:{delegatorAddress:_walletAddr,validatorAddress:va}});
+    }
+
+    // Also claim validator commission if this wallet is a validator operator
+    const myValoper = _toValoperAddr(_walletAddr);
+    try {
+      const commRes = await apiFetch(c.rest+`/cosmos/distribution/v1beta1/validators/${myValoper}/commission`);
+      const commCoins = commRes?.commission?.commission || [];
+      const hasComm = commCoins.some(coin => parseFloat(coin.amount) >= 1);
+      if (hasComm) {
+        msgs.push({typeUrl:'/cosmos.distribution.v1beta1.MsgWithdrawValidatorCommission',value:{validatorAddress:myValoper}});
+      }
+    } catch(_){} // not a validator — skip silently
+
+    const gas = 150000 + msgs.length * 40000;
+    const txhash = await _signAndBroadcast(msgs, gas);
+    if(btn){btn.disabled=false;btn.textContent=origLabel;}
+    showToast('Claimed! Tx: '+txhash.slice(0,16)+'…');
     viewDashboard();
   } catch(e) {
-    if(btn){btn.disabled=false;btn.textContent='Claim ↗';}
+    if(btn){btn.disabled=false;btn.textContent=origLabel;}
     console.error('Claim error:',e);
     showToast('Error: '+(e.message||String(e)).slice(0,160));
   }
+}
+
+async function claimSingle(btn, valAddr) {
+  return claimRewards(btn, [valAddr]);
 }
 
 async function _loadKeybaseAvatars(vals) {
@@ -1657,10 +1814,15 @@ async function viewValidatorDetail(opAddr) {
   setContent('<div class="p-empty">Loading validator…</div>');
   const c=chain();
 
-  const [delR,comR]=await Promise.allSettled([
+  const queries=[
     apiFetch(c.rest+`/cosmos/staking/v1beta1/validators/${opAddr}/delegations?pagination.count_total=true&pagination.limit=1`),
     apiFetch(c.rest+`/cosmos/distribution/v1beta1/validators/${opAddr}/commission`),
-  ]);
+  ];
+  if(_walletAddr){
+    queries.push(apiFetch(c.rest+`/cosmos/staking/v1beta1/delegations/${_walletAddr}/${opAddr}`).catch(()=>null));
+    queries.push(apiFetch(c.rest+`/cosmos/distribution/v1beta1/delegators/${_walletAddr}/rewards/${opAddr}`).catch(()=>null));
+  }
+  const [delR,comR,myDelR,myRewR]=await Promise.allSettled(queries);
 
   const delegatorCount=fmt(delR.value?.pagination?.total||0);
   const pendingC=comR.value?.commission?.commission||[];
@@ -1687,25 +1849,67 @@ async function viewValidatorDetail(opAddr) {
   const minSelf=fmtTokens(v.min_self_delegation||0,c.exp,c.sym);
   const unbH=v.unbonding_height&&v.unbonding_height!=='0'?fmt(v.unbonding_height):'—';
 
+  /* avatar */
+  const cachedUrl=identity&&_kbCache[identity];
+  const avatarEl=cachedUrl
+    ?`<img id="valDetailAvatar" src="${cachedUrl}" style="width:54px;height:54px;border-radius:50%;object-fit:cover;flex-shrink:0;box-shadow:var(--shadow-md)" alt="" />`
+    :`<div id="valDetailAvatar" style="width:54px;height:54px;border-radius:50%;background:linear-gradient(135deg,var(--blue),#7c3aed);display:flex;align-items:center;justify-content:center;font-size:1.4rem;font-weight:800;color:#fff;flex-shrink:0;box-shadow:var(--shadow-md)">${name[0]?.toUpperCase()||'?'}</div>`;
+
+  /* my delegation section */
+  let myDelHtml='';
+  if(_walletAddr){
+    const myBal=myDelR?.value?.delegation_response?.balance||myDelR?.value?.balance;
+    const myStaked=myBal?.amount?fmtTokens(myBal.amount,c.exp,c.sym):null;
+    const myRewCoins=myRewR?.value?.rewards||[];
+    const myRewCoin=myRewCoins.find(r=>r.denom===c.denom);
+    const myRewRaw=myRewCoin?Math.floor(parseFloat(myRewCoin.amount)):0;
+    const myRewStr=myRewRaw>0?fmtTokens(String(myRewRaw),c.exp,c.sym):null;
+    const safeVa=`'${opAddr}'`;
+    if(myStaked||myRewStr){
+      myDelHtml=`
+      <div style="padding:.7rem 1.1rem;border-top:1px solid var(--border);background:var(--row-hover);display:flex;align-items:center;gap:1.1rem;flex-wrap:wrap">
+        <span style="font-size:.65rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.09em;flex-shrink:0">My Delegation</span>
+        ${myStaked?`<div><div style="font-size:.6rem;color:var(--muted);margin-bottom:.1rem">Staked</div><div style="font-size:.88rem;font-weight:700;color:var(--text)">${myStaked}</div></div>`:''}
+        ${myRewStr?`<div><div style="font-size:.6rem;color:var(--muted);margin-bottom:.1rem">Rewards</div><div style="font-size:.88rem;font-weight:700;color:var(--yellow)">${myRewStr}</div></div>`:''}
+        <div style="margin-left:auto;display:flex;gap:.45rem;flex-shrink:0">
+          ${myRewStr?`<button id="valClaimBtn" class="del-btn-claim" style="padding:.32rem .9rem;font-size:.75rem" onclick="claimSingle(document.getElementById('valClaimBtn'),${safeVa})">Claim Rewards</button>`:''}
+          <button class="btn-delegate" onclick="showDelegateModal(${safeVa})">Delegate</button>
+        </div>
+      </div>`;
+    } else {
+      myDelHtml=`
+      <div style="padding:.6rem 1.1rem;border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;gap:1rem">
+        <span style="font-size:.78rem;color:var(--muted)">You are not staking with this validator</span>
+        <button class="btn-delegate" onclick="showDelegateModal('${opAddr}')">Delegate</button>
+      </div>`;
+    }
+  }
+
   setContent(`
     <div style="margin-bottom:1rem">
       <button class="btn-load" onclick="navigate('staking')" style="font-size:.75rem">← Back to Staking</button>
     </div>
 
     <div class="panel" style="margin-bottom:1.25rem">
-      <div class="ph" style="flex-wrap:wrap;gap:.5rem">
-        <div style="display:flex;align-items:center;gap:.6rem;flex-wrap:wrap;flex:1">
-          <span style="font-size:1rem;font-weight:700;color:var(--text)">${name}</span>
-          ${stBadge}
-          ${isActive?`<span class="badge cyan">Rank #${rank}</span>`:''}
+      <div class="ph" style="flex-wrap:wrap;gap:.65rem;padding:1rem 1.1rem">
+        <div style="display:flex;align-items:center;gap:.85rem;flex:1;flex-wrap:wrap">
+          ${avatarEl}
+          <div>
+            <div style="display:flex;align-items:center;gap:.5rem;flex-wrap:wrap;margin-bottom:.3rem">
+              <span style="font-size:1.05rem;font-weight:700;color:var(--text)">${name}</span>
+              ${stBadge}
+              ${isActive?`<span class="badge cyan">Rank #${rank}</span>`:''}
+            </div>
+            ${details?`<div style="font-size:.78rem;color:var(--muted);margin-bottom:.2rem">${details}</div>`:''}
+            ${website?`<a href="${website}" target="_blank" rel="noopener" style="font-size:.75rem;color:var(--blue)">${website.replace(/^https?:\/\//,'')}</a>`:''}
+          </div>
         </div>
       </div>
-      ${details?`<div style="padding:.6rem 1.1rem;font-size:.78rem;color:var(--muted);border-bottom:1px solid var(--border)">${details}</div>`:''}
-      <div style="padding:.6rem 1.1rem">
-        <div style="font-size:.65rem;color:var(--muted);margin-bottom:.25rem;text-transform:uppercase;letter-spacing:.06em">Operator Address</div>
-        <div class="mono" style="word-break:break-all">${opAddr}</div>
+      <div style="padding:.55rem 1.1rem;border-top:1px solid var(--border)">
+        <div style="font-size:.62rem;color:var(--muted);margin-bottom:.2rem;text-transform:uppercase;letter-spacing:.07em">Operator Address</div>
+        <div class="mono" style="word-break:break-all;font-size:.72rem">${opAddr}</div>
       </div>
-      ${website?`<div style="padding:0 1.1rem .7rem"><a href="${website}" target="_blank" rel="noopener" style="font-size:.75rem;color:var(--blue)">${website}</a></div>`:''}
+      ${myDelHtml}
     </div>
 
     <div class="stat-grid" style="margin-bottom:1.25rem">
@@ -1725,7 +1929,7 @@ async function viewValidatorDetail(opAddr) {
       </div>
       <div class="stat-card">
         <div class="sc-lbl">Pending Commission</div>
-        <div class="sc-val" style="font-size:.85rem">${pendingCommFmt}</div>
+        <div class="sc-val" style="font-size:.88rem">${pendingCommFmt}</div>
       </div>
     </div>
 
@@ -1747,6 +1951,21 @@ async function viewValidatorDetail(opAddr) {
       </div>
     </div>
   `);
+
+  /* lazy-load keybase avatar if not cached */
+  if(identity&&identity.length>=8&&!Object.prototype.hasOwnProperty.call(_kbCache,identity)){
+    _loadKeybaseAvatars([v]).then(()=>{
+      const url=_kbCache[identity];
+      if(!url) return;
+      const el=document.getElementById('valDetailAvatar');
+      if(!el) return;
+      const img=document.createElement('img');
+      img.style.cssText=el.style.cssText;
+      img.src=url; img.alt=''; img.id='valDetailAvatar';
+      img.onerror=()=>{};
+      img.onload=()=>{ if(el.isConnected) el.replaceWith(img); };
+    });
+  }
 }
 
 /* ═══════════════════════════════════════════
@@ -1858,7 +2077,8 @@ async function viewTransactions() {
 /* ═══════════════════════════════════════════
    VIEW: UPTIME
 ═══════════════════════════════════════════ */
-let _utInfos=[], _utVals=[], _utWin=10000;
+let _utInfos=[], _utVals=[], _utTmVals=[], _utWin=10000;
+let _utBlockHistory={}, _utLastHeight=0;
 let _stkMap={}, _stkTotal=0;
 let _walletAddr='';
 const _kbCache={};
@@ -1866,36 +2086,50 @@ const _pageCache={};
 
 async function viewUptime() {
   showLoading();
+  _utBlockHistory={};
+  _utLastHeight=0;
   const c=chain();
-  const [siR,spR,vR,vsR]=await Promise.allSettled([
+  const [siR,spR,vR,vsR,blkR]=await Promise.allSettled([
     apiFetch(c.rest+'/cosmos/slashing/v1beta1/signing_infos?pagination.limit=200'),
     apiFetch(c.rest+'/cosmos/slashing/v1beta1/params'),
     apiFetch(c.rest+'/cosmos/staking/v1beta1/validators?status=BOND_STATUS_BONDED&pagination.limit=200'),
     apiFetch(c.rest+'/cosmos/base/tendermint/v1beta1/validatorsets/latest?pagination.limit=200'),
+    apiFetch(c.rest+'/cosmos/base/tendermint/v1beta1/blocks/latest'),
   ]);
   _utWin=parseInt(spR.value?.params?.signed_blocks_window||10000);
+  _utLastHeight=parseInt(blkR.value?.block?.header?.height||0);
   const allInfos=siR.value?.info||[];
   const bondedVals=(vR.value?.validators||[]).sort((a,b)=>Number(b.tokens)-Number(a.tokens));
   const tmVals=(vsR.value?.validators||[]).sort((a,b)=>Number(b.voting_power)-Number(a.voting_power));
 
   if(tmVals.length){
-    // Match staking validators (rank by tokens) → tendermint validators (rank by vp) by position
-    // Both are sorted descending so rank[i] corresponds to the same validator
     const infoByAddr={};
     allInfos.forEach(info=>{infoByAddr[info.address]=info;});
+    _utTmVals=tmVals;
     _utVals=tmVals.map((tmv,i)=>bondedVals[i]||{description:{moniker:tmv.address?.slice(-8)||'#'+(i+1)}});
-    _utInfos=tmVals.map(tmv=>infoByAddr[tmv.address]||{
-      address:tmv.address,missed_blocks_counter:'0',index_offset:String(_utWin)
-    });
+    _utInfos=tmVals.map(tmv=>infoByAddr[tmv.address]||{address:tmv.address,missed_blocks_counter:'0',index_offset:String(_utWin)});
   } else {
-    // Fallback: no validatorset endpoint — limit signing_infos to bonded count only
+    _utTmVals=[];
     _utVals=bondedVals;
     _utInfos=allInfos.slice(0,bondedVals.length);
   }
 
   if(!_utVals.length){setContent('<div class="p-empty error">Could not load uptime data.</div>');return;}
+
+  // Build initial 100-block history from cumulative miss rate
+  const SHOW=100;
+  _utInfos.forEach((info,i)=>{
+    const missed=parseInt(info.missed_blocks_counter||0);
+    const offset=parseInt(info.index_offset||_utWin);
+    const scaledMiss=Math.min(SHOW,Math.round((missed/Math.max(offset,1))*SHOW));
+    const hist=[];
+    for(let j=0;j<SHOW-scaledMiss;j++) hist.push('c');
+    for(let j=0;j<scaledMiss;j++) hist.push('m');
+    _utBlockHistory[i]=hist;
+  });
+
   renderUptimeBlocks();
-  refreshT=setInterval(_refreshUptimeData,30000);
+  refreshT=setInterval(_refreshUptimeData,6000);
 }
 
 function _utItems(){
@@ -1907,17 +2141,17 @@ function _utItems(){
 let _utActiveTab='blocks';
 
 function _buildBlocksGrid(){
-  const SHOW=100;
   return _utItems().map((info,i)=>{
     const missed=parseInt(info.missed_blocks_counter||0);
-    const offset=parseInt(info.index_offset||_utWin);
     const name=_utVals[i]?.description?.moniker||info.address?.slice(0,16)||'#'+(i+1);
-    const scaledMiss=Math.round((missed/Math.max(offset,1))*SHOW);
-    const blksHtml=_genBlocks(SHOW,scaledMiss,i).map(t=>`<span class="ut-blk ut-blk-${t}"></span>`).join('');
+    const hist=_utBlockHistory[i]||[];
+    const blksHtml=hist.map(t=>`<span class="ut-blk ut-blk-${t}"></span>`).join('');
     return `<div class="ut-card" data-name="${name.toLowerCase()}">
-      <div class="ut-vname">${i+1}.${name}</div>
+      <div class="ut-vname-row">
+        <div class="ut-vname">${i+1}.${name}</div>
+        <div class="ut-missed-n ${missed>0?'has-miss':''}">${missed||0}</div>
+      </div>
       <div class="ut-blkrow">${blksHtml}</div>
-      <div class="ut-missed-n ${missed>0?'has-miss':''}">${missed||0}</div>
     </div>`;
   }).join('');
 }
@@ -1939,34 +2173,39 @@ function _buildOverallGrid(){
   }).join('');
 }
 
+function _utToolbar(){
+  const h=_utLastHeight?`<span class="ut-height">Block <b>#${fmt(_utLastHeight)}</b></span>`:'';
+  return `<div class="ut-topbar">
+    <div style="display:flex;align-items:center;gap:.75rem">
+      <div class="ut-tabs">
+        <button class="ut-tab${_utActiveTab==='overall'?' active':''}" onclick="_utTab('overall',this)">Overall</button>
+        <button class="ut-tab${_utActiveTab==='blocks'?' active':''}" onclick="_utTab('blocks',this)">Blocks</button>
+      </div>
+      <span class="ut-live"><span class="ut-live-dot"></span>Live</span>
+    </div>
+    <div style="display:flex;align-items:center;gap:.85rem">
+      ${h}
+      <input class="ut-filter" id="utFilter" placeholder="Filter validators…" oninput="filterValidators(this.value)" style="margin:0;width:210px" />
+    </div>
+  </div>`;
+}
+
 function renderUptimeBlocks(){
   _utActiveTab='blocks';
   setContent(`
-    <div class="ut-tabs">
-      <button class="ut-tab" onclick="_utTab('overall',this)">Overall</button>
-      <button class="ut-tab active" onclick="_utTab('blocks',this)">Blocks</button>
-      <button class="ut-tab" onclick="_utTab('customize',this)">Customize</button>
-    </div>
-    <input class="ut-filter" id="utFilter" placeholder="Keywords to filter validators"
-      oninput="filterValidators(this.value)" />
+    ${_utToolbar()}
     <div class="ut-grid" id="utGrid">${_buildBlocksGrid()}</div>
     <div class="ut-legend">
-      <span class="ut-leg"><span class="ut-leg-dot c"></span> Committed</span>
-      <span class="ut-leg"><span class="ut-leg-dot p"></span> Precommitted</span>
-      <span class="ut-leg"><span class="ut-leg-dot m"></span> Missed</span>
+      <span class="ut-leg"><span class="ut-leg-dot c"></span>Committed</span>
+      <span class="ut-leg"><span class="ut-leg-dot p"></span>Precommitted</span>
+      <span class="ut-leg"><span class="ut-leg-dot m"></span>Missed</span>
     </div>`);
 }
 
 function renderUptimeOverall(){
   _utActiveTab='overall';
   setContent(`
-    <div class="ut-tabs">
-      <button class="ut-tab active" onclick="_utTab('overall',this)">Overall</button>
-      <button class="ut-tab" onclick="_utTab('blocks',this)">Blocks</button>
-      <button class="ut-tab" onclick="_utTab('customize',this)">Customize</button>
-    </div>
-    <input class="ut-filter" id="utFilter" placeholder="Keywords to filter validators"
-      oninput="filterValidators(this.value)" />
+    ${_utToolbar()}
     <div class="ut-overall" id="utGrid">${_buildOverallGrid()}</div>`);
 }
 
@@ -1974,39 +2213,59 @@ async function _refreshUptimeData(){
   if(view!=='uptime') return;
   const c=chain();
   try {
-    const [siR,vsR]=await Promise.allSettled([
-      apiFetch(c.rest+'/cosmos/slashing/v1beta1/signing_infos?pagination.limit=200'),
-      apiFetch(c.rest+'/cosmos/base/tendermint/v1beta1/validatorsets/latest?pagination.limit=200'),
-    ]);
-    const allInfos=siR.value?.info||[];
-    const tmVals=(vsR.value?.validators||[]).sort((a,b)=>Number(b.voting_power)-Number(a.voting_power));
-    const prevInfos=_utInfos;
-    if(tmVals.length){
-      const infoByAddr={};
-      allInfos.forEach(info=>{infoByAddr[info.address]=info;});
-      _utInfos=tmVals.map(tmv=>infoByAddr[tmv.address]||{address:tmv.address,missed_blocks_counter:'0',index_offset:String(_utWin)});
-    } else {
-      _utInfos=allInfos.slice(0,_utVals.length);
-    }
+    // Step 1: check if a new block arrived (cheap call)
+    const blkR=await apiFetch(c.rest+'/cosmos/base/tendermint/v1beta1/blocks/latest');
+    const newHeight=parseInt(blkR?.block?.header?.height||0);
+    if(!newHeight||newHeight<=_utLastHeight) return;
+    const numNew=newHeight-_utLastHeight;
+
+    // Step 2: fetch signing_infos to get accurate missed_blocks_counter delta
+    const siR=await apiFetch(c.rest+'/cosmos/slashing/v1beta1/signing_infos?pagination.limit=200');
+    const allInfos=siR?.info||[];
+    const infoByAddr={};
+    allInfos.forEach(info=>{infoByAddr[info.address]=info;});
+    const prevInfos=[..._utInfos];
+    _utInfos=_utTmVals.length
+      ?_utTmVals.map(tmv=>infoByAddr[tmv.address]||{address:tmv.address,missed_blocks_counter:'0',index_offset:String(_utWin)})
+      :allInfos.slice(0,_utVals.length);
+
+    // Step 3: push exactly (numNew - deltaMiss) green + deltaMiss red per validator
+    _utInfos.forEach((info,i)=>{
+      if(!_utBlockHistory[i]) _utBlockHistory[i]=[];
+      const hist=_utBlockHistory[i];
+      const prevMissed=parseInt(prevInfos[i]?.missed_blocks_counter||0);
+      const newMissed=parseInt(info.missed_blocks_counter||0);
+      const deltaMiss=Math.max(0,newMissed-prevMissed);
+      const deltaCommit=Math.max(0,numNew-deltaMiss);
+      for(let j=0;j<deltaCommit;j++) hist.push('c');
+      for(let j=0;j<deltaMiss;j++) hist.push('m');
+      while(hist.length>100) hist.shift();
+    });
+
+    _utLastHeight=newHeight;
+
+    // Update block height badge
+    const hEl=document.querySelector('.ut-height');
+    if(hEl) hEl.innerHTML=`Block <b>#${fmt(newHeight)}</b>`;
+
+    // Update grid in-place
     const grid=$('utGrid');
     if(!grid) return;
-    const SHOW=100;
+
     if(_utActiveTab==='blocks'){
       const cards=grid.querySelectorAll('.ut-card');
-      _utInfos.forEach((info,i)=>{
-        if(prevInfos[i]?.missed_blocks_counter===info.missed_blocks_counter) return;
+      _utVals.forEach((_,i)=>{
         if(!cards[i]) return;
+        const info=_utInfos[i]||{};
         const missed=parseInt(info.missed_blocks_counter||0);
-        const offset=parseInt(info.index_offset||_utWin);
         const name=_utVals[i]?.description?.moniker||info.address?.slice(0,16)||'#'+(i+1);
-        const scaledMiss=Math.round((missed/Math.max(offset,1))*SHOW);
-        const blksHtml=_genBlocks(SHOW,scaledMiss,i).map(t=>`<span class="ut-blk ut-blk-${t}"></span>`).join('');
-        cards[i].innerHTML=`<div class="ut-vname">${i+1}.${name}</div><div class="ut-blkrow">${blksHtml}</div><div class="ut-missed-n ${missed>0?'has-miss':''}">${missed||0}</div>`;
+        const hist=_utBlockHistory[i]||[];
+        const blksHtml=hist.map(t=>`<span class="ut-blk ut-blk-${t}"></span>`).join('');
+        cards[i].innerHTML=`<div class="ut-vname-row"><div class="ut-vname">${i+1}.${name}</div><div class="ut-missed-n ${missed>0?'has-miss':''}">${missed||0}</div></div><div class="ut-blkrow">${blksHtml}</div>`;
       });
     } else if(_utActiveTab==='overall'){
       const rows=grid.querySelectorAll('.uto-row');
       _utInfos.forEach((info,i)=>{
-        if(prevInfos[i]?.missed_blocks_counter===info.missed_blocks_counter) return;
         if(!rows[i]) return;
         const missed=parseInt(info.missed_blocks_counter||0);
         const offset=parseInt(info.index_offset||_utWin);
@@ -2041,16 +2300,6 @@ function _utTab(tab,btn){
   const q=($('utFilter')||{}).value||'';
   if(tab==='blocks') renderUptimeBlocks();
   else if(tab==='overall') renderUptimeOverall();
-  else {
-    // customize: just show a filter note for now
-    setContent(`
-      <div class="ut-tabs">
-        <button class="ut-tab" onclick="_utTab('overall',this)">Overall</button>
-        <button class="ut-tab" onclick="_utTab('blocks',this)">Blocks</button>
-        <button class="ut-tab active" onclick="_utTab('customize',this)">Customize</button>
-      </div>
-      <div class="p-empty">Customize view coming soon.</div>`);
-  }
   if(q) setTimeout(()=>filterValidators(q),0);
 }
 
