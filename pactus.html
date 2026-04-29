@@ -4,6 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Pactus — Node Setup | Stilucky.eth</title>
+  <link rel="icon" type="image/png" href="https://raw.githubusercontent.com/stilucky/my-web/main/avail_9429136-1.png" />
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&family=Fira+Sans:wght@300;400;500;600&display=swap" rel="stylesheet" />
   <style>
     :root {
@@ -97,7 +98,11 @@
       font-size: 1.1rem;
       color: var(--heading);
       text-decoration: none;
+      display: flex;
+      align-items: center;
+      gap: .4rem;
     }
+    .nav-logo img { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; }
     .nav-logo span { color: var(--accent); }
 
     .theme-btn {
@@ -417,7 +422,7 @@
 <nav>
   <div class="nav-left">
     <a href="home.html" class="nav-back">← Back</a>
-    <a href="home.html" class="nav-logo">Stilucky<span>.eth</span></a>
+    <a href="home.html" class="nav-logo"><img src="https://raw.githubusercontent.com/stilucky/my-web/main/avail_9429136-1.png" alt="Stilucky" />Stilucky<span>.eth</span></a>
   </div>
   <button class="theme-btn" onclick="toggleTheme()" id="themeBtn">☾</button>
 </nav>

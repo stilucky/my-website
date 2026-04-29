@@ -4,6 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Safrochain — Node Setup | Stilucky.eth</title>
+  <link rel="icon" type="image/png" href="https://raw.githubusercontent.com/stilucky/my-web/main/avail_9429136-1.png" />
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&family=Fira+Sans:wght@300;400;500;600&display=swap" rel="stylesheet" />
   <style>
     :root{--bg:#111318;--surface:#1a1d24;--card:#21242d;--border:#2d3040;--accent:#60a5fa;--accent2:#a78bfa;--accent3:#34d399;--text:#d1d5db;--muted:#6b7280;--heading:#f3f4f6;--nav-bg:rgba(17,19,24,0.9);--code-bg:#0d0f14;--code-border:#2d3040;--noise-opacity:0.2}
@@ -15,7 +16,8 @@
     .nav-left{display:flex;align-items:center;gap:1.5rem}
     .nav-back{font-family:'Share Tech Mono',monospace;font-size:.78rem;color:var(--muted);text-decoration:none;letter-spacing:.1em;transition:color .2s}
     .nav-back:hover{color:var(--accent)}
-    .nav-logo{font-family:'Orbitron',monospace;font-weight:900;font-size:1.1rem;color:var(--heading);text-decoration:none}
+    .nav-logo{font-family:'Orbitron',monospace;font-weight:900;font-size:1.1rem;color:var(--heading);text-decoration:none;display:flex;align-items:center;gap:.4rem}
+    .nav-logo img{width:40px;height:40px;border-radius:50%;object-fit:cover}
     .nav-logo span{color:var(--accent)}
     .theme-btn{background:none;border:1px solid var(--border);color:var(--text);width:36px;height:36px;border-radius:50%;cursor:pointer;font-size:1rem;display:flex;align-items:center;justify-content:center;transition:border-color .2s,color .2s}
     .theme-btn:hover{border-color:var(--accent);color:var(--accent)}
@@ -56,7 +58,7 @@
 <nav>
   <div class="nav-left">
     <a href="home.html" class="nav-back">← Back</a>
-    <a href="home.html" class="nav-logo">Stilucky<span>.eth</span></a>
+    <a href="home.html" class="nav-logo"><img src="https://raw.githubusercontent.com/stilucky/my-web/main/avail_9429136-1.png" alt="Stilucky" />Stilucky<span>.eth</span></a>
   </div>
   <button class="theme-btn" onclick="toggleTheme()" id="themeBtn">☾</button>
 </nav>

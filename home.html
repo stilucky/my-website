@@ -4,6 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Stilucky.eth — Staking Provider</title>
+  <link rel="icon" type="image/png" href="https://raw.githubusercontent.com/stilucky/my-web/main/avail_9429136-1.png" />
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&family=Fira+Sans:wght@300;400;500;600&display=swap" rel="stylesheet" />
   <style>
     :root {
@@ -87,8 +88,11 @@
       color: var(--heading);
       text-decoration: none;
       letter-spacing: 0.05em;
+      display: flex;
+      align-items: center;
+      gap: .45rem;
     }
-
+    .nav-logo img { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; }
     .nav-logo span { color: var(--accent); }
 
     .nav-links { display: flex; gap: 2rem; list-style: none; }
@@ -480,7 +484,6 @@
       text-align: center;
     }
 
-    .stat-item {}
     .stat-value {
       font-family: 'Orbitron', monospace;
       font-size: 2.4rem;
@@ -598,7 +601,7 @@
 
   <!-- NAVBAR -->
   <nav>
-    <a href="#" class="nav-logo">Stilucky<span>.</span>eth</a>
+    <a href="#" class="nav-logo"><img src="https://raw.githubusercontent.com/stilucky/my-web/main/avail_9429136-1.png" alt="Stilucky" />Stilucky<span>.</span>eth</a>
     <ul class="nav-links">
       <li><a href="explorer.html" target="_blank">Explorer</a></li>
       <li><a href="#chains">Mainnet</a></li>
