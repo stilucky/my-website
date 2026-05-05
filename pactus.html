@@ -409,11 +409,169 @@
     .tab-panel { display: none; }
     .tab-panel.active { display: block; }
 
+    /* ── VALIDATOR PROFILE CARD ── */
+    .val-profile {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-top: 3px solid var(--accent);
+      padding: 1.4rem 1.5rem 1.1rem;
+      margin-bottom: 1.2rem;
+    }
+    .val-name-row {
+      display: flex;
+      align-items: center;
+      gap: 0.55rem;
+      margin-bottom: 0.45rem;
+    }
+    .val-name {
+      font-family: 'Orbitron', monospace;
+      font-weight: 700;
+      font-size: 1.15rem;
+      color: var(--heading);
+    }
+    .val-badge-star { font-size: 1rem; }
+    .val-badge-verified {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 18px; height: 18px;
+      border-radius: 50%;
+      background: #22c55e;
+      color: #fff;
+      font-size: 0.65rem;
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+    .val-hub-addr {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 0.78rem;
+      color: var(--accent);
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      margin-bottom: 0.6rem;
+      flex-wrap: wrap;
+    }
+    .val-copy-btn {
+      background: none;
+      border: none;
+      color: var(--muted);
+      cursor: pointer;
+      font-size: 0.78rem;
+      padding: 0;
+      transition: color 0.2s;
+      line-height: 1;
+    }
+    .val-copy-btn:hover { color: var(--accent); }
+    .val-copy-btn.copied { color: var(--accent3); }
+    .val-desc {
+      font-size: 0.85rem;
+      color: var(--muted);
+      line-height: 1.65;
+      margin-bottom: 0.75rem;
+    }
+    .val-socials {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.9rem;
+      margin-bottom: 1.1rem;
+    }
+    .val-social-link {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 0.72rem;
+      color: var(--muted);
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      gap: 0.3rem;
+      transition: color 0.2s;
+    }
+    .val-social-link:hover { color: var(--accent); }
+    .val-stats-row {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 0.75rem;
+    }
+    .val-stat {
+      background: var(--code-bg);
+      border: 1px solid var(--code-border);
+      padding: 0.85rem 1rem;
+      text-align: center;
+    }
+    .val-stat-val {
+      font-family: 'Orbitron', monospace;
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--accent);
+      margin-bottom: 0.3rem;
+    }
+    .val-stat-val.green { color: var(--accent3); }
+    .val-stat-lbl {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 0.62rem;
+      color: var(--muted);
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+    }
+    /* ── DELEGATE SECTION ── */
+    .delegate-box {
+      background: var(--card);
+      border: 1px solid var(--border);
+      padding: 1.2rem 1.5rem;
+      margin-bottom: 0;
+    }
+    .delegate-label {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 0.7rem;
+      letter-spacing: 0.15em;
+      color: var(--accent2);
+      text-transform: uppercase;
+      margin-bottom: 0.5rem;
+    }
+    .delegate-input-row {
+      display: flex;
+      gap: 0.6rem;
+      align-items: center;
+      margin-bottom: 0.9rem;
+      flex-wrap: wrap;
+    }
+    .delegate-input {
+      flex: 1;
+      min-width: 240px;
+      background: var(--code-bg);
+      border: 1px solid var(--code-border);
+      color: var(--accent3);
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 0.78rem;
+      padding: 0.5rem 0.8rem;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .delegate-input::placeholder { color: var(--muted); opacity: 0.7; }
+    .delegate-input:focus { border-color: var(--accent); }
+    .delegate-cmd-block {
+      position: relative;
+      background: var(--code-bg);
+      border: 1px solid var(--code-border);
+      border-left: 3px solid var(--accent2);
+      padding: 1rem 3rem 1rem 1.1rem;
+    }
+    .delegate-cmd-block pre {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 0.78rem;
+      color: var(--accent3);
+      line-height: 1.7;
+      white-space: pre-wrap;
+      word-break: break-all;
+    }
+    .delegate-cmd-block .copy-btn { top: 0.6rem; right: 0.6rem; }
+
     @media (max-width: 768px) {
       nav { padding: 1rem 1.5rem; }
       .chain-hero { padding: 3rem 1.5rem 2rem; }
       .content { padding: 2rem 1.5rem 4rem; }
       .chain-hero-inner { flex-direction: column; gap: 1.2rem; }
+      .val-embed-wrap iframe { height: 420px; }
     }
   </style>
 </head>
@@ -452,6 +610,85 @@
 
 <!-- CONTENT -->
 <div class="content">
+
+  <!-- MY VALIDATOR -->
+  <div class="guide-section">
+    <div class="section-label">Validator Info</div>
+    <div class="section-title">My Validator</div>
+
+    <!-- Profile card -->
+    <div class="val-profile">
+      <div class="val-name-row">
+        <span class="val-name">Stilucky</span>
+        <span class="val-badge-star">⭐</span>
+        <span class="val-badge-verified">✓</span>
+      </div>
+
+      <div class="val-hub-addr">
+        <span>pc1rpwp6zcqx3vw76y4j2hj69m3kf4agk37zc26nf6</span>
+        <button class="val-copy-btn" id="valCopyBtn" onclick="copyValAddr()" title="Copy address">⧉</button>
+      </div>
+
+      <div class="val-desc">
+        Reliable validator with high uptime, secure infrastructure, and 24/7 monitoring. Optimized for performance and stability.
+      </div>
+
+      <div class="val-socials">
+        <a class="val-social-link" href="https://stilucky.xyz/" target="_blank" rel="noopener">🌐 stilucky.xyz</a>
+        <a class="val-social-link" href="mailto:toilaai12321@gmail.com">✉ toilaai12321@gmail.com</a>
+        <a class="val-social-link" href="https://x.com/stilucky" target="_blank" rel="noopener">𝕏 @stilucky</a>
+        <a class="val-social-link" href="https://t.me/stilucky39" target="_blank" rel="noopener">✈ @stilucky39</a>
+      </div>
+
+      <div class="val-stats-row">
+        <div class="val-stat">
+          <div class="val-stat-val">0.20 PAC</div>
+          <div class="val-stat-lbl">Owner Share</div>
+        </div>
+        <div class="val-stat">
+          <div class="val-stat-val green">99.9%</div>
+          <div class="val-stat-lbl">Avg Avail</div>
+        </div>
+        <div class="val-stat">
+          <div class="val-stat-val" id="vOpenSlots">16</div>
+          <div class="val-stat-lbl">Open Slots</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Delegate command -->
+    <div class="delegate-box">
+      <div class="delegate-label">Delegate to this validator</div>
+      <div class="delegate-input-row">
+        <input
+          class="delegate-input"
+          id="delegateAccInput"
+          placeholder="Your account address (pc1…)"
+          oninput="updateDelegateCmd()" />
+        <input
+          class="delegate-input"
+          id="delegateAmtInput"
+          type="number"
+          min="1"
+          placeholder="Amount (PAC)"
+          value="1000"
+          oninput="updateDelegateCmd()"
+          style="max-width:140px" />
+      </div>
+      <div class="delegate-cmd-block">
+        <button class="copy-btn" onclick="copyCode(this)">COPY</button>
+        <pre id="delegateCmdPre">cd $HOME/node_pactus && ./pactus-wallet send bond \
+  --pub public1p3ll3tu4s84fdwgc9n76yj9evgh8kavnpcjpd0n6fplgqjesn32qklgraekx7s8u732ht4y3gevt4krl88wrjk6ej0x34sut2777sd2k3993vq0daxrhv0htgwl0l5hclcku0vqntdrj2zhklwaz3j85whg0e4fff \
+  --delegate-owner &lt;YOUR_ACCOUNT&gt; \
+  --delegate-share 0.20 \
+  --delegate-expiry 10000000 \
+  &lt;YOUR_ACCOUNT&gt; pc1p0yfku4czflwfm9fju9cwgt5mj8clqpt9l35yge 1000</pre>
+      </div>
+      <div style="margin-top:.55rem">
+        <a class="ext-link" href="https://pactusscan.com/hub/pc1rpwp6zcqx3vw76y4j2hj69m3kf4agk37zc26nf6" target="_blank" rel="noopener">🔍 View on PactusScan</a>
+      </div>
+    </div>
+  </div>
 
   <!-- REQUIREMENTS -->
   <div class="guide-section">
@@ -673,11 +910,42 @@ sudo systemctl start pactusd</pre>
   // ── COPY ──
   function copyCode(btn) {
     const pre = btn.nextElementSibling;
+    // innerText decodes HTML entities (e.g. &lt; → <) — correct for copying
     navigator.clipboard.writeText(pre.innerText).then(() => {
       btn.textContent = 'COPIED';
       btn.classList.add('copied');
       setTimeout(() => { btn.textContent = 'COPY'; btn.classList.remove('copied'); }, 2000);
     });
+  }
+
+  // ── VALIDATOR ──
+  const VAL_HUB_ADDR  = 'pc1rpwp6zcqx3vw76y4j2hj69m3kf4agk37zc26nf6';
+  const VAL_ADDR      = 'pc1p0yfku4czflwfm9fju9cwgt5mj8clqpt9l35yge';
+  const VAL_PUBKEY    = 'public1p3ll3tu4s84fdwgc9n76yj9evgh8kavnpcjpd0n6fplgqjesn32qklgraekx7s8u732ht4y3gevt4krl88wrjk6ej0x34sut2777sd2k3993vq0daxrhv0htgwl0l5hclcku0vqntdrj2zhklwaz3j85whg0e4fff';
+  const VAL_SHARE     = '0.20';
+  const VAL_EXPIRY    = '10000000';
+
+  function copyValAddr() {
+    navigator.clipboard.writeText(VAL_HUB_ADDR).then(() => {
+      const b = document.getElementById('valCopyBtn');
+      b.textContent = '✓';
+      b.classList.add('copied');
+      setTimeout(() => { b.textContent = '⧉'; b.classList.remove('copied'); }, 2000);
+    });
+  }
+
+  function updateDelegateCmd() {
+    const acc = (document.getElementById('delegateAccInput').value.trim()) || '&lt;YOUR_ACCOUNT&gt;';
+    const amt = (document.getElementById('delegateAmtInput').value.trim()) || '1000';
+    const pre = document.getElementById('delegateCmdPre');
+    const safeAcc = acc.replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    pre.innerHTML =
+      `cd $HOME/node_pactus && ./pactus-wallet send bond \\\n` +
+      `  --pub ${VAL_PUBKEY} \\\n` +
+      `  --delegate-owner ${safeAcc} \\\n` +
+      `  --delegate-share ${VAL_SHARE} \\\n` +
+      `  --delegate-expiry ${VAL_EXPIRY} \\\n` +
+      `  ${safeAcc} ${VAL_ADDR} ${amt}`;
   }
 </script>
 </body>
