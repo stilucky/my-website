@@ -602,7 +602,7 @@
         <span class="chain-badge">Ubuntu 22.04</span>
         <span class="chain-badge">Port 21888</span>
         <span class="chain-badge">1 CPU · 1GB RAM · 20GB SSD</span>
-        <span class="chain-badge">v1.13.0</span>
+        <span class="chain-badge">v1.14.0</span>
       </div>
     </div>
   </div>
@@ -712,7 +712,8 @@
     <div class="step-desc">Update system packages and install required dependencies.</div>
     <div class="code-block">
       <button class="copy-btn" onclick="copyCode(this)">COPY</button>
-      <pre>sudo apt update && sudo apt upgrade -y && sudo apt install tmux git curl -y && sudo apt install make clang pkg-config libssl-dev build-essential -y</pre>
+      <pre># Cập nhật và cài dependencies
+sudo apt update && sudo apt upgrade -y && sudo apt install tmux git curl -y && sudo apt install make clang pkg-config libssl-dev build-essential -y</pre>
     </div>
 
     <div class="step-label">Step 2 — Download Binary</div>
@@ -726,7 +727,8 @@
     <div class="tab-panel active" id="tab-amd64">
       <div class="code-block">
         <button class="copy-btn" onclick="copyCode(this)">COPY</button>
-        <pre>ver="1.13.0" && \
+        <pre># Tải và giải nén binary Pactus (amd64)
+ver="1.13.0" && \
 cd $HOME && rm -rf node_pactus && \
 wget https://github.com/pactus-project/pactus/releases/download/v${ver}/pactus-cli_${ver}_linux_amd64.tar.gz && \
 tar -xzf pactus-cli_${ver}_linux_amd64.tar.gz && \
@@ -738,7 +740,8 @@ mv pactus-cli_${ver} node_pactus && cd node_pactus</pre>
     <div class="tab-panel" id="tab-arm64">
       <div class="code-block">
         <button class="copy-btn" onclick="copyCode(this)">COPY</button>
-        <pre>ver="1.13.0" && \
+        <pre># Tải và giải nén binary Pactus (arm64)
+ver="1.13.0" && \
 cd $HOME && rm -rf node_pactus && \
 wget https://github.com/pactus-project/pactus/releases/download/v${ver}/pactus-cli_${ver}_linux_arm64.tar.gz && \
 tar -xzf pactus-cli_${ver}_linux_arm64.tar.gz && \
@@ -762,9 +765,11 @@ mv pactus-cli_${ver} node_pactus && cd node_pactus</pre>
     <div class="step-desc">Remove lock files and data, then import to sync with the network.</div>
     <div class="code-block">
       <button class="copy-btn" onclick="copyCode(this)">COPY</button>
-      <pre>rm -rf $HOME/pactus/.pactus.lock
+      <pre># Xóa lock file và dữ liệu cũ
+rm -rf $HOME/pactus/.pactus.lock
 rm -rf $HOME/pactus/data
 cd $HOME/node_pactus
+# Đồng bộ dữ liệu blockchain
 ./pactus-daemon import</pre>
     </div>
   </div>
@@ -782,7 +787,8 @@ cd $HOME/node_pactus
     <div class="tab-panel active" id="tab-tmux">
       <div class="code-block">
         <button class="copy-btn" onclick="copyCode(this)">COPY</button>
-        <pre>tmux new -s pactus
+        <pre># Tạo session tmux và chạy node
+tmux new -s pactus
 cd $HOME/node_pactus
 sudo ./pactus-daemon start</pre>
       </div>
@@ -792,7 +798,8 @@ sudo ./pactus-daemon start</pre>
       <div class="step-desc">Create environment file with wallet password:</div>
       <div class="code-block">
         <button class="copy-btn" onclick="copyCode(this)">COPY</button>
-        <pre>cd $HOME
+        <pre># Tạo file chứa mật khẩu ví
+cd $HOME
 mkdir -p .env && cd .env
 echo "PACTUS_PASSWORD=your-secure-password" > pactusd.env</pre>
       </div>
@@ -800,7 +807,8 @@ echo "PACTUS_PASSWORD=your-secure-password" > pactusd.env</pre>
       <div class="step-desc">Create and enable the systemd service:</div>
       <div class="code-block">
         <button class="copy-btn" onclick="copyCode(this)">COPY</button>
-        <pre>sudo tee /etc/systemd/system/pactusd.service > /dev/null &lt;&lt;EOF
+        <pre># Tạo systemd service
+sudo tee /etc/systemd/system/pactusd.service > /dev/null &lt;&lt;EOF
 [Unit]
 Description=Pactus Node
 After=network-online.target
@@ -816,9 +824,11 @@ RestartSec=5
 [Install]
 WantedBy=multi-user.target
 EOF
-
+# Reload daemon
 sudo systemctl daemon-reload
+# Bật auto-start
 sudo systemctl enable pactusd
+# Khởi động node
 sudo systemctl start pactusd</pre>
       </div>
     </div>

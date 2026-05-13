@@ -103,20 +103,27 @@
     <div class="section-label">Step 1</div>
     <div class="section-title">Install Dependencies & Go</div>
     <div class="code-block"><button class="copy-btn" onclick="copyCode(this)">COPY</button>
-<pre>sudo apt update && sudo apt upgrade -y
+<pre># Cập nhật hệ thống
+sudo apt update && sudo apt upgrade -y
+# Cài dependencies
 sudo apt-get install git curl build-essential make jq gcc snapd chrony lz4 tmux unzip make bc -y</pre></div>
     <div class="step-label">Install Go 1.24.6 (amd64)</div>
     <div class="code-block"><button class="copy-btn" onclick="copyCode(this)">COPY</button>
-<pre>sudo rm -rf $HOME/go && sudo rm -rf /usr/local/go
+<pre># Xóa Go cũ
+sudo rm -rf $HOME/go && sudo rm -rf /usr/local/go
 cd $HOME
+# Tải và giải nén Go 1.24.6
 curl https://dl.google.com/go/go1.24.6.linux-amd64.tar.gz | sudo tar -C /usr/local -zxvf -
+# Thêm Go vào PATH
 cat &lt;&lt;'EOF' >> $HOME/.bashrc
 export GOROOT=/usr/local/go
 export GOPATH=$HOME/go
 export PATH=$PATH:/usr/local/go/bin:$HOME/go/bin
 export GOPROXY=https://proxy.golang.org.direct
 EOF
+# Áp dụng biến môi trường
 source $HOME/.bashrc
+# Kiểm tra phiên bản Go
 go version</pre></div>
   </div>
 
@@ -124,17 +131,23 @@ go version</pre></div>
     <div class="section-label">Step 2</div>
     <div class="section-title">Set Variables & Install Binary</div>
     <div class="code-block"><button class="copy-btn" onclick="copyCode(this)">COPY</button>
-<pre>echo "export BITBADGES_PORT="38"" >> $HOME/.bash_profile
+<pre># Đặt prefix cổng
+echo "export BITBADGES_PORT="38"" >> $HOME/.bash_profile
+# Áp dụng biến
 source $HOME/.bash_profile</pre></div>
     <div class="step-label">Build from source (v27)</div>
     <div class="code-block"><button class="copy-btn" onclick="copyCode(this)">COPY</button>
 <pre>cd $HOME
 rm -rf bitbadgeschain
+# Clone source code
 git clone https://github.com/BitBadges/bitbadgeschain.git
 cd bitbadgeschain
+# Chuyển sang phiên bản v27
 git checkout v27
+# Biên dịch binary
 make build-linux/amd64
 sudo mv build/bitbadgeschain-linux-amd64 $HOME/go/bin/bitbadgeschaind
+# Xác nhận phiên bản mới
 bitbadgeschaind version</pre></div>
   </div>
 
@@ -143,29 +156,44 @@ bitbadgeschaind version</pre></div>
     <div class="section-title">Configure Node</div>
     <div class="step-label">Initialize & client config</div>
     <div class="code-block"><button class="copy-btn" onclick="copyCode(this)">COPY</button>
-<pre>bitbadgeschaind init Stilucky-node --chain-id bitbadges-1
+<pre># Khởi tạo node
+bitbadgeschaind init Stilucky-node --chain-id bitbadges-1
+# Ghi chain-id vào config
 sed -i "s/chain-id = .*/chain-id = \"bitbadges-1\"/" $HOME/.bitbadgeschain/config/client.toml
+# Đặt keyring backend
 sed -i "s/keyring-backend = .*/keyring-backend = \"os\"/" $HOME/.bitbadgeschain/config/client.toml
+# Trỏ RPC về cổng tùy chỉnh
 sed -i "s/node = .*/node = \"tcp:\/\/localhost:${BITBADGES_PORT}657\"/" $HOME/.bitbadgeschain/config/client.toml
 sed -i '/^timeout_commit =/c timeout_commit = "2s"' ${HOME}/.bitbadgeschain/config/config.toml</pre></div>
     <div class="step-label">Custom ports</div>
     <div class="code-block"><button class="copy-btn" onclick="copyCode(this)">COPY</button>
-<pre>sed -i.bak -e "s%:1317%:${BITBADGES_PORT}317%g;s%:8080%:${BITBADGES_PORT}080%g;s%:9090%:${BITBADGES_PORT}090%g;s%:9091%:${BITBADGES_PORT}091%g;s%:8545%:${BITBADGES_PORT}545%g;s%:8546%:${BITBADGES_PORT}546%g;s%:6065%:${BITBADGES_PORT}065%g" $HOME/.bitbadgeschain/config/app.toml
+<pre># Đổi cổng REST/gRPC (app.toml)
+sed -i.bak -e "s%:1317%:${BITBADGES_PORT}317%g;s%:8080%:${BITBADGES_PORT}080%g;s%:9090%:${BITBADGES_PORT}090%g;s%:9091%:${BITBADGES_PORT}091%g;s%:8545%:${BITBADGES_PORT}545%g;s%:8546%:${BITBADGES_PORT}546%g;s%:6065%:${BITBADGES_PORT}065%g" $HOME/.bitbadgeschain/config/app.toml
+# Đổi cổng P2P/RPC (config.toml)
 sed -i.bak -e "s%:26658%:${BITBADGES_PORT}658%g;s%:26657%:${BITBADGES_PORT}657%g;s%:6060%:${BITBADGES_PORT}060%g;s%:26656%:${BITBADGES_PORT}656%g;s%^external_address = \"\"%external_address = \"$(wget -qO- eth0.me):${BITBADGES_PORT}656\"%;s%:26660%:${BITBADGES_PORT}660%g" $HOME/.bitbadgeschain/config/config.toml</pre></div>
     <div class="step-label">Gas, indexer & pruning</div>
     <div class="code-block"><button class="copy-btn" onclick="copyCode(this)">COPY</button>
-<pre>sed -i "s/minimum-gas-prices = .*/minimum-gas-prices = \"0.025ubadge\"/" $HOME/.bitbadgeschain/config/app.toml
+<pre># Gas tối thiểu
+sed -i "s/minimum-gas-prices = .*/minimum-gas-prices = \"0.025ubadge\"/" $HOME/.bitbadgeschain/config/app.toml
+# Tắt indexer
 sed -i -e "s/^indexer *=.*/indexer = \"null\"/" $HOME/.bitbadgeschain/config/config.toml
+# Bật pruning tùy chỉnh
 sed -i -e "s/^pruning *=.*/pruning = \"custom\"/" $HOME/.bitbadgeschain/config/app.toml
+# Giữ 100 block gần nhất
 sed -i -e "s/^pruning-keep-recent *=.*/pruning-keep-recent = \"100\"/" $HOME/.bitbadgeschain/config/app.toml
+# Pruning mỗi 50 block
 sed -i -e "s/^pruning-interval *=.*/pruning-interval = \"50\"/" $HOME/.bitbadgeschain/config/app.toml</pre></div>
     <div class="step-label">Genesis & address book</div>
     <div class="code-block"><button class="copy-btn" onclick="copyCode(this)">COPY</button>
-<pre>curl -Ls https://file3.node39.top/Mainnet/Bitbadges/genesis.json > $HOME/.bitbadgeschain/config/genesis.json
+<pre># Tải genesis.json
+curl -Ls https://file3.node39.top/Mainnet/Bitbadges/genesis.json > $HOME/.bitbadgeschain/config/genesis.json
+# Tải addrbook.json
 curl -Ls https://file3.node39.top/Mainnet/Bitbadges/addrbook.json > $HOME/.bitbadgeschain/config/addrbook.json</pre></div>
     <div class="step-label">Peers</div>
     <div class="code-block"><button class="copy-btn" onclick="copyCode(this)">COPY</button>
-<pre>peers="a87a406c31a3cc6a240c594277039011272ab67c@bitbadges-peers.node39.top:21656"
+<pre># Peer seed
+peers="a87a406c31a3cc6a240c594277039011272ab67c@bitbadges-peers.node39.top:21656"
+# Ghi vào persistent_peers
 sed -i.bak -e "s/^persistent_peers *=.*/persistent_peers = \"$peers\"/" $HOME/.bitbadgeschain/config/config.toml</pre></div>
   </div>
 
@@ -173,7 +201,8 @@ sed -i.bak -e "s/^persistent_peers *=.*/persistent_peers = \"$peers\"/" $HOME/.b
     <div class="section-label">Step 4</div>
     <div class="section-title">Create Service & Start</div>
     <div class="code-block"><button class="copy-btn" onclick="copyCode(this)">COPY</button>
-<pre>sudo tee /etc/systemd/system/bitbadgeschaind.service > /dev/null &lt;&lt;EOF
+<pre># Tạo systemd service
+sudo tee /etc/systemd/system/bitbadgeschaind.service > /dev/null &lt;&lt;EOF
 [Unit]
 Description=Bitbadges Node
 After=network-online.target
@@ -189,12 +218,16 @@ LimitNOFILE=65535
 [Install]
 WantedBy=multi-user.target
 EOF
+# Reload daemon
 sudo systemctl daemon-reload
+# Bật auto-start
 sudo systemctl enable bitbadgeschaind
+# Khởi động node
 sudo systemctl start bitbadgeschaind</pre></div>
     <div class="step-label">Check sync status</div>
     <div class="code-block"><button class="copy-btn" onclick="copyCode(this)">COPY</button>
-<pre>bitbadgeschaind status 2>&1 | jq .SyncInfo</pre></div>
+<pre># catching_up=false → đã sync xong
+bitbadgeschaind status 2>&1 | jq .SyncInfo</pre></div>
   </div>
 
 </div>
@@ -210,16 +243,23 @@ sudo systemctl start bitbadgeschaind</pre></div>
     <div class="info-box">Kiểm tra phiên bản mới nhất trên GitHub trước khi upgrade. Thay <code style="color:var(--accent3)">NEW_VERSION</code> bằng tag cần nâng.</div>
     <div class="step-label">Stop & build new version</div>
     <div class="code-block"><button class="copy-btn" onclick="copyCode(this)">COPY</button>
-<pre>sudo systemctl stop bitbadgeschaind
+<pre># Dừng node
+sudo systemctl stop bitbadgeschaind
 cd $HOME/bitbadgeschain
+# Lấy code mới nhất
 git pull
+# Chuyển phiên bản mới
 git checkout NEW_VERSION
+# Biên dịch binary
 make build-linux/amd64
 sudo mv build/bitbadgeschain-linux-amd64 $HOME/go/bin/bitbadgeschaind
+# Xác nhận phiên bản mới
 bitbadgeschaind version</pre></div>
     <div class="step-label">Restart & verify</div>
     <div class="code-block"><button class="copy-btn" onclick="copyCode(this)">COPY</button>
-<pre>sudo systemctl restart bitbadgeschaind
+<pre># Khởi động lại
+sudo systemctl restart bitbadgeschaind
+# Xem log realtime
 sudo journalctl -u bitbadgeschaind -f</pre></div>
   </div>
 </div>
@@ -233,24 +273,38 @@ sudo journalctl -u bitbadgeschaind -f</pre></div>
     <div class="section-title">Useful Commands</div>
 
     <div class="step-label">Service management</div>
-    <div class="code-block"><button class="copy-btn" onclick="copyCode(this)">COPY</button><pre>sudo journalctl -u bitbadgeschaind -f</pre></div>
-    <div class="code-block"><button class="copy-btn" onclick="copyCode(this)">COPY</button><pre>sudo systemctl start bitbadgeschaind</pre></div>
-    <div class="code-block"><button class="copy-btn" onclick="copyCode(this)">COPY</button><pre>sudo systemctl stop bitbadgeschaind</pre></div>
-    <div class="code-block"><button class="copy-btn" onclick="copyCode(this)">COPY</button><pre>sudo systemctl restart bitbadgeschaind</pre></div>
-    <div class="code-block"><button class="copy-btn" onclick="copyCode(this)">COPY</button><pre>bitbadgeschaind status 2>&1 | jq .SyncInfo</pre></div>
+    <div class="code-block"><button class="copy-btn" onclick="copyCode(this)">COPY</button><pre># Xem log realtime
+sudo journalctl -u bitbadgeschaind -f</pre></div>
+    <div class="code-block"><button class="copy-btn" onclick="copyCode(this)">COPY</button><pre># Khởi động node
+sudo systemctl start bitbadgeschaind</pre></div>
+    <div class="code-block"><button class="copy-btn" onclick="copyCode(this)">COPY</button><pre># Dừng node
+sudo systemctl stop bitbadgeschaind</pre></div>
+    <div class="code-block"><button class="copy-btn" onclick="copyCode(this)">COPY</button><pre># Khởi động lại
+sudo systemctl restart bitbadgeschaind</pre></div>
+    <div class="code-block"><button class="copy-btn" onclick="copyCode(this)">COPY</button><pre># catching_up=false → đã sync xong
+bitbadgeschaind status 2>&1 | jq .SyncInfo</pre></div>
 
     <div class="step-label">Wallet</div>
-    <div class="code-block"><button class="copy-btn" onclick="copyCode(this)">COPY</button><pre>bitbadgeschaind keys add &lt;wallet&gt;</pre></div>
-    <div class="code-block"><button class="copy-btn" onclick="copyCode(this)">COPY</button><pre>bitbadgeschaind keys add &lt;wallet&gt; --recover</pre></div>
-    <div class="code-block"><button class="copy-btn" onclick="copyCode(this)">COPY</button><pre>bitbadgeschaind keys list</pre></div>
-    <div class="code-block"><button class="copy-btn" onclick="copyCode(this)">COPY</button><pre>bitbadgeschaind query bank balances &lt;address&gt;</pre></div>
+    <div class="code-block"><button class="copy-btn" onclick="copyCode(this)">COPY</button><pre># Tạo ví mới
+bitbadgeschaind keys add &lt;wallet&gt;</pre></div>
+    <div class="code-block"><button class="copy-btn" onclick="copyCode(this)">COPY</button><pre># Khôi phục ví từ mnemonic
+bitbadgeschaind keys add &lt;wallet&gt; --recover</pre></div>
+    <div class="code-block"><button class="copy-btn" onclick="copyCode(this)">COPY</button><pre># Xem danh sách ví
+bitbadgeschaind keys list</pre></div>
+    <div class="code-block"><button class="copy-btn" onclick="copyCode(this)">COPY</button><pre># Kiểm tra số dư
+bitbadgeschaind query bank balances &lt;address&gt;</pre></div>
 
     <div class="step-label">Validator</div>
-    <div class="code-block"><button class="copy-btn" onclick="copyCode(this)">COPY</button><pre>bitbadgeschaind tx staking create-validator validator.json --from &lt;wallet&gt; --chain-id bitbadges-1 --gas auto --gas-adjustment 1.5 --fees 500ubadge -y</pre></div>
-    <div class="code-block"><button class="copy-btn" onclick="copyCode(this)">COPY</button><pre>bitbadgeschaind tx staking delegate &lt;valoper&gt; &lt;amount&gt;ubadge --from &lt;wallet&gt; --chain-id bitbadges-1 --fees 500ubadge -y</pre></div>
-    <div class="code-block"><button class="copy-btn" onclick="copyCode(this)">COPY</button><pre>bitbadgeschaind tx distribution withdraw-rewards &lt;valoper&gt; --from &lt;wallet&gt; --chain-id bitbadges-1 --fees 500ubadge -y</pre></div>
-    <div class="code-block"><button class="copy-btn" onclick="copyCode(this)">COPY</button><pre>bitbadgeschaind tx slashing unjail --from &lt;wallet&gt; --chain-id bitbadges-1 --fees 500ubadge -y</pre></div>
-    <div class="code-block"><button class="copy-btn" onclick="copyCode(this)">COPY</button><pre>bitbadgeschaind tx gov vote &lt;id&gt; yes --from &lt;wallet&gt; --chain-id bitbadges-1 --fees 500ubadge -y</pre></div>
+    <div class="code-block"><button class="copy-btn" onclick="copyCode(this)">COPY</button><pre># Tạo validator
+bitbadgeschaind tx staking create-validator validator.json --from &lt;wallet&gt; --chain-id bitbadges-1 --gas auto --gas-adjustment 1.5 --fees 500ubadge -y</pre></div>
+    <div class="code-block"><button class="copy-btn" onclick="copyCode(this)">COPY</button><pre># Delegate token
+bitbadgeschaind tx staking delegate &lt;valoper&gt; &lt;amount&gt;ubadge --from &lt;wallet&gt; --chain-id bitbadges-1 --fees 500ubadge -y</pre></div>
+    <div class="code-block"><button class="copy-btn" onclick="copyCode(this)">COPY</button><pre># Rút phần thưởng
+bitbadgeschaind tx distribution withdraw-rewards &lt;valoper&gt; --from &lt;wallet&gt; --chain-id bitbadges-1 --fees 500ubadge -y</pre></div>
+    <div class="code-block"><button class="copy-btn" onclick="copyCode(this)">COPY</button><pre># Gỡ jailed validator
+bitbadgeschaind tx slashing unjail --from &lt;wallet&gt; --chain-id bitbadges-1 --fees 500ubadge -y</pre></div>
+    <div class="code-block"><button class="copy-btn" onclick="copyCode(this)">COPY</button><pre># Bỏ phiếu governance
+bitbadgeschaind tx gov vote &lt;id&gt; yes --from &lt;wallet&gt; --chain-id bitbadges-1 --fees 500ubadge -y</pre></div>
   </div>
 </div>
 </div>

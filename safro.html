@@ -95,20 +95,27 @@
     <div class="section-label">Step 1</div>
     <div class="section-title">Install Dependencies & Go</div>
     <div class="code-block"><button class="copy-btn" onclick="copyCode(this)">COPY</button>
-<pre>sudo apt update && sudo apt upgrade -y
+<pre># Cập nhật hệ thống
+sudo apt update && sudo apt upgrade -y
+# Cài dependencies
 sudo apt-get install git curl build-essential make jq gcc snapd chrony lz4 tmux unzip make bc -y</pre></div>
     <div class="step-label">Install Go 1.23.4 (amd64)</div>
     <div class="code-block"><button class="copy-btn" onclick="copyCode(this)">COPY</button>
-<pre>rm -rf $HOME/go && sudo rm -rf /usr/local/go
+<pre># Xóa Go cũ
+rm -rf $HOME/go && sudo rm -rf /usr/local/go
 cd $HOME
+# Tải và giải nén Go 1.23.4
 curl https://dl.google.com/go/go1.23.4.linux-amd64.tar.gz | sudo tar -C /usr/local -zxvf -
+# Thêm Go vào PATH
 cat &lt;&lt;'EOF' >> $HOME/.bash_profile
 export GOROOT=/usr/local/go
 export GOPATH=$HOME/go
 export GO111MODULE=on
 export PATH=$PATH:/usr/local/go/bin:$HOME/go/bin
 EOF
+# Áp dụng biến môi trường
 source $HOME/.bash_profile
+# Kiểm tra phiên bản Go
 go version</pre></div>
   </div>
 
@@ -116,15 +123,21 @@ go version</pre></div>
     <div class="section-label">Step 2</div>
     <div class="section-title">Set Variables & Install Binary</div>
     <div class="code-block"><button class="copy-btn" onclick="copyCode(this)">COPY</button>
-<pre>echo "export SAFRO_PORT="42"" >> $HOME/.bash_profile
+<pre># Đặt prefix cổng
+echo "export SAFRO_PORT="42"" >> $HOME/.bash_profile
+# Áp dụng biến
 source $HOME/.bash_profile</pre></div>
     <div class="step-label">Build from source (v0.1.0)</div>
     <div class="code-block"><button class="copy-btn" onclick="copyCode(this)">COPY</button>
 <pre>cd $HOME
+# Clone source code
 git clone https://github.com/Safrochain-Org/safrochain-node.git
 cd safrochain-node
+# Chuyển sang phiên bản v0.1.0
 git checkout release/v0.1.0
+# Biên dịch và cài binary
 make install
+# Xác nhận phiên bản mới
 safrochaind version</pre></div>
   </div>
 
@@ -133,24 +146,37 @@ safrochaind version</pre></div>
     <div class="section-title">Configure Node</div>
     <div class="step-label">Initialize & client config</div>
     <div class="code-block"><button class="copy-btn" onclick="copyCode(this)">COPY</button>
-<pre>safrochaind init Stilucky-node --chain-id safro-testnet-1
+<pre># Khởi tạo node
+safrochaind init Stilucky-node --chain-id safro-testnet-1
+# Ghi chain-id vào config
 sed -i "s/chain-id = .*/chain-id = \"safro-testnet-1\"/" $HOME/.safrochain/config/client.toml
+# Đặt keyring backend
 sed -i "s/keyring-backend = .*/keyring-backend = \"os\"/" $HOME/.safrochain/config/client.toml
+# Trỏ RPC về cổng tùy chỉnh
 sed -i "s/node = .*/node = \"tcp:\/\/localhost:${SAFRO_PORT}657\"/" $HOME/.safrochain/config/client.toml</pre></div>
     <div class="step-label">Custom ports</div>
     <div class="code-block"><button class="copy-btn" onclick="copyCode(this)">COPY</button>
-<pre>sed -i.bak -e "s%:1317%:${SAFRO_PORT}317%g;s%:8080%:${SAFRO_PORT}080%g;s%:9090%:${SAFRO_PORT}090%g;s%:9091%:${SAFRO_PORT}091%g;s%:8545%:${SAFRO_PORT}545%g;s%:8546%:${SAFRO_PORT}546%g;s%:6065%:${SAFRO_PORT}065%g" $HOME/.safrochain/config/app.toml
+<pre># Đổi cổng REST/gRPC (app.toml)
+sed -i.bak -e "s%:1317%:${SAFRO_PORT}317%g;s%:8080%:${SAFRO_PORT}080%g;s%:9090%:${SAFRO_PORT}090%g;s%:9091%:${SAFRO_PORT}091%g;s%:8545%:${SAFRO_PORT}545%g;s%:8546%:${SAFRO_PORT}546%g;s%:6065%:${SAFRO_PORT}065%g" $HOME/.safrochain/config/app.toml
+# Đổi cổng P2P/RPC (config.toml)
 sed -i.bak -e "s%:26658%:${SAFRO_PORT}658%g;s%:26657%:${SAFRO_PORT}657%g;s%:6060%:${SAFRO_PORT}060%g;s%:26656%:${SAFRO_PORT}656%g;s%^external_address = \"\"%external_address = \"$(wget -qO- eth0.me):${SAFRO_PORT}656\"%;s%:26660%:${SAFRO_PORT}660%g" $HOME/.safrochain/config/config.toml</pre></div>
     <div class="step-label">Gas, indexer & pruning</div>
     <div class="code-block"><button class="copy-btn" onclick="copyCode(this)">COPY</button>
-<pre>sed -i 's|minimum-gas-prices =.*|minimum-gas-prices = "0.001usaf"|g' $HOME/.safrochain/config/app.toml
+<pre># Gas tối thiểu
+sed -i 's|minimum-gas-prices =.*|minimum-gas-prices = "0.001usaf"|g' $HOME/.safrochain/config/app.toml
+# Tắt indexer
 sed -i -e "s/^indexer *=.*/indexer = \"null\"/" $HOME/.safrochain/config/config.toml
+# Bật pruning tùy chỉnh
 sed -i -e "s/^pruning *=.*/pruning = \"custom\"/" $HOME/.safrochain/config/app.toml
+# Giữ 100 block gần nhất
 sed -i -e "s/^pruning-keep-recent *=.*/pruning-keep-recent = \"100\"/" $HOME/.safrochain/config/app.toml
+# Pruning mỗi 50 block
 sed -i -e "s/^pruning-interval *=.*/pruning-interval = \"50\"/" $HOME/.safrochain/config/app.toml</pre></div>
     <div class="step-label">Genesis & address book</div>
     <div class="code-block"><button class="copy-btn" onclick="copyCode(this)">COPY</button>
-<pre>curl -Ls https://file3.node39.top/Testnet/Safro/genesis.json > $HOME/.safrochain/config/genesis.json
+<pre># Tải genesis.json
+curl -Ls https://file3.node39.top/Testnet/Safro/genesis.json > $HOME/.safrochain/config/genesis.json
+# Tải addrbook.json
 curl -Ls https://file3.node39.top/Testnet/Safro/addrbook.json > $HOME/.safrochain/config/addrbook.json</pre></div>
   </div>
 
@@ -158,7 +184,8 @@ curl -Ls https://file3.node39.top/Testnet/Safro/addrbook.json > $HOME/.safrochai
     <div class="section-label">Step 4</div>
     <div class="section-title">Create Service & Start</div>
     <div class="code-block"><button class="copy-btn" onclick="copyCode(this)">COPY</button>
-<pre>sudo tee /etc/systemd/system/safrochaind.service > /dev/null &lt;&lt;EOF
+<pre># Tạo systemd service
+sudo tee /etc/systemd/system/safrochaind.service > /dev/null &lt;&lt;EOF
 [Unit]
 Description=safrochaind Service
 After=network-online.target
@@ -173,12 +200,16 @@ LimitNOFILE=65535
 [Install]
 WantedBy=multi-user.target
 EOF
+# Reload daemon
 sudo systemctl daemon-reload
+# Bật auto-start
 sudo systemctl enable safrochaind
+# Khởi động node
 sudo systemctl start safrochaind</pre></div>
     <div class="step-label">Check sync status</div>
     <div class="code-block"><button class="copy-btn" onclick="copyCode(this)">COPY</button>
-<pre>safrochaind status 2>&1 | jq .SyncInfo</pre></div>
+<pre># catching_up=false → đã sync xong
+safrochaind status 2>&1 | jq .SyncInfo</pre></div>
   </div>
 </div>
 </div>
@@ -192,18 +223,25 @@ sudo systemctl start safrochaind</pre></div>
     <div class="info-box">Thay <code style="color:var(--accent3)">NEW_VERSION</code> bằng tag phiên bản mới nhất từ GitHub.</div>
     <div class="step-label">Stop & build new version</div>
     <div class="code-block"><button class="copy-btn" onclick="copyCode(this)">COPY</button>
-<pre>sudo systemctl stop safrochaind
+<pre># Dừng node
+sudo systemctl stop safrochaind
 cd $HOME
 rm -rf safrochain-node
 rm -rf $(which safrochaind)
+# Clone source code
 git clone https://github.com/Safrochain-Org/safrochain-node.git
 cd safrochain-node
+# Chuyển phiên bản mới
 git checkout NEW_VERSION
+# Biên dịch và cài binary
 make install
+# Xác nhận phiên bản mới
 safrochaind version</pre></div>
     <div class="step-label">Restart & verify</div>
     <div class="code-block"><button class="copy-btn" onclick="copyCode(this)">COPY</button>
-<pre>sudo systemctl restart safrochaind
+<pre># Khởi động lại
+sudo systemctl restart safrochaind
+# Xem log realtime
 sudo journalctl -u safrochaind -f</pre></div>
   </div>
 </div>
@@ -216,24 +254,38 @@ sudo journalctl -u safrochaind -f</pre></div>
     <div class="section-label">Operations</div>
     <div class="section-title">Useful Commands</div>
     <div class="step-label">Service management</div>
-    <div class="code-block"><button class="copy-btn" onclick="copyCode(this)">COPY</button><pre>sudo journalctl -u safrochaind -f</pre></div>
-    <div class="code-block"><button class="copy-btn" onclick="copyCode(this)">COPY</button><pre>sudo systemctl start safrochaind</pre></div>
-    <div class="code-block"><button class="copy-btn" onclick="copyCode(this)">COPY</button><pre>sudo systemctl stop safrochaind</pre></div>
-    <div class="code-block"><button class="copy-btn" onclick="copyCode(this)">COPY</button><pre>sudo systemctl restart safrochaind</pre></div>
-    <div class="code-block"><button class="copy-btn" onclick="copyCode(this)">COPY</button><pre>safrochaind status 2>&1 | jq .SyncInfo</pre></div>
+    <div class="code-block"><button class="copy-btn" onclick="copyCode(this)">COPY</button><pre># Xem log realtime
+sudo journalctl -u safrochaind -f</pre></div>
+    <div class="code-block"><button class="copy-btn" onclick="copyCode(this)">COPY</button><pre># Khởi động node
+sudo systemctl start safrochaind</pre></div>
+    <div class="code-block"><button class="copy-btn" onclick="copyCode(this)">COPY</button><pre># Dừng node
+sudo systemctl stop safrochaind</pre></div>
+    <div class="code-block"><button class="copy-btn" onclick="copyCode(this)">COPY</button><pre># Khởi động lại
+sudo systemctl restart safrochaind</pre></div>
+    <div class="code-block"><button class="copy-btn" onclick="copyCode(this)">COPY</button><pre># catching_up=false → đã sync xong
+safrochaind status 2>&1 | jq .SyncInfo</pre></div>
 
     <div class="step-label">Wallet</div>
-    <div class="code-block"><button class="copy-btn" onclick="copyCode(this)">COPY</button><pre>safrochaind keys add &lt;wallet&gt;</pre></div>
-    <div class="code-block"><button class="copy-btn" onclick="copyCode(this)">COPY</button><pre>safrochaind keys add &lt;wallet&gt; --recover</pre></div>
-    <div class="code-block"><button class="copy-btn" onclick="copyCode(this)">COPY</button><pre>safrochaind keys list</pre></div>
-    <div class="code-block"><button class="copy-btn" onclick="copyCode(this)">COPY</button><pre>safrochaind query bank balances &lt;address&gt;</pre></div>
+    <div class="code-block"><button class="copy-btn" onclick="copyCode(this)">COPY</button><pre># Tạo ví mới
+safrochaind keys add &lt;wallet&gt;</pre></div>
+    <div class="code-block"><button class="copy-btn" onclick="copyCode(this)">COPY</button><pre># Khôi phục ví từ mnemonic
+safrochaind keys add &lt;wallet&gt; --recover</pre></div>
+    <div class="code-block"><button class="copy-btn" onclick="copyCode(this)">COPY</button><pre># Xem danh sách ví
+safrochaind keys list</pre></div>
+    <div class="code-block"><button class="copy-btn" onclick="copyCode(this)">COPY</button><pre># Kiểm tra số dư
+safrochaind query bank balances &lt;address&gt;</pre></div>
 
     <div class="step-label">Validator</div>
-    <div class="code-block"><button class="copy-btn" onclick="copyCode(this)">COPY</button><pre>safrochaind tx staking create-validator validator.json --from &lt;wallet&gt; --chain-id safro-testnet-1 --gas auto --gas-adjustment 1.5 --fees 1000usaf -y</pre></div>
-    <div class="code-block"><button class="copy-btn" onclick="copyCode(this)">COPY</button><pre>safrochaind tx staking delegate &lt;valoper&gt; &lt;amount&gt;usaf --from &lt;wallet&gt; --chain-id safro-testnet-1 --fees 1000usaf -y</pre></div>
-    <div class="code-block"><button class="copy-btn" onclick="copyCode(this)">COPY</button><pre>safrochaind tx distribution withdraw-rewards &lt;valoper&gt; --from &lt;wallet&gt; --chain-id safro-testnet-1 --fees 1000usaf -y</pre></div>
-    <div class="code-block"><button class="copy-btn" onclick="copyCode(this)">COPY</button><pre>safrochaind tx slashing unjail --from &lt;wallet&gt; --chain-id safro-testnet-1 --fees 1000usaf -y</pre></div>
-    <div class="code-block"><button class="copy-btn" onclick="copyCode(this)">COPY</button><pre>safrochaind tx gov vote &lt;id&gt; yes --from &lt;wallet&gt; --chain-id safro-testnet-1 --fees 1000usaf -y</pre></div>
+    <div class="code-block"><button class="copy-btn" onclick="copyCode(this)">COPY</button><pre># Tạo validator
+safrochaind tx staking create-validator validator.json --from &lt;wallet&gt; --chain-id safro-testnet-1 --gas auto --gas-adjustment 1.5 --fees 1000usaf -y</pre></div>
+    <div class="code-block"><button class="copy-btn" onclick="copyCode(this)">COPY</button><pre># Delegate token
+safrochaind tx staking delegate &lt;valoper&gt; &lt;amount&gt;usaf --from &lt;wallet&gt; --chain-id safro-testnet-1 --fees 1000usaf -y</pre></div>
+    <div class="code-block"><button class="copy-btn" onclick="copyCode(this)">COPY</button><pre># Rút phần thưởng
+safrochaind tx distribution withdraw-rewards &lt;valoper&gt; --from &lt;wallet&gt; --chain-id safro-testnet-1 --fees 1000usaf -y</pre></div>
+    <div class="code-block"><button class="copy-btn" onclick="copyCode(this)">COPY</button><pre># Gỡ jailed validator
+safrochaind tx slashing unjail --from &lt;wallet&gt; --chain-id safro-testnet-1 --fees 1000usaf -y</pre></div>
+    <div class="code-block"><button class="copy-btn" onclick="copyCode(this)">COPY</button><pre># Bỏ phiếu governance
+safrochaind tx gov vote &lt;id&gt; yes --from &lt;wallet&gt; --chain-id safro-testnet-1 --fees 1000usaf -y</pre></div>
   </div>
 </div>
 </div>

@@ -101,20 +101,27 @@
     <div class="section-label">Step 1</div>
     <div class="section-title">Install Dependencies & Go</div>
     <div class="code-block"><button class="copy-btn" onclick="copyCode(this)">COPY</button>
-<pre>sudo apt update && sudo apt upgrade -y
+<pre># Cập nhật hệ thống
+sudo apt update && sudo apt upgrade -y
+# Cài các gói phụ thuộc cần thiết
 sudo apt-get install git curl build-essential make jq gcc snapd chrony lz4 tmux unzip make bc -y</pre></div>
     <div class="step-label">Install Go 1.24.6 (amd64)</div>
     <div class="code-block"><button class="copy-btn" onclick="copyCode(this)">COPY</button>
-<pre>sudo rm -rf $HOME/go && sudo rm -rf /usr/local/go
+<pre># Xóa Go cũ nếu có
+sudo rm -rf $HOME/go && sudo rm -rf /usr/local/go
 cd $HOME
+# Tải và giải nén Go 1.24.6 vào /usr/local
 curl https://dl.google.com/go/go1.24.6.linux-amd64.tar.gz | sudo tar -C /usr/local -zxvf -
+# Thêm Go vào PATH trong .bashrc
 cat &lt;&lt;'EOF' >> $HOME/.bashrc
 export GOROOT=/usr/local/go
 export GOPATH=$HOME/go
 export PATH=$PATH:/usr/local/go/bin:$HOME/go/bin
 export GOPROXY=https://proxy.golang.org.direct
 EOF
+# Áp dụng biến môi trường ngay
 source $HOME/.bashrc
+# Kiểm tra phiên bản
 go version</pre></div>
   </div>
 
@@ -122,14 +129,19 @@ go version</pre></div>
     <div class="section-label">Step 2</div>
     <div class="section-title">Set Variables & Install Binary</div>
     <div class="code-block"><button class="copy-btn" onclick="copyCode(this)">COPY</button>
-<pre>echo "export ARKEO_PORT="36"" >> $HOME/.bash_profile
+<pre># Đặt prefix cổng tùy chỉnh = 36
+echo "export ARKEO_PORT="36"" >> $HOME/.bash_profile
+# Áp dụng biến
 source $HOME/.bash_profile</pre></div>
     <div class="step-label">Build from source (v1.0.17)</div>
     <div class="code-block"><button class="copy-btn" onclick="copyCode(this)">COPY</button>
 <pre>cd $HOME
+# Clone source code Arkeo
 git clone https://github.com/arkeonetwork/arkeo
 cd arkeo
+# Chuyển sang phiên bản v1.0.17
 git checkout v1.0.17
+# Biên dịch và cài binary arkeod
 make install</pre></div>
   </div>
 
@@ -138,28 +150,43 @@ make install</pre></div>
     <div class="section-title">Configure Node</div>
     <div class="step-label">Initialize & client config</div>
     <div class="code-block"><button class="copy-btn" onclick="copyCode(this)">COPY</button>
-<pre>arkeod init Stilucky-node --chain-id arkeo-main-v1
+<pre># Khởi tạo thư mục ~/.arkeo
+arkeod init Stilucky-node --chain-id arkeo-main-v1
+# Ghi chain-id vào client.toml
 sed -i "s/chain-id = .*/chain-id = \"arkeo-main-v1\"/" $HOME/.arkeo/config/client.toml
+# Dùng keyring OS để lưu key an toàn
 sed -i "s/keyring-backend = .*/keyring-backend = \"os\"/" $HOME/.arkeo/config/client.toml
+# Trỏ RPC về cổng tùy chỉnh (36657)
 sed -i "s/node = .*/node = \"tcp:\/\/localhost:${ARKEO_PORT}657\"/" $HOME/.arkeo/config/client.toml</pre></div>
     <div class="step-label">Custom ports</div>
     <div class="code-block"><button class="copy-btn" onclick="copyCode(this)">COPY</button>
-<pre>sed -i.bak -e "s%:1317%:${ARKEO_PORT}317%g;s%:8080%:${ARKEO_PORT}080%g;s%:9090%:${ARKEO_PORT}090%g;s%:9091%:${ARKEO_PORT}091%g;s%:8545%:${ARKEO_PORT}545%g;s%:8546%:${ARKEO_PORT}546%g;s%:6065%:${ARKEO_PORT}065%g" $HOME/.arkeo/config/app.toml
+<pre># Đổi cổng REST/gRPC trong app.toml sang prefix 36
+sed -i.bak -e "s%:1317%:${ARKEO_PORT}317%g;s%:8080%:${ARKEO_PORT}080%g;s%:9090%:${ARKEO_PORT}090%g;s%:9091%:${ARKEO_PORT}091%g;s%:8545%:${ARKEO_PORT}545%g;s%:8546%:${ARKEO_PORT}546%g;s%:6065%:${ARKEO_PORT}065%g" $HOME/.arkeo/config/app.toml
+# Đổi cổng P2P/RPC trong config.toml, tự điền IP public vào external_address
 sed -i.bak -e "s%:26658%:${ARKEO_PORT}658%g;s%:26657%:${ARKEO_PORT}657%g;s%:6060%:${ARKEO_PORT}060%g;s%:26656%:${ARKEO_PORT}656%g;s%^external_address = \"\"%external_address = \"$(wget -qO- eth0.me):${ARKEO_PORT}656\"%;s%:26660%:${ARKEO_PORT}660%g" $HOME/.arkeo/config/config.toml</pre></div>
     <div class="step-label">Gas, indexer & pruning</div>
     <div class="code-block"><button class="copy-btn" onclick="copyCode(this)">COPY</button>
-<pre>sed -i "s/minimum-gas-prices = .*/minimum-gas-prices = \"0.01uarkeo\"/" $HOME/.arkeo/config/app.toml
+<pre># Gas tối thiểu 0.01 uarkeo
+sed -i "s/minimum-gas-prices = .*/minimum-gas-prices = \"0.01uarkeo\"/" $HOME/.arkeo/config/app.toml
+# Tắt indexer để tiết kiệm dung lượng
 sed -i -e "s/^indexer *=.*/indexer = \"null\"/" $HOME/.arkeo/config/config.toml
+# Bật pruning tùy chỉnh
 sed -i -e "s/^pruning *=.*/pruning = \"custom\"/" $HOME/.arkeo/config/app.toml
+# Giữ 100 block gần nhất
 sed -i -e "s/^pruning-keep-recent *=.*/pruning-keep-recent = \"100\"/" $HOME/.arkeo/config/app.toml
+# Chạy pruning mỗi 50 block
 sed -i -e "s/^pruning-interval *=.*/pruning-interval = \"50\"/" $HOME/.arkeo/config/app.toml</pre></div>
     <div class="step-label">Genesis & address book</div>
     <div class="code-block"><button class="copy-btn" onclick="copyCode(this)">COPY</button>
-<pre>curl -Ls https://file3.node39.top/Mainnet/Arkeo/genesis.json > $HOME/.arkeo/config/genesis.json
+<pre># Tải genesis.json (trạng thái khởi đầu blockchain)
+curl -Ls https://file3.node39.top/Mainnet/Arkeo/genesis.json > $HOME/.arkeo/config/genesis.json
+# Tải addrbook.json (danh sách peer để kết nối mạng nhanh hơn)
 curl -Ls https://file3.node39.top/Mainnet/Arkeo/addrbook.json > $HOME/.arkeo/config/addrbook.json</pre></div>
     <div class="step-label">Peers</div>
     <div class="code-block"><button class="copy-btn" onclick="copyCode(this)">COPY</button>
-<pre>peers="[email protected]:17656"
+<pre># Peer seed để gia nhập mạng
+peers="[email protected]:17656"
+# Ghi vào persistent_peers trong config.toml
 sed -i.bak -e "s/^persistent_peers *=.*/persistent_peers = \"$peers\"/" $HOME/.arkeo/config/config.toml</pre></div>
   </div>
 
@@ -167,7 +194,8 @@ sed -i.bak -e "s/^persistent_peers *=.*/persistent_peers = \"$peers\"/" $HOME/.a
     <div class="section-label">Step 4</div>
     <div class="section-title">Create Service & Start</div>
     <div class="code-block"><button class="copy-btn" onclick="copyCode(this)">COPY</button>
-<pre>sudo tee /etc/systemd/system/arkeod.service > /dev/null &lt;&lt;EOF
+<pre># Tạo systemd service cho arkeod
+sudo tee /etc/systemd/system/arkeod.service > /dev/null &lt;&lt;EOF
 [Unit]
 Description=Arkeo Node
 After=network-online.target
@@ -183,12 +211,16 @@ LimitNOFILE=65535
 [Install]
 WantedBy=multi-user.target
 EOF
+# Reload để nhận diện service mới
 sudo systemctl daemon-reload
+# Bật tự khởi động khi reboot
 sudo systemctl enable arkeod
+# Khởi động node
 sudo systemctl start arkeod</pre></div>
     <div class="step-label">Check sync status</div>
     <div class="code-block"><button class="copy-btn" onclick="copyCode(this)">COPY</button>
-<pre>arkeod status 2>&1 | jq .SyncInfo</pre></div>
+<pre># catching_up=false → node đã sync xong
+arkeod status 2>&1 | jq .SyncInfo</pre></div>
   </div>
 </div>
 </div>
@@ -204,15 +236,22 @@ sudo systemctl start arkeod</pre></div>
     <div class="info-box">Thay <code style="color:var(--accent3)">NEW_VERSION</code> bằng tag phiên bản mới nhất từ GitHub.</div>
     <div class="step-label">Stop & build new version</div>
     <div class="code-block"><button class="copy-btn" onclick="copyCode(this)">COPY</button>
-<pre>sudo systemctl stop arkeod
+<pre># Dừng node trước khi nâng cấp
+sudo systemctl stop arkeod
 cd $HOME/arkeo
+# Lấy code mới nhất
 git pull
+# Chuyển sang tag mới (ví dụ: v1.0.18)
 git checkout NEW_VERSION
+# Biên dịch lại và cài binary
 make install
+# Xác nhận phiên bản mới
 arkeod version</pre></div>
     <div class="step-label">Restart & verify</div>
     <div class="code-block"><button class="copy-btn" onclick="copyCode(this)">COPY</button>
-<pre>sudo systemctl restart arkeod
+<pre># Khởi động lại với binary mới
+sudo systemctl restart arkeod
+# Xem log để xác nhận node hoạt động bình thường
 sudo journalctl -u arkeod -f</pre></div>
   </div>
 </div>
@@ -225,24 +264,38 @@ sudo journalctl -u arkeod -f</pre></div>
     <div class="section-label">Operations</div>
     <div class="section-title">Useful Commands</div>
     <div class="step-label">Service management</div>
-    <div class="code-block"><button class="copy-btn" onclick="copyCode(this)">COPY</button><pre>sudo journalctl -u arkeod -f</pre></div>
-    <div class="code-block"><button class="copy-btn" onclick="copyCode(this)">COPY</button><pre>sudo systemctl start arkeod</pre></div>
-    <div class="code-block"><button class="copy-btn" onclick="copyCode(this)">COPY</button><pre>sudo systemctl stop arkeod</pre></div>
-    <div class="code-block"><button class="copy-btn" onclick="copyCode(this)">COPY</button><pre>sudo systemctl restart arkeod</pre></div>
-    <div class="code-block"><button class="copy-btn" onclick="copyCode(this)">COPY</button><pre>arkeod status 2>&1 | jq .SyncInfo</pre></div>
+    <div class="code-block"><button class="copy-btn" onclick="copyCode(this)">COPY</button><pre># Xem log realtime
+sudo journalctl -u arkeod -f</pre></div>
+    <div class="code-block"><button class="copy-btn" onclick="copyCode(this)">COPY</button><pre># Khởi động
+sudo systemctl start arkeod</pre></div>
+    <div class="code-block"><button class="copy-btn" onclick="copyCode(this)">COPY</button><pre># Dừng
+sudo systemctl stop arkeod</pre></div>
+    <div class="code-block"><button class="copy-btn" onclick="copyCode(this)">COPY</button><pre># Khởi động lại
+sudo systemctl restart arkeod</pre></div>
+    <div class="code-block"><button class="copy-btn" onclick="copyCode(this)">COPY</button><pre># Kiểm tra trạng thái sync
+arkeod status 2>&1 | jq .SyncInfo</pre></div>
 
     <div class="step-label">Wallet</div>
-    <div class="code-block"><button class="copy-btn" onclick="copyCode(this)">COPY</button><pre>arkeod keys add &lt;wallet&gt;</pre></div>
-    <div class="code-block"><button class="copy-btn" onclick="copyCode(this)">COPY</button><pre>arkeod keys add &lt;wallet&gt; --recover</pre></div>
-    <div class="code-block"><button class="copy-btn" onclick="copyCode(this)">COPY</button><pre>arkeod keys list</pre></div>
-    <div class="code-block"><button class="copy-btn" onclick="copyCode(this)">COPY</button><pre>arkeod query bank balances &lt;address&gt;</pre></div>
+    <div class="code-block"><button class="copy-btn" onclick="copyCode(this)">COPY</button><pre># Tạo ví mới
+arkeod keys add &lt;wallet&gt;</pre></div>
+    <div class="code-block"><button class="copy-btn" onclick="copyCode(this)">COPY</button><pre># Khôi phục ví từ mnemonic
+arkeod keys add &lt;wallet&gt; --recover</pre></div>
+    <div class="code-block"><button class="copy-btn" onclick="copyCode(this)">COPY</button><pre># Xem danh sách ví
+arkeod keys list</pre></div>
+    <div class="code-block"><button class="copy-btn" onclick="copyCode(this)">COPY</button><pre># Kiểm tra số dư
+arkeod query bank balances &lt;address&gt;</pre></div>
 
     <div class="step-label">Validator</div>
-    <div class="code-block"><button class="copy-btn" onclick="copyCode(this)">COPY</button><pre>arkeod tx staking create-validator validator.json --from &lt;wallet&gt; --chain-id arkeo-main-v1 --gas auto --gas-adjustment 1.5 --fees 1000uarkeo -y</pre></div>
-    <div class="code-block"><button class="copy-btn" onclick="copyCode(this)">COPY</button><pre>arkeod tx staking delegate &lt;valoper&gt; &lt;amount&gt;uarkeo --from &lt;wallet&gt; --chain-id arkeo-main-v1 --fees 1000uarkeo -y</pre></div>
-    <div class="code-block"><button class="copy-btn" onclick="copyCode(this)">COPY</button><pre>arkeod tx distribution withdraw-rewards &lt;valoper&gt; --from &lt;wallet&gt; --chain-id arkeo-main-v1 --fees 1000uarkeo -y</pre></div>
-    <div class="code-block"><button class="copy-btn" onclick="copyCode(this)">COPY</button><pre>arkeod tx slashing unjail --from &lt;wallet&gt; --chain-id arkeo-main-v1 --fees 1000uarkeo -y</pre></div>
-    <div class="code-block"><button class="copy-btn" onclick="copyCode(this)">COPY</button><pre>arkeod tx gov vote &lt;id&gt; yes --from &lt;wallet&gt; --chain-id arkeo-main-v1 --fees 1000uarkeo -y</pre></div>
+    <div class="code-block"><button class="copy-btn" onclick="copyCode(this)">COPY</button><pre># Tạo validator (cần chuẩn bị file validator.json trước)
+arkeod tx staking create-validator validator.json --from &lt;wallet&gt; --chain-id arkeo-main-v1 --gas auto --gas-adjustment 1.5 --fees 1000uarkeo -y</pre></div>
+    <div class="code-block"><button class="copy-btn" onclick="copyCode(this)">COPY</button><pre># Delegate token cho validator
+arkeod tx staking delegate &lt;valoper&gt; &lt;amount&gt;uarkeo --from &lt;wallet&gt; --chain-id arkeo-main-v1 --fees 1000uarkeo -y</pre></div>
+    <div class="code-block"><button class="copy-btn" onclick="copyCode(this)">COPY</button><pre># Rút phần thưởng staking
+arkeod tx distribution withdraw-rewards &lt;valoper&gt; --from &lt;wallet&gt; --chain-id arkeo-main-v1 --fees 1000uarkeo -y</pre></div>
+    <div class="code-block"><button class="copy-btn" onclick="copyCode(this)">COPY</button><pre># Gỡ jailed validator (bị phạt do downtime hoặc double sign)
+arkeod tx slashing unjail --from &lt;wallet&gt; --chain-id arkeo-main-v1 --fees 1000uarkeo -y</pre></div>
+    <div class="code-block"><button class="copy-btn" onclick="copyCode(this)">COPY</button><pre># Bỏ phiếu governance (yes / no / abstain / no_with_veto)
+arkeod tx gov vote &lt;id&gt; yes --from &lt;wallet&gt; --chain-id arkeo-main-v1 --fees 1000uarkeo -y</pre></div>
   </div>
 </div>
 </div>

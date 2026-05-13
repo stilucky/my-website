@@ -95,15 +95,20 @@
     <div class="section-label">Step 1</div>
     <div class="section-title">Install Dependencies & Docker</div>
     <div class="code-block"><button class="copy-btn" onclick="copyCode(this)">COPY</button>
-<pre>sudo apt-get update && apt-get upgrade -y
+<pre># Cập nhật hệ thống
+sudo apt-get update && apt-get upgrade -y
+# Cài dependencies cơ bản
 sudo apt-get install ca-certificates curl gnupg -y</pre></div>
     <div class="step-label">Install Docker</div>
     <div class="code-block"><button class="copy-btn" onclick="copyCode(this)">COPY</button>
-<pre>sudo install -m 0755 -d /etc/apt/keyring
+<pre># Thêm GPG key Docker
+sudo install -m 0755 -d /etc/apt/keyring
 curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
 sudo chmod a+r /etc/apt/keyrings/docker.gpg
+# Thêm repo Docker
 echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu $(. /etc/os-release && echo $VERSION_CODENAME) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
 sudo apt-get update
+# Cài Docker Engine
 sudo apt-get install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin -y</pre></div>
   </div>
 
@@ -111,12 +116,16 @@ sudo apt-get install docker-ce docker-ce-cli containerd.io docker-buildx-plugin 
     <div class="section-label">Step 2</div>
     <div class="section-title">Deploy Muon Node</div>
     <div class="code-block"><button class="copy-btn" onclick="copyCode(this)">COPY</button>
-<pre>curl -o docker-compose.yml https://raw.githubusercontent.com/muon-protocol/muon-node-js/pion/docker-compose-pull.yml
+<pre># Tải file cấu hình Docker
+curl -o docker-compose.yml https://raw.githubusercontent.com/muon-protocol/muon-node-js/pion/docker-compose-pull.yml
+# Kéo image mới nhất
 docker compose pull
+# Khởi động node
 docker compose up -d</pre></div>
     <div class="step-label">Verify node is running (wait ~5 minutes)</div>
     <div class="code-block"><button class="copy-btn" onclick="copyCode(this)">COPY</button>
-<pre>curl http://localhost:8012/status</pre></div>
+<pre># Kiểm tra trạng thái node
+curl http://localhost:8012/status</pre></div>
   </div>
 
   <div class="guide-section">
@@ -124,7 +133,9 @@ docker compose up -d</pre></div>
     <div class="section-title">Backup Keys</div>
     <div class="info-box">Backup your keys immediately after deployment. Store the backup.json in a safe location.</div>
     <div class="code-block"><button class="copy-btn" onclick="copyCode(this)">COPY</button>
-<pre>docker exec -it muon-node ./node_modules/.bin/ts-node ./src/cmd/index.ts keys backup > backup.json
+<pre># Sao lưu key node
+docker exec -it muon-node ./node_modules/.bin/ts-node ./src/cmd/index.ts keys backup > backup.json
+# Xem nội dung backup
 cat backup.json</pre></div>
   </div>
 </div>
@@ -138,12 +149,16 @@ cat backup.json</pre></div>
     <div class="section-title">Update Node</div>
     <div class="step-label">Pull latest image & restart</div>
     <div class="code-block"><button class="copy-btn" onclick="copyCode(this)">COPY</button>
-<pre>docker compose pull
+<pre># Kéo image mới nhất
+docker compose pull
+# Dừng container
 docker compose down
+# Khởi động lại
 docker compose up -d</pre></div>
     <div class="step-label">Verify after update</div>
     <div class="code-block"><button class="copy-btn" onclick="copyCode(this)">COPY</button>
-<pre>curl http://localhost:8012/status</pre></div>
+<pre># Kiểm tra trạng thái node
+curl http://localhost:8012/status</pre></div>
   </div>
 </div>
 </div>
@@ -155,15 +170,22 @@ docker compose up -d</pre></div>
     <div class="section-label">Operations</div>
     <div class="section-title">Useful Commands</div>
     <div class="step-label">Container management</div>
-    <div class="code-block"><button class="copy-btn" onclick="copyCode(this)">COPY</button><pre>docker compose up -d</pre></div>
-    <div class="code-block"><button class="copy-btn" onclick="copyCode(this)">COPY</button><pre>docker compose down</pre></div>
-    <div class="code-block"><button class="copy-btn" onclick="copyCode(this)">COPY</button><pre>docker compose restart</pre></div>
-    <div class="code-block"><button class="copy-btn" onclick="copyCode(this)">COPY</button><pre>docker compose logs -f --tail 100</pre></div>
-    <div class="code-block"><button class="copy-btn" onclick="copyCode(this)">COPY</button><pre>curl http://localhost:8012/status</pre></div>
+    <div class="code-block"><button class="copy-btn" onclick="copyCode(this)">COPY</button><pre># Khởi động node
+docker compose up -d</pre></div>
+    <div class="code-block"><button class="copy-btn" onclick="copyCode(this)">COPY</button><pre># Dừng container
+docker compose down</pre></div>
+    <div class="code-block"><button class="copy-btn" onclick="copyCode(this)">COPY</button><pre># Khởi động lại
+docker compose restart</pre></div>
+    <div class="code-block"><button class="copy-btn" onclick="copyCode(this)">COPY</button><pre># Xem log realtime
+docker compose logs -f --tail 100</pre></div>
+    <div class="code-block"><button class="copy-btn" onclick="copyCode(this)">COPY</button><pre># Kiểm tra trạng thái node
+curl http://localhost:8012/status</pre></div>
 
     <div class="step-label">Key management</div>
-    <div class="code-block"><button class="copy-btn" onclick="copyCode(this)">COPY</button><pre>docker exec -it muon-node ./node_modules/.bin/ts-node ./src/cmd/index.ts keys backup > backup.json</pre></div>
-    <div class="code-block"><button class="copy-btn" onclick="copyCode(this)">COPY</button><pre>docker exec -it muon-node ./node_modules/.bin/ts-node ./src/cmd/index.ts keys restore "$(cat backup.json)"</pre></div>
+    <div class="code-block"><button class="copy-btn" onclick="copyCode(this)">COPY</button><pre># Sao lưu key node
+docker exec -it muon-node ./node_modules/.bin/ts-node ./src/cmd/index.ts keys backup > backup.json</pre></div>
+    <div class="code-block"><button class="copy-btn" onclick="copyCode(this)">COPY</button><pre># Khôi phục key từ backup
+docker exec -it muon-node ./node_modules/.bin/ts-node ./src/cmd/index.ts keys restore "$(cat backup.json)"</pre></div>
   </div>
 </div>
 </div>

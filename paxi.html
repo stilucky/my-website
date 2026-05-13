@@ -101,20 +101,27 @@
     <div class="section-label">Step 1</div>
     <div class="section-title">Install Dependencies & Go</div>
     <div class="code-block"><button class="copy-btn" onclick="copyCode(this)">COPY</button>
-<pre>sudo apt update && sudo apt upgrade -y
+<pre># Cập nhật hệ thống
+sudo apt update && sudo apt upgrade -y
+# Cài dependencies
 sudo apt-get install git curl build-essential make jq gcc snapd chrony lz4 tmux unzip make bc -y</pre></div>
     <div class="step-label">Install Go 1.24.6 (amd64)</div>
     <div class="code-block"><button class="copy-btn" onclick="copyCode(this)">COPY</button>
-<pre>sudo rm -rf $HOME/go && sudo rm -rf /usr/local/go
+<pre># Xóa Go cũ
+sudo rm -rf $HOME/go && sudo rm -rf /usr/local/go
 cd $HOME
+# Tải và giải nén Go 1.24.6
 curl https://dl.google.com/go/go1.24.6.linux-amd64.tar.gz | sudo tar -C /usr/local -zxvf -
+# Thêm Go vào PATH
 cat &lt;&lt;'EOF' >> $HOME/.bashrc
 export GOROOT=/usr/local/go
 export GOPATH=$HOME/go
 export PATH=$PATH:/usr/local/go/bin:$HOME/go/bin
 export GOPROXY=https://proxy.golang.org.direct
 EOF
+# Áp dụng biến môi trường
 source $HOME/.bashrc
+# Kiểm tra phiên bản Go
 go version</pre></div>
   </div>
 
@@ -122,15 +129,21 @@ go version</pre></div>
     <div class="section-label">Step 2</div>
     <div class="section-title">Set Variables & Install Binary</div>
     <div class="code-block"><button class="copy-btn" onclick="copyCode(this)">COPY</button>
-<pre>echo "export PAXI_PORT="40"" >> $HOME/.bash_profile
+<pre># Đặt prefix cổng
+echo "export PAXI_PORT="40"" >> $HOME/.bash_profile
+# Áp dụng biến
 source $HOME/.bash_profile</pre></div>
     <div class="step-label">Build from source (v1.0.6)</div>
     <div class="code-block"><button class="copy-btn" onclick="copyCode(this)">COPY</button>
 <pre>cd $HOME
+# Clone source code
 git clone https://github.com/paxi-web3/paxi
 cd paxi
+# Chuyển sang phiên bản v1.0.6
 git checkout v1.0.6
+# Biên dịch và cài binary
 make install
+# Xác nhận phiên bản mới
 paxid version</pre></div>
   </div>
 
@@ -139,30 +152,46 @@ paxid version</pre></div>
     <div class="section-title">Configure Node</div>
     <div class="step-label">Initialize & client config</div>
     <div class="code-block"><button class="copy-btn" onclick="copyCode(this)">COPY</button>
-<pre>paxid init Stilucky-node --chain-id paxi-mainnet
+<pre># Khởi tạo node
+paxid init Stilucky-node --chain-id paxi-mainnet
+# Ghi chain-id vào config
 sed -i "s/chain-id = .*/chain-id = \"paxi-mainnet\"/" $(dirname $(which paxid))/paxi/config/client.toml
+# Đặt keyring backend
 sed -i "s/keyring-backend = .*/keyring-backend = \"os\"/" $(dirname $(which paxid))/paxi/config/client.toml
+# Trỏ RPC về cổng tùy chỉnh
 sed -i "s/node = .*/node = \"tcp:\/\/localhost:${PAXI_PORT}657\"/" $(dirname $(which paxid))/paxi/config/client.toml</pre></div>
     <div class="step-label">Custom ports</div>
     <div class="code-block"><button class="copy-btn" onclick="copyCode(this)">COPY</button>
-<pre>sed -i.bak -e "s%:1317%:${PAXI_PORT}317%g;s%:8080%:${PAXI_PORT}080%g;s%:9090%:${PAXI_PORT}090%g;s%:9091%:${PAXI_PORT}091%g;s%:8545%:${PAXI_PORT}545%g;s%:8546%:${PAXI_PORT}546%g;s%:6065%:${PAXI_PORT}065%g" $(dirname $(which paxid))/paxi/config/app.toml
+<pre># Đổi cổng REST/gRPC (app.toml)
+sed -i.bak -e "s%:1317%:${PAXI_PORT}317%g;s%:8080%:${PAXI_PORT}080%g;s%:9090%:${PAXI_PORT}090%g;s%:9091%:${PAXI_PORT}091%g;s%:8545%:${PAXI_PORT}545%g;s%:8546%:${PAXI_PORT}546%g;s%:6065%:${PAXI_PORT}065%g" $(dirname $(which paxid))/paxi/config/app.toml
+# Đổi cổng P2P/RPC (config.toml)
 sed -i.bak -e "s%:26658%:${PAXI_PORT}658%g;s%:26657%:${PAXI_PORT}657%g;s%:6060%:${PAXI_PORT}060%g;s%:26656%:${PAXI_PORT}656%g;s%^external_address = \"\"%external_address = \"$(wget -qO- eth0.me):${PAXI_PORT}656\"%;s%:26660%:${PAXI_PORT}660%g" $(dirname $(which paxid))/paxi/config/config.toml</pre></div>
     <div class="step-label">Gas, indexer, pruning & DB</div>
     <div class="code-block"><button class="copy-btn" onclick="copyCode(this)">COPY</button>
-<pre>sed -i "s/minimum-gas-prices = .*/minimum-gas-prices = \"0.05upaxi\"/" $(dirname $(which paxid))/paxi/config/app.toml
+<pre># Gas tối thiểu
+sed -i "s/minimum-gas-prices = .*/minimum-gas-prices = \"0.05upaxi\"/" $(dirname $(which paxid))/paxi/config/app.toml
+# Tắt indexer
 sed -i -e "s/^indexer *=.*/indexer = \"null\"/" $(dirname $(which paxid))/paxi/config/config.toml
+# Bật pruning tùy chỉnh
 sed -i -e "s/^pruning *=.*/pruning = \"custom\"/" $(dirname $(which paxid))/paxi/config/app.toml
+# Giữ 100 block gần nhất
 sed -i -e "s/^pruning-keep-recent *=.*/pruning-keep-recent = \"100\"/" $(dirname $(which paxid))/paxi/config/app.toml
+# Pruning mỗi 50 block
 sed -i -e "s/^pruning-interval *=.*/pruning-interval = \"50\"/" $(dirname $(which paxid))/paxi/config/app.toml
+# Đặt DB backend goleveldb
 sed -i "s|db_backend =.*|db_backend=\"goleveldb\"|g" "$(dirname $(which paxid))/paxi/config/config.toml"
 sed -i "s|app-db-backend =.*|app-db-backend=\"goleveldb\"|g" "$(dirname $(which paxid))/paxi/config/app.toml"</pre></div>
     <div class="step-label">Genesis & address book</div>
     <div class="code-block"><button class="copy-btn" onclick="copyCode(this)">COPY</button>
-<pre>curl -Ls https://file2.node39.top/Mainnet/Paxi/genesis.json > $(dirname $(which paxid))/paxi/config/genesis.json
+<pre># Tải genesis.json
+curl -Ls https://file2.node39.top/Mainnet/Paxi/genesis.json > $(dirname $(which paxid))/paxi/config/genesis.json
+# Tải addrbook.json
 curl -Ls https://file2.node39.top/Mainnet/Paxi/addrbook.json > $(dirname $(which paxid))/paxi/config/addrbook.json</pre></div>
     <div class="step-label">Peers</div>
     <div class="code-block"><button class="copy-btn" onclick="copyCode(this)">COPY</button>
-<pre>peers="[email protected]:17656"
+<pre># Peer seed
+peers="[email protected]:17656"
+# Ghi vào persistent_peers
 sed -i.bak -e "s/^persistent_peers *=.*/persistent_peers = \"$peers\"/" $(dirname $(which paxid))/paxi/config/config.toml</pre></div>
   </div>
 
@@ -170,7 +199,8 @@ sed -i.bak -e "s/^persistent_peers *=.*/persistent_peers = \"$peers\"/" $(dirnam
     <div class="section-label">Step 4</div>
     <div class="section-title">Create Service & Start</div>
     <div class="code-block"><button class="copy-btn" onclick="copyCode(this)">COPY</button>
-<pre>sudo tee /etc/systemd/system/paxid.service > /dev/null &lt;&lt;EOF
+<pre># Tạo systemd service
+sudo tee /etc/systemd/system/paxid.service > /dev/null &lt;&lt;EOF
 [Unit]
 Description=Paxi Node
 After=network-online.target
@@ -186,12 +216,16 @@ LimitNOFILE=65535
 [Install]
 WantedBy=multi-user.target
 EOF
+# Reload daemon
 sudo systemctl daemon-reload
+# Bật auto-start
 sudo systemctl enable paxid
+# Khởi động node
 sudo systemctl start paxid</pre></div>
     <div class="step-label">Check sync status</div>
     <div class="code-block"><button class="copy-btn" onclick="copyCode(this)">COPY</button>
-<pre>paxid status 2>&1 | jq .SyncInfo</pre></div>
+<pre># catching_up=false → đã sync xong
+paxid status 2>&1 | jq .SyncInfo</pre></div>
   </div>
 </div>
 </div>
@@ -207,15 +241,22 @@ sudo systemctl start paxid</pre></div>
     <div class="info-box">Thay <code style="color:var(--accent3)">NEW_VERSION</code> bằng tag phiên bản mới nhất từ GitHub.</div>
     <div class="step-label">Stop & build new version</div>
     <div class="code-block"><button class="copy-btn" onclick="copyCode(this)">COPY</button>
-<pre>sudo systemctl stop paxid
+<pre># Dừng node
+sudo systemctl stop paxid
 cd $HOME/paxi
+# Lấy code mới nhất
 git pull
+# Chuyển phiên bản mới
 git checkout NEW_VERSION
+# Biên dịch và cài binary
 make install
+# Xác nhận phiên bản mới
 paxid version</pre></div>
     <div class="step-label">Restart & verify</div>
     <div class="code-block"><button class="copy-btn" onclick="copyCode(this)">COPY</button>
-<pre>sudo systemctl restart paxid
+<pre># Khởi động lại
+sudo systemctl restart paxid
+# Xem log realtime
 sudo journalctl -u paxid -f</pre></div>
   </div>
 </div>
@@ -228,24 +269,38 @@ sudo journalctl -u paxid -f</pre></div>
     <div class="section-label">Operations</div>
     <div class="section-title">Useful Commands</div>
     <div class="step-label">Service management</div>
-    <div class="code-block"><button class="copy-btn" onclick="copyCode(this)">COPY</button><pre>sudo journalctl -u paxid -f</pre></div>
-    <div class="code-block"><button class="copy-btn" onclick="copyCode(this)">COPY</button><pre>sudo systemctl start paxid</pre></div>
-    <div class="code-block"><button class="copy-btn" onclick="copyCode(this)">COPY</button><pre>sudo systemctl stop paxid</pre></div>
-    <div class="code-block"><button class="copy-btn" onclick="copyCode(this)">COPY</button><pre>sudo systemctl restart paxid</pre></div>
-    <div class="code-block"><button class="copy-btn" onclick="copyCode(this)">COPY</button><pre>paxid status 2>&1 | jq .SyncInfo</pre></div>
+    <div class="code-block"><button class="copy-btn" onclick="copyCode(this)">COPY</button><pre># Xem log realtime
+sudo journalctl -u paxid -f</pre></div>
+    <div class="code-block"><button class="copy-btn" onclick="copyCode(this)">COPY</button><pre># Khởi động node
+sudo systemctl start paxid</pre></div>
+    <div class="code-block"><button class="copy-btn" onclick="copyCode(this)">COPY</button><pre># Dừng node
+sudo systemctl stop paxid</pre></div>
+    <div class="code-block"><button class="copy-btn" onclick="copyCode(this)">COPY</button><pre># Khởi động lại
+sudo systemctl restart paxid</pre></div>
+    <div class="code-block"><button class="copy-btn" onclick="copyCode(this)">COPY</button><pre># catching_up=false → đã sync xong
+paxid status 2>&1 | jq .SyncInfo</pre></div>
 
     <div class="step-label">Wallet</div>
-    <div class="code-block"><button class="copy-btn" onclick="copyCode(this)">COPY</button><pre>paxid keys add &lt;wallet&gt;</pre></div>
-    <div class="code-block"><button class="copy-btn" onclick="copyCode(this)">COPY</button><pre>paxid keys add &lt;wallet&gt; --recover</pre></div>
-    <div class="code-block"><button class="copy-btn" onclick="copyCode(this)">COPY</button><pre>paxid keys list</pre></div>
-    <div class="code-block"><button class="copy-btn" onclick="copyCode(this)">COPY</button><pre>paxid query bank balances &lt;address&gt;</pre></div>
+    <div class="code-block"><button class="copy-btn" onclick="copyCode(this)">COPY</button><pre># Tạo ví mới
+paxid keys add &lt;wallet&gt;</pre></div>
+    <div class="code-block"><button class="copy-btn" onclick="copyCode(this)">COPY</button><pre># Khôi phục ví từ mnemonic
+paxid keys add &lt;wallet&gt; --recover</pre></div>
+    <div class="code-block"><button class="copy-btn" onclick="copyCode(this)">COPY</button><pre># Xem danh sách ví
+paxid keys list</pre></div>
+    <div class="code-block"><button class="copy-btn" onclick="copyCode(this)">COPY</button><pre># Kiểm tra số dư
+paxid query bank balances &lt;address&gt;</pre></div>
 
     <div class="step-label">Validator</div>
-    <div class="code-block"><button class="copy-btn" onclick="copyCode(this)">COPY</button><pre>paxid tx staking create-validator validator.json --from &lt;wallet&gt; --chain-id paxi-mainnet --gas auto --gas-adjustment 1.5 --fees 5000upaxi -y</pre></div>
-    <div class="code-block"><button class="copy-btn" onclick="copyCode(this)">COPY</button><pre>paxid tx staking delegate &lt;valoper&gt; &lt;amount&gt;upaxi --from &lt;wallet&gt; --chain-id paxi-mainnet --fees 5000upaxi -y</pre></div>
-    <div class="code-block"><button class="copy-btn" onclick="copyCode(this)">COPY</button><pre>paxid tx distribution withdraw-rewards &lt;valoper&gt; --from &lt;wallet&gt; --chain-id paxi-mainnet --fees 5000upaxi -y</pre></div>
-    <div class="code-block"><button class="copy-btn" onclick="copyCode(this)">COPY</button><pre>paxid tx slashing unjail --from &lt;wallet&gt; --chain-id paxi-mainnet --fees 5000upaxi -y</pre></div>
-    <div class="code-block"><button class="copy-btn" onclick="copyCode(this)">COPY</button><pre>paxid tx gov vote &lt;id&gt; yes --from &lt;wallet&gt; --chain-id paxi-mainnet --fees 5000upaxi -y</pre></div>
+    <div class="code-block"><button class="copy-btn" onclick="copyCode(this)">COPY</button><pre># Tạo validator
+paxid tx staking create-validator validator.json --from &lt;wallet&gt; --chain-id paxi-mainnet --gas auto --gas-adjustment 1.5 --fees 5000upaxi -y</pre></div>
+    <div class="code-block"><button class="copy-btn" onclick="copyCode(this)">COPY</button><pre># Delegate token
+paxid tx staking delegate &lt;valoper&gt; &lt;amount&gt;upaxi --from &lt;wallet&gt; --chain-id paxi-mainnet --fees 5000upaxi -y</pre></div>
+    <div class="code-block"><button class="copy-btn" onclick="copyCode(this)">COPY</button><pre># Rút phần thưởng
+paxid tx distribution withdraw-rewards &lt;valoper&gt; --from &lt;wallet&gt; --chain-id paxi-mainnet --fees 5000upaxi -y</pre></div>
+    <div class="code-block"><button class="copy-btn" onclick="copyCode(this)">COPY</button><pre># Gỡ jailed validator
+paxid tx slashing unjail --from &lt;wallet&gt; --chain-id paxi-mainnet --fees 5000upaxi -y</pre></div>
+    <div class="code-block"><button class="copy-btn" onclick="copyCode(this)">COPY</button><pre># Bỏ phiếu governance
+paxid tx gov vote &lt;id&gt; yes --from &lt;wallet&gt; --chain-id paxi-mainnet --fees 5000upaxi -y</pre></div>
   </div>
 </div>
 </div>
