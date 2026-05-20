@@ -991,15 +991,22 @@ sudo systemctl start pactusd</pre>
       const list = data.validators || [];
       if (list.length === 0) throw new Error('empty');
 
+      // Chỉ hiện slot chưa delegate
+      const open = list.filter(v => v.isDelegated === false);
+      if (open.length === 0) {
+        if (statusEl) statusEl.textContent = '— no open slots';
+        return;
+      }
+
       SLOTS.length = 0;
-      list.forEach(v => SLOTS.push({
+      open.forEach(v => SLOTS.push({
         addr:   v.address,
         pubkey: v.publicKey || v.public_key || ''
       }));
       selectedSlot = SLOTS[0];
       renderSlots();
       updateDelegateCmd();
-      if (statusEl) statusEl.textContent = `✓ ${list.length} slot(s) — live`;
+      if (statusEl) statusEl.textContent = `✓ ${open.length} open slot(s) — live`;
     } catch (_) {
       if (statusEl) statusEl.textContent = '— cached data';
     }

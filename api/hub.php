@@ -12,8 +12,7 @@ if (empty($addresses)) {
 }
 
 function parseValidatorHtml(string $html): ?array {
-    // Extract all <td>key</td><td>value</td> pairs
-    preg_match_all('/<td>([^<]+)<\/td>\s*<td[^>]*>(?:<a[^>]*>)?([^<]+)(?:<\/a>)?<\/td>/i', $html, $m);
+    preg_match_all('/<td>([^<]+)<\/td>\s*<td[^>]*>(?:<a[^>]*>)?([^<]*)(?:<\/a>)?<\/td>/i', $html, $m);
     if (empty($m[1])) return null;
 
     $data = [];
@@ -22,16 +21,16 @@ function parseValidatorHtml(string $html): ?array {
     }
 
     return [
-        'address'            => $data['Address']            ?? '',
-        'publicKey'          => $data['Public Key']         ?? '',
-        'number'             => (int)($data['Number']       ?? 0),
-        'stake'              => $data['Stake']              ?? '',
-        'availabilityScore'  => (float)($data['Availability Score'] ?? 0),
-        'lastBondingHeight'  => (int)($data['Last Bonding Height']  ?? 0),
-        'unbondingHeight'    => (int)($data['Unbonding Height']     ?? 0),
-        'isDelegated'        => isset($data['Delegate Owner']),
-        'delegateOwner'      => $data['Delegate Owner']     ?? '',
-        'delegateShare'      => $data['Delegate Share']     ?? '',
+        'address'           => $data['Address']           ?? '',
+        'publicKey'         => $data['Public Key']        ?? '',
+        'number'            => (int)($data['Number']      ?? 0),
+        'stake'             => $data['Stake']             ?? '',
+        'availabilityScore' => (float)($data['AvailabilityScore'] ?? 0),
+        'lastBondingHeight' => (int)($data['LastBondingHeight']   ?? 0),
+        'unbondingHeight'   => (int)($data['UnbondingHeight']     ?? 0),
+        'isDelegated'       => strtolower($data['IsDelegated'] ?? 'false') === 'true',
+        'delegateOwner'     => $data['DelegateOwner']     ?? '',
+        'delegateShare'     => $data['DelegateShare']     ?? '',
     ];
 }
 
