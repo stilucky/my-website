@@ -581,6 +581,58 @@
     [data-theme="light"] .chain-chip:hover { border-color: var(--accent); color: var(--accent); background: rgba(0,136,187,0.06); }
     [data-theme="light"] nav { border-bottom-color: rgba(0,136,187,0.18); }
 
+    /* ── TELEGRAM BUTTON ── */
+    .btn-tg {
+      background: linear-gradient(135deg, #229ed9, #1a7fc1);
+      color: #fff;
+      font-weight: 700;
+    }
+    .btn-tg:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 28px rgba(34,158,217,0.4);
+      filter: brightness(1.1);
+    }
+
+    /* ── FLOATING TELEGRAM ── */
+    .tg-float {
+      position: fixed;
+      bottom: 2rem;
+      right: 2rem;
+      z-index: 200;
+      width: 54px;
+      height: 54px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #229ed9, #1a7fc1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 4px 20px rgba(34,158,217,0.5);
+      transition: all 0.25s;
+      text-decoration: none;
+      font-size: 1.5rem;
+    }
+    .tg-float:hover {
+      transform: scale(1.12) translateY(-3px);
+      box-shadow: 0 8px 32px rgba(34,158,217,0.65);
+    }
+    .tg-float-tooltip {
+      position: absolute;
+      right: 62px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      color: var(--text);
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 0.72rem;
+      white-space: nowrap;
+      padding: 0.35rem 0.75rem;
+      border-radius: 4px;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.2s;
+      letter-spacing: 0.05em;
+    }
+    .tg-float:hover .tg-float-tooltip { opacity: 1; }
+
     /* ── ANIMATIONS ── */
     @keyframes fadeUp {
       from { opacity: 0; transform: translateY(24px); }
@@ -607,6 +659,8 @@
       <li><a href="#chains">Mainnet</a></li>
       <li><a href="#chains">Testnet</a></li>
       <li><a href="https://github.com/stilucky" target="_blank">GitHub</a></li>
+      <li><a href="https://t.me/stilucky39" target="_blank" rel="noopener">Telegram</a></li>
+      <li><a href="https://t.me/stiluckybot" target="_blank" rel="noopener" style="color:var(--accent);">Alert Bot</a></li>
     </ul>
     <button class="theme-btn" id="themeBtn" onclick="toggleTheme()" title="Toggle light/dark">
       <span id="themeIcon">☀</span>
@@ -628,6 +682,7 @@
       <div class="hero-cta">
         <a href="#features" class="btn btn-primary">Learn More</a>
         <a href="https://stilucky.xyz/explorer.html" target="_blank" class="btn btn-outline">Explorer →</a>
+        <a href="https://t.me/stiluckybot" target="_blank" rel="noopener" class="btn btn-tg">✈ Telegram Bot</a>
       </div>
     </div>
   </section>
@@ -709,6 +764,7 @@
     <ul class="footer-links">
       <li><a href="https://stilucky.xyz/explorer.html" target="_blank">Explorer</a></li>
       <li><a href="https://github.com/stilucky" target="_blank">GitHub</a></li>
+      <li><a href="https://t.me/stiluckybot" target="_blank" rel="noopener">Telegram</a></li>
       <li><a href="mailto:toilaai12321@gmail.com">Contact</a></li>
       <li><a href="#">Terms</a></li>
       <li><a href="#">Privacy</a></li>
