@@ -59,20 +59,9 @@ foreach ($handles as $addr => $ch) {
     if (!$body) continue;
     $gotResults = true;
 
-    // 404 = validator not yet bonded on chain → still an open slot
+    // Open slot = validator not yet bonded on chain (pactusscan returns 404)
+    // Validators already on-chain (200) have been pre-bonded by hub operator — not "open" in pactusscan's terms
     if ($code === 404) {
-        $openSlots[] = ['address' => $addr, 'publicKey' => $KNOWN[$addr]];
-        continue;
-    }
-    if ($code !== 200) continue;
-
-    $v = json_decode($body, true);
-    if (isset($v['validator'])) $v = $v['validator'];
-
-    // Slot is OPEN when delegate_owner is still the hub account (not claimed by a user yet)
-    $owner = $v['delegate_owner'] ?? '';
-    $HUB_OWNER = 'pc1z24smayvvyalglr9sfpyz0yscdn38fh0p5hud3k';
-    if ($owner === $HUB_OWNER || $owner === '') {
         $openSlots[] = ['address' => $addr, 'publicKey' => $KNOWN[$addr]];
     }
 }
