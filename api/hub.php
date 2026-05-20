@@ -60,13 +60,12 @@ foreach ($handles as $addr => $ch) {
     $gotResults = true;
 
     $v = json_decode($body, true);
-    // pactusscan may wrap in {validator:{...}} or return the object directly
     if (isset($v['validator'])) $v = $v['validator'];
 
-    $isDelegated = $v['is_delegated'] ?? $v['IsDelegated'] ?? null;
-
-    // Keep only if explicitly NOT delegated
-    if ($isDelegated === false || $isDelegated === 'false' || $isDelegated === 0) {
+    // Slot is OPEN when delegate_owner is still the hub account (not claimed by a user yet)
+    $owner = $v['delegate_owner'] ?? '';
+    $HUB_OWNER = 'pc1z24smayvvyalglr9sfpyz0yscdn38fh0p5hud3k';
+    if ($owner === $HUB_OWNER || $owner === '') {
         $openSlots[] = ['address' => $addr, 'publicKey' => $KNOWN[$addr]];
     }
 }
