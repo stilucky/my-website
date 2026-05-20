@@ -11,45 +11,50 @@ if (empty($addresses)) {
     exit;
 }
 
-// Debug mode: ?debug=1
-$debug = !empty($_GET['debug']);
+function parseValidatorHtml(string $html): ?array {
+    // Extract all <td>key</td><td>value</td> pairs
+    preg_match_all('/<td>([^<]+)<\/td>\s*<td[^>]*>(?:<a[^>]*>)?([^<]+)(?:<\/a>)?<\/td>/i', $html, $m);
+    if (empty($m[1])) return null;
 
-$nodes = [
-    'https://bootstrap1.pactus.org',
-    'http://bootstrap1.pactus.org',
-];
-
-$results = [];
-$logs    = [];
-
-foreach ($addresses as $addr) {
-    $got = false;
-    foreach ($nodes as $node) {
-        $url = $node . '/validator/address/' . $addr;
-        $ch  = curl_init($url);
-        curl_setopt_array($ch, [
-            CURLOPT_RETURNTRANSFER => true,
-            CURLOPT_TIMEOUT        => 10,
-            CURLOPT_SSL_VERIFYPEER => false,
-            CURLOPT_SSL_VERIFYHOST => false,
-            CURLOPT_FOLLOWLOCATION => true,
-            CURLOPT_USERAGENT      => 'Mozilla/5.0',
-        ]);
-        $body = curl_exec($ch);
-        $code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-        $err  = curl_error($ch);
-        curl_close($ch);
-
-        $logs[] = ['url' => $url, 'code' => $code, 'err' => $err, 'body_len' => strlen((string)$body), 'body_raw' => substr((string)$body, 0, 300)];
-
-        if ($body && $code === 200) {
-            $v = json_decode($body, true);
-            if ($v) { $results[] = $v; $got = true; break; }
-        }
+    $data = [];
+    foreach ($m[1] as $i => $key) {
+        $data[trim($key)] = trim($m[2][$i]);
     }
-    if (!$got) $logs[] = ['addr' => $addr, 'status' => 'failed'];
+
+    return [
+        'address'            => $data['Address']            ?? '',
+        'publicKey'          => $data['Public Key']         ?? '',
+        'number'             => (int)($data['Number']       ?? 0),
+        'stake'              => $data['Stake']              ?? '',
+        'availabilityScore'  => (float)($data['Availability Score'] ?? 0),
+        'lastBondingHeight'  => (int)($data['Last Bonding Height']  ?? 0),
+        'unbondingHeight'    => (int)($data['Unbonding Height']     ?? 0),
+        'isDelegated'        => isset($data['Delegate Owner']),
+        'delegateOwner'      => $data['Delegate Owner']     ?? '',
+        'delegateShare'      => $data['Delegate Share']     ?? '',
+    ];
 }
 
-$out = ['validators' => $results];
-if ($debug) $out['debug'] = $logs;
-echo json_encode($out);
+$results = [];
+
+foreach ($addresses as $addr) {
+    $url = 'https://bootstrap1.pactus.org/validator/address/' . $addr;
+    $ch  = curl_init($url);
+    curl_setopt_array($ch, [
+        CURLOPT_RETURNTRANSFER => true,
+        CURLOPT_TIMEOUT        => 10,
+        CURLOPT_SSL_VERIFYPEER => false,
+        CURLOPT_FOLLOWLOCATION => true,
+        CURLOPT_USERAGENT      => 'Mozilla/5.0',
+    ]);
+    $body = curl_exec($ch);
+    $code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    curl_close($ch);
+
+    if ($body && $code === 200) {
+        $v = parseValidatorHtml($body);
+        if ($v && $v['address']) $results[] = $v;
+    }
+}
+
+echo json_encode(['validators' => $results]);
