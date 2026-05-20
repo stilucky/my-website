@@ -656,6 +656,15 @@
       </div>
     </div>
 
+    <!-- Open Slots -->
+    <div style="margin-bottom:1rem">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.6rem;flex-wrap:wrap;gap:.4rem">
+        <div class="delegate-label" style="margin-bottom:0">Open Slots — click to select</div>
+        <span id="slotFetchStatus" style="font-family:'Share Tech Mono',monospace;font-size:.65rem;color:var(--muted)">loading...</span>
+      </div>
+      <div id="slotList" style="display:flex;flex-direction:column;gap:.4rem"></div>
+    </div>
+
     <!-- Delegate command -->
     <div class="delegate-box">
       <div class="delegate-label">Delegate to this validator</div>
@@ -929,11 +938,101 @@ sudo systemctl start pactusd</pre>
   }
 
   // ── VALIDATOR ──
-  const VAL_HUB_ADDR  = 'pc1rpwp6zcqx3vw76y4j2hj69m3kf4agk37zc26nf6';
-  const VAL_ADDR      = 'pc1p0yfku4czflwfm9fju9cwgt5mj8clqpt9l35yge';
-  const VAL_PUBKEY    = 'public1p3ll3tu4s84fdwgc9n76yj9evgh8kavnpcjpd0n6fplgqjesn32qklgraekx7s8u732ht4y3gevt4krl88wrjk6ej0x34sut2777sd2k3993vq0daxrhv0htgwl0l5hclcku0vqntdrj2zhklwaz3j85whg0e4fff';
-  const VAL_SHARE     = '0.20';
-  const VAL_EXPIRY    = '10000000';
+  const VAL_HUB_ADDR = 'pc1rpwp6zcqx3vw76y4j2hj69m3kf4agk37zc26nf6';
+  const VAL_SHARE    = '0.20';
+  const VAL_EXPIRY   = '10000000';
+
+  const SLOTS = [
+    {
+      addr:   'pc1p0yfku4czflwfm9fju9cwgt5mj8clqpt9l35yge',
+      pubkey: 'public1p3ll3tu4s84fdwgc9n76yj9evgh8kavnpcjpd0n6fplgqjesn32qklgraekx7s8u732ht4y3gevt4krl88wrjk6ej0x34sut2777sd2k3993vq0daxrhv0htgwl0l5hclcku0vqntdrj2zhklwaz3j85whg0e4fff'
+    },
+    // thêm slot mới ở đây: { addr: 'pc1p...', pubkey: 'public1...' }
+  ];
+
+  let selectedSlot = SLOTS[0];
+
+  function renderSlots() {
+    const list = document.getElementById('slotList');
+    list.innerHTML = SLOTS.map((s, i) => `
+      <div id="slot-${i}" onclick="selectSlot(${i})"
+        style="font-family:'Share Tech Mono',monospace;font-size:.76rem;padding:.5rem .9rem;
+               border:1px solid ${i===0?'var(--accent)':'var(--border)'};
+               color:${i===0?'var(--accent)':'var(--muted)'};
+               background:${i===0?'rgba(0,212,255,0.06)':'transparent'};
+               cursor:pointer;word-break:break-all;transition:all .2s">
+        <span style="color:var(--accent2);margin-right:.5rem">#${i+1}</span>${s.addr}
+      </div>`).join('');
+  }
+
+  function selectSlot(i) {
+    selectedSlot = SLOTS[i];
+    document.querySelectorAll('#slotList > div').forEach((el, j) => {
+      const active = j === i;
+      el.style.borderColor = active ? 'var(--accent)' : 'var(--border)';
+      el.style.color       = active ? 'var(--accent)' : 'var(--muted)';
+      el.style.background  = active ? 'rgba(0,212,255,0.06)' : 'transparent';
+    });
+    updateDelegateCmd();
+  }
+
+  renderSlots();
+
+  // ── FETCH OPEN SLOTS FROM PACTUSSCAN (via CORS proxy) ──
+  const KNOWN_PUBKEYS = {
+    'pc1p0yfku4czflwfm9fju9cwgt5mj8clqpt9l35yge': 'public1p3ll3tu4s84fdwgc9n76yj9evgh8kavnpcjpd0n6fplgqjesn32qklgraekx7s8u732ht4y3gevt4krl88wrjk6ej0x34sut2777sd2k3993vq0daxrhv0htgwl0l5hclcku0vqntdrj2zhklwaz3j85whg0e4fff'
+  };
+
+  async function fetchSlotsFromPactusscan() {
+    const statusEl = document.getElementById('slotFetchStatus');
+    const target = `https://pactusscan.com/api/v1/hub/${VAL_HUB_ADDR}`;
+
+    const proxies = [
+      // own VPS proxy — fastest, no CORS issue
+      _url => `https://stilucky.xyz/api/hub.php?address=${VAL_HUB_ADDR}`,
+      url => `https://corsproxy.io/?${encodeURIComponent(url)}`,
+      url => `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`,
+    ];
+
+    for (const makeProxy of proxies) {
+      try {
+        const res = await fetch(makeProxy(target));
+        if (!res.ok) continue;
+        const raw = await res.json();
+        // allorigins wraps in { contents: "..." }
+        const data = raw.contents ? JSON.parse(raw.contents) : raw;
+
+        let validators = null;
+        if (Array.isArray(data)) validators = data;
+        else if (Array.isArray(data.validators)) validators = data.validators;
+        else if (Array.isArray(data.slots)) validators = data.slots;
+        else if (Array.isArray(data.data)) validators = data.data;
+        else if (data.hub && Array.isArray(data.hub.validators)) validators = data.hub.validators;
+
+        if (!validators || validators.length === 0) continue;
+
+        const mapped = validators.map(v => {
+          const addr = v.address || v.validator_address || v.addr || (typeof v === 'string' ? v : '');
+          const pubkey = v.public_key || v.pubkey || v.pub_key || KNOWN_PUBKEYS[addr] || '';
+          return { addr, pubkey };
+        }).filter(v => v.addr.startsWith('pc1p'));
+
+        if (mapped.length === 0) continue;
+
+        SLOTS.length = 0;
+        mapped.forEach(v => SLOTS.push(v));
+        selectedSlot = SLOTS[0];
+        renderSlots();
+        updateDelegateCmd();
+        if (statusEl) statusEl.textContent = `✓ ${mapped.length} slot(s) — PactusScan`;
+        return;
+      } catch (_) { /* try next proxy */ }
+    }
+
+    if (statusEl) statusEl.textContent = '— cached data';
+  }
+
+  fetchSlotsFromPactusscan();
 
   function copyValAddr() {
     navigator.clipboard.writeText(VAL_HUB_ADDR).then(() => {
@@ -951,11 +1050,11 @@ sudo systemctl start pactusd</pre>
     const safeAcc = acc.replace(/</g,'&lt;').replace(/>/g,'&gt;');
     pre.innerHTML =
       `cd $HOME/node_pactus && ./pactus-wallet send bond \\\n` +
-      `  --pub ${VAL_PUBKEY} \\\n` +
+      `  --pub ${selectedSlot.pubkey} \\\n` +
       `  --delegate-owner ${safeAcc} \\\n` +
       `  --delegate-share ${VAL_SHARE} \\\n` +
       `  --delegate-expiry ${VAL_EXPIRY} \\\n` +
-      `  ${safeAcc} ${VAL_ADDR} ${amt}`;
+      `  ${safeAcc} ${selectedSlot.addr} ${amt}`;
   }
 </script>
 </body>
