@@ -21,34 +21,35 @@ $KNOWN = [
     'pc1pv5pf9tuap0ahhq4rmjswmupcws7wvny9rtldjh' => 'public1p5c7rjw7azer9q9759ryy7lee0hcnltr73e9ntlycxj4ntg89dsdrzf043tk5wutg4c3qu2hvl8tvs95zp683arktqdfz6pxx943hv9exj9x44wggpxh2ftkhnvazwgjaswfj4g6953fmwp3kd3wlyfetfguma8t8',
 ];
 
-// Fetch all validators from bootstrap1 in parallel
-$curlOpts = [
+$curlBase = [
     CURLOPT_RETURNTRANSFER => true,
-    CURLOPT_TIMEOUT        => 8,
+    CURLOPT_TIMEOUT        => 10,
     CURLOPT_SSL_VERIFYPEER => false,
     CURLOPT_FOLLOWLOCATION => true,
     CURLOPT_USERAGENT      => 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36',
+    CURLOPT_HTTPHEADER     => ['Accept: application/json'],
 ];
 
+// Query pactusscan individually for each known validator (parallel)
 $mh      = curl_multi_init();
 $handles = [];
 
 foreach (array_keys($KNOWN) as $addr) {
-    $ch = curl_init("https://bootstrap1.pactus.org/validator/{$addr}");
-    curl_setopt_array($ch, $curlOpts);
+    $ch = curl_init("https://pactusscan.com/api/v1/validators/{$addr}");
+    curl_setopt_array($ch, $curlBase);
     curl_multi_add_handle($mh, $ch);
     $handles[$addr] = $ch;
 }
 
-// Run all requests
 $running = null;
 do {
     curl_multi_exec($mh, $running);
     curl_multi_select($mh);
 } while ($running > 0);
 
-// Parse results
-$openSlots = [];
+$openSlots  = [];
+$gotResults = false;
+
 foreach ($handles as $addr => $ch) {
     $body = curl_multi_getcontent($ch);
     $code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
@@ -56,20 +57,30 @@ foreach ($handles as $addr => $ch) {
     curl_close($ch);
 
     if (!$body || $code !== 200) continue;
+    $gotResults = true;
 
-    // Parse HTML table: <td>IsDelegated</td><td>...</td>
-    if (preg_match('/<td[^>]*>\s*IsDelegated\s*<\/td>\s*<td[^>]*>(.*?)<\/td>/si', $body, $m)) {
-        $val = strip_tags(trim($m[1]));
-        if (strtolower($val) === 'false' || $val === '0' || $val === '') {
-            $openSlots[] = ['address' => $addr, 'publicKey' => $KNOWN[$addr]];
-        }
+    $v = json_decode($body, true);
+    // pactusscan may wrap in {validator:{...}} or return the object directly
+    if (isset($v['validator'])) $v = $v['validator'];
+
+    $isDelegated = $v['is_delegated'] ?? $v['IsDelegated'] ?? null;
+
+    // Keep only if explicitly NOT delegated
+    if ($isDelegated === false || $isDelegated === 'false' || $isDelegated === 0) {
+        $openSlots[] = ['address' => $addr, 'publicKey' => $KNOWN[$addr]];
     }
 }
 
 curl_multi_close($mh);
 
+// If API responded but returned empty — all slots delegated
+if ($gotResults && empty($openSlots)) {
+    echo json_encode(['validators' => [], 'fallback' => false]);
+    exit;
+}
+
+// If API did not respond at all — return full hardcoded list as cached fallback
 if (empty($openSlots)) {
-    // All delegated or bootstrap1 unreachable — return full list as fallback
     foreach ($KNOWN as $addr => $pubkey) {
         $openSlots[] = ['address' => $addr, 'publicKey' => $pubkey];
     }

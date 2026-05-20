@@ -650,7 +650,7 @@
           <div class="val-stat-lbl">Avg Avail</div>
         </div>
         <div class="val-stat">
-          <div class="val-stat-val" id="vOpenSlots">16</div>
+          <div class="val-stat-val" id="vOpenSlots">15</div>
           <div class="val-stat-lbl">Open Slots</div>
         </div>
       </div>
@@ -973,6 +973,8 @@ sudo systemctl start pactusd</pre>
                cursor:pointer;word-break:break-all;transition:all .2s">
         <span style="color:var(--accent2);margin-right:.5rem">#${i+1}</span>${s.addr}
       </div>`).join('');
+    const badge = document.getElementById('vOpenSlots');
+    if (badge) badge.textContent = SLOTS.length;
   }
 
   function selectSlot(i) {
@@ -1000,11 +1002,6 @@ sudo systemctl start pactusd</pre>
       const list = data.validators || [];
       if (list.length === 0) throw new Error('empty');
 
-      if (list.length === 0) {
-        if (statusEl) statusEl.textContent = '— no open slots';
-        return;
-      }
-
       SLOTS.length = 0;
       list.forEach(v => SLOTS.push({
         addr:   v.address,
@@ -1013,7 +1010,8 @@ sudo systemctl start pactusd</pre>
       selectedSlot = SLOTS[0];
       renderSlots();
       updateDelegateCmd();
-      if (statusEl) statusEl.textContent = `✓ ${list.length} open slot(s) — live`;
+      const tag = data.fallback ? ' — cached' : ' — live';
+      if (statusEl) statusEl.textContent = `✓ ${list.length} open slot(s)${tag}`;
     } catch (_) {
       if (statusEl) statusEl.textContent = '— cached data';
     }
