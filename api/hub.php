@@ -40,7 +40,7 @@ foreach ($addresses as $addr) {
         $err  = curl_error($ch);
         curl_close($ch);
 
-        $logs[] = ['url' => $url, 'code' => $code, 'err' => $err, 'body_len' => strlen((string)$body)];
+        $logs[] = ['url' => $url, 'code' => $code, 'err' => $err, 'body_len' => strlen((string)$body), 'body_raw' => substr((string)$body, 0, 300)];
 
         if ($body && $code === 200) {
             $v = json_decode($body, true);
