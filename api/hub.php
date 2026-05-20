@@ -57,4 +57,13 @@ foreach ($addresses as $addr) {
     }
 }
 
-echo json_encode(['validators' => $results]);
+$out = ['validators' => $results];
+if (!empty($_GET['debug'])) {
+    // show raw HTML of first address for inspection
+    $addr0 = array_values($addresses)[0];
+    $ch = curl_init('https://bootstrap1.pactus.org/validator/address/' . $addr0);
+    curl_setopt_array($ch, [CURLOPT_RETURNTRANSFER=>true,CURLOPT_TIMEOUT=>10,CURLOPT_SSL_VERIFYPEER=>false]);
+    $out['raw_html'] = curl_exec($ch);
+    curl_close($ch);
+}
+echo json_encode($out);
