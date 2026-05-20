@@ -2,67 +2,60 @@
 header('Access-Control-Allow-Origin: *');
 header('Content-Type: application/json');
 
-$addresses = array_filter(
-    array_map(fn($a) => preg_replace('/[^a-zA-Z0-9]/', '', trim($a)),
-    explode(',', $_GET['validators'] ?? '')));
+$hub = preg_replace('/[^a-zA-Z0-9]/', '', $_GET['hub'] ?? '');
+if (!$hub) { echo '{"error":"missing hub param"}'; exit; }
 
-if (empty($addresses)) {
-    echo '{"error":"missing validators param"}';
+// Mapping hub reward address → on-chain delegate_owner account address
+$hubMap = [
+    'pc1rpwp6zcqx3vw76y4j2hj69m3kf4agk37zc26nf6' => 'pc1z24smayvvyalglr9sfpyz0yscdn38fh0p5hud3k',
+];
+$delegateOwner = $hubMap[$hub] ?? $hub;
+
+$curlOpts = [
+    CURLOPT_RETURNTRANSFER => true,
+    CURLOPT_TIMEOUT        => 12,
+    CURLOPT_SSL_VERIFYPEER => false,
+    CURLOPT_FOLLOWLOCATION => true,
+    CURLOPT_USERAGENT      => 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36',
+    CURLOPT_HTTPHEADER     => ['Accept: application/json'],
+];
+
+$openSlots = [];
+$page = 1;
+
+do {
+    $url = "https://pactusscan.com/api/v1/validators?delegate_owner={$delegateOwner}&page={$page}";
+    $ch  = curl_init($url);
+    curl_setopt_array($ch, $curlOpts);
+    $body  = curl_exec($ch);
+    $code  = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    curl_close($ch);
+
+    if (!$body || $code !== 200) break;
+    $data  = json_decode($body, true);
+    $list  = $data['validators'] ?? [];
+    $total = (int)($data['total'] ?? 0);
+    $pages = (int)($data['pages'] ?? 1);
+
+    // Nếu không được filter (trả về toàn bộ 9000+ validators) thì dừng
+    if ($total > 500) break;
+
+    foreach ($list as $v) {
+        if (($v['is_delegated'] ?? true) === false && !empty($v['address'])) {
+            $openSlots[] = [
+                'address'   => $v['address'],
+                'publicKey' => $v['public_key'] ?? '',
+            ];
+        }
+    }
+    $page++;
+} while ($page <= $pages);
+
+// Fallback: nếu pactusscan không filter được, dùng SLOTS cứng từ bootstrap1
+if (empty($openSlots)) {
+    // Trả về rỗng để JS dùng cached SLOTS
+    echo json_encode(['validators' => [], 'fallback' => true]);
     exit;
 }
 
-function parseValidatorHtml(string $html): ?array {
-    preg_match_all('/<td>([^<]+)<\/td>\s*<td[^>]*>(?:<a[^>]*>)?([^<]*)(?:<\/a>)?<\/td>/i', $html, $m);
-    if (empty($m[1])) return null;
-
-    $data = [];
-    foreach ($m[1] as $i => $key) {
-        $data[trim($key)] = trim($m[2][$i]);
-    }
-
-    return [
-        'address'           => $data['Address']           ?? '',
-        'publicKey'         => $data['Public Key']        ?? '',
-        'number'            => (int)($data['Number']      ?? 0),
-        'stake'             => $data['Stake']             ?? '',
-        'availabilityScore' => (float)($data['AvailabilityScore'] ?? 0),
-        'lastBondingHeight' => (int)($data['LastBondingHeight']   ?? 0),
-        'unbondingHeight'   => (int)($data['UnbondingHeight']     ?? 0),
-        'isDelegated'       => strtolower($data['IsDelegated'] ?? 'false') === 'true',
-        'delegateOwner'     => $data['DelegateOwner']     ?? '',
-        'delegateShare'     => $data['DelegateShare']     ?? '',
-    ];
-}
-
-$results = [];
-
-foreach ($addresses as $addr) {
-    $url = 'https://bootstrap1.pactus.org/validator/address/' . $addr;
-    $ch  = curl_init($url);
-    curl_setopt_array($ch, [
-        CURLOPT_RETURNTRANSFER => true,
-        CURLOPT_TIMEOUT        => 10,
-        CURLOPT_SSL_VERIFYPEER => false,
-        CURLOPT_FOLLOWLOCATION => true,
-        CURLOPT_USERAGENT      => 'Mozilla/5.0',
-    ]);
-    $body = curl_exec($ch);
-    $code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-    curl_close($ch);
-
-    if ($body && $code === 200) {
-        $v = parseValidatorHtml($body);
-        if ($v && $v['address']) $results[] = $v;
-    }
-}
-
-$out = ['validators' => $results];
-if (!empty($_GET['debug'])) {
-    // show raw HTML of first address for inspection
-    $addr0 = array_values($addresses)[0];
-    $ch = curl_init('https://bootstrap1.pactus.org/validator/address/' . $addr0);
-    curl_setopt_array($ch, [CURLOPT_RETURNTRANSFER=>true,CURLOPT_TIMEOUT=>10,CURLOPT_SSL_VERIFYPEER=>false]);
-    $out['raw_html'] = curl_exec($ch);
-    curl_close($ch);
-}
-echo json_encode($out);
+echo json_encode(['validators' => $openSlots]);
