@@ -56,8 +56,15 @@ foreach ($handles as $addr => $ch) {
     curl_multi_remove_handle($mh, $ch);
     curl_close($ch);
 
-    if (!$body || $code !== 200) continue;
+    if (!$body) continue;
     $gotResults = true;
+
+    // 404 = validator not yet bonded on chain → still an open slot
+    if ($code === 404) {
+        $openSlots[] = ['address' => $addr, 'publicKey' => $KNOWN[$addr]];
+        continue;
+    }
+    if ($code !== 200) continue;
 
     $v = json_decode($body, true);
     if (isset($v['validator'])) $v = $v['validator'];
