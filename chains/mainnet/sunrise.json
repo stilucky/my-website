@@ -1,0 +1,26 @@
+{
+  "chain_name": "sunrise",
+  "registry_name": "sunrise",
+  "api": [
+    { "provider": "Foundation", "address": "https://a.consensus.sunrise-1.sunriselayer.io:1318" },
+    { "provider": "Node39.TOP", "address": "https://sunrise-api.node39.top" },
+    { "provider": "cosmos.directory", "address": "https://rest.cosmos.directory/sunrise" }
+  ],
+  "rpc": [
+    { "provider": "cosmos.directory", "address": "https://rpc.cosmos.directory/sunrise" }
+  ],
+  "sdk_version": "0.50.6",
+  "coin_type": "118",
+  "min_tx_fee": "100",
+  "addr_prefix": "sunrise",
+  "logo": "https://raw.githubusercontent.com/cosmos/chain-registry/master/sunrise/images/sunrise.png",
+  "assets": [
+    {
+      "base": "urise",
+      "symbol": "RISE",
+      "exponent": "6",
+      "coingecko_id": "",
+      "logo": "https://raw.githubusercontent.com/cosmos/chain-registry/master/sunrise/images/sunrise.png"
+    }
+  ]
+}
