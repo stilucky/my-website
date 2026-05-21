@@ -61,12 +61,16 @@ foreach ($handles as $addr => $ch) {
     if ($code === 0) continue;   // network error — skip
     $gotResults = true;
 
-    if ($code === 404) {
+    $v = json_decode($body, true) ?: [];
+
+    // Treat as "not found" when HTTP 404 OR when API returns {"error":...}
+    $notFound = ($code === 404) || isset($v['error']);
+
+    if ($notFound) {
         // Not bonded on chain yet → open slot
         $openSlots[] = ['address' => $addr, 'publicKey' => $KNOWN[$addr]];
     } elseif ($code === 200) {
         // On chain — check if delegate_owner is still hub (not claimed by user)
-        $v     = json_decode($body, true) ?: [];
         $owner = $v['delegate_owner'] ?? '';
         if ($owner === $HUB_OWNER) {
             $openSlots[] = ['address' => $addr, 'publicKey' => $KNOWN[$addr]];
