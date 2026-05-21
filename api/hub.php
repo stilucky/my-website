@@ -1,8 +1,8 @@
 <?php
+error_reporting(0);
 header('Access-Control-Allow-Origin: *');
 header('Content-Type: application/json');
 
-// All known validators for this hub — keyed by address
 $KNOWN = [
     'pc1pmklncfdqc8dqqf56tvk2upd7exgjs9zq2k693p' => 'public1p5zeyj4538neyff7fvr0ze5vndfy73ru72y98l49296dnr0el9vkl9exmnphx33we48v9wph3acmyyqlj3jsec2t4z4pd4vtrpd4dh76kkrq4nultafq2nd7ysrkp0rvh9292wx6pu8gfwvugcswrfq4mlqvcce46',
     'pc1pamhkjej7qmys7w729n92v5ep4v0uj6938vt4d5' => 'public1pjf5an7hacww5khxymr8lsa3qfesgr27rv3lts8yl8ryfewxm83yxwxxvjz7tj75czlrxkv57uu5nxr933tskgjjl6p6utawkphnxtv3j5caft2pm0828ufngctgx2vwkwtghsf9xjm47dy5w494hnc2w4ua6snsn',
@@ -21,61 +21,63 @@ $KNOWN = [
     'pc1pv5pf9tuap0ahhq4rmjswmupcws7wvny9rtldjh' => 'public1p5c7rjw7azer9q9759ryy7lee0hcnltr73e9ntlycxj4ntg89dsdrzf043tk5wutg4c3qu2hvl8tvs95zp683arktqdfz6pxx943hv9exj9x44wggpxh2ftkhnvazwgjaswfj4g6953fmwp3kd3wlyfetfguma8t8',
 ];
 
-$curlBase = [
-    CURLOPT_RETURNTRANSFER => true,
-    CURLOPT_TIMEOUT        => 10,
-    CURLOPT_SSL_VERIFYPEER => false,
-    CURLOPT_FOLLOWLOCATION => true,
-    CURLOPT_USERAGENT      => 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36',
-    CURLOPT_HTTPHEADER     => ['Accept: application/json'],
-];
+$HUB_OWNER  = 'pc1z24smayvvyalglr9sfpyz0yscdn38fh0p5hud3k';
+$openSlots  = [];
+$gotResults = false;
 
-// Query pactusscan individually for each known validator (parallel)
+// Use curl_multi with proper loop pattern and timeout guard
 $mh      = curl_multi_init();
 $handles = [];
-
 foreach (array_keys($KNOWN) as $addr) {
     $ch = curl_init("https://pactusscan.com/api/v1/validators/{$addr}");
-    curl_setopt_array($ch, $curlBase);
+    curl_setopt_array($ch, [
+        CURLOPT_RETURNTRANSFER => true,
+        CURLOPT_TIMEOUT        => 8,
+        CURLOPT_CONNECTTIMEOUT => 5,
+        CURLOPT_SSL_VERIFYPEER => false,
+        CURLOPT_FOLLOWLOCATION => false,  // do NOT follow redirects — keep real HTTP code
+        CURLOPT_USERAGENT      => 'Mozilla/5.0',
+        CURLOPT_HTTPHEADER     => ['Accept: application/json'],
+    ]);
     curl_multi_add_handle($mh, $ch);
     $handles[$addr] = $ch;
 }
 
-$running = null;
+$active = null;
 do {
-    curl_multi_exec($mh, $running);
-    curl_multi_select($mh);
-} while ($running > 0);
-
-$openSlots  = [];
-$gotResults = false;
+    $mrc = curl_multi_exec($mh, $active);
+    if ($active) {
+        $sel = curl_multi_select($mh, 0.5);
+        if ($sel === -1) usleep(50000);
+    }
+} while ($active > 0 && $mrc === CURLM_OK);
 
 foreach ($handles as $addr => $ch) {
     $body = curl_multi_getcontent($ch);
-    $code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    $code = (int) curl_getinfo($ch, CURLINFO_HTTP_CODE);
     curl_multi_remove_handle($mh, $ch);
     curl_close($ch);
 
-    if (!$body) continue;
+    if ($code === 0) continue;   // network error — skip
     $gotResults = true;
 
-    // Open slot = validator not yet bonded on chain (pactusscan returns 404)
-    // Validators already on-chain (200) have been pre-bonded by hub operator — not "open" in pactusscan's terms
     if ($code === 404) {
+        // Not bonded on chain yet → open slot
         $openSlots[] = ['address' => $addr, 'publicKey' => $KNOWN[$addr]];
+    } elseif ($code === 200) {
+        // On chain — check if delegate_owner is still hub (not claimed by user)
+        $v     = json_decode($body, true) ?: [];
+        $owner = $v['delegate_owner'] ?? '';
+        if ($owner === $HUB_OWNER) {
+            $openSlots[] = ['address' => $addr, 'publicKey' => $KNOWN[$addr]];
+        }
     }
 }
 
 curl_multi_close($mh);
 
-// If API responded but returned empty — all slots delegated
-if ($gotResults && empty($openSlots)) {
-    echo json_encode(['validators' => [], 'fallback' => false]);
-    exit;
-}
-
-// If API did not respond at all — return full hardcoded list as cached fallback
-if (empty($openSlots)) {
+if (!$gotResults) {
+    // pactusscan unreachable — return full list as cached fallback
     foreach ($KNOWN as $addr => $pubkey) {
         $openSlots[] = ['address' => $addr, 'publicKey' => $pubkey];
     }
