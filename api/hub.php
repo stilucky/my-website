@@ -58,16 +58,16 @@ foreach ($handles as $addr => $ch) {
     curl_multi_remove_handle($mh, $ch);
     curl_close($ch);
 
-    if ($code === 0) continue;   // network error — skip
+    if ($code === 0 && !$body) continue;  // total network failure — skip
     $gotResults = true;
 
     $v = json_decode($body, true) ?: [];
 
-    // Treat as "not found" when HTTP 404 OR when API returns {"error":...}
-    $notFound = ($code === 404) || isset($v['error']);
+    // Open slot = validator has no on-chain address field (not bonded yet)
+    // pactusscan returns {"error":"..."} for not-found validators
+    $onChain = isset($v['address']) && !isset($v['error']);
 
-    if ($notFound) {
-        // Not bonded on chain at all → open slot (user hasn't delegated yet)
+    if (!$onChain) {
         $openSlots[] = ['address' => $addr, 'publicKey' => $KNOWN[$addr]];
     }
 }
