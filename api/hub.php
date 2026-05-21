@@ -67,14 +67,8 @@ foreach ($handles as $addr => $ch) {
     $notFound = ($code === 404) || isset($v['error']);
 
     if ($notFound) {
-        // Not bonded on chain yet → open slot
+        // Not bonded on chain at all → open slot (user hasn't delegated yet)
         $openSlots[] = ['address' => $addr, 'publicKey' => $KNOWN[$addr]];
-    } elseif ($code === 200) {
-        // On chain — check if delegate_owner is still hub (not claimed by user)
-        $owner = $v['delegate_owner'] ?? '';
-        if ($owner === $HUB_OWNER) {
-            $openSlots[] = ['address' => $addr, 'publicKey' => $KNOWN[$addr]];
-        }
     }
 }
 
