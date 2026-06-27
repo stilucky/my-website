@@ -1,9 +1,10 @@
 {
-  "chain_name": "safrochain-testnet",
-  "registry_name": "safrochain-testnet",
+  "chain_name": "safrochain-Mainnet",
+  "registry_name": "safrochain-Mainnet",
   "api": [
-    { "provider": "Safro", "address": "https://rest.testnet.safrochain.com" },
-    { "provider": "Node39.TOP", "address": "https://safro-testnet-api.node39.top" },
+    { "provider": "Vinjan", "address": "https://api-safro.vinjan-inc.com" },
+    { "provider": "Safro", "address": "https://rest.mainnet.safrochain.com" },
+    { "provider": "Node39", "address": "https://safro-mainnet-api.node39.top" },
     { "provider": "cosmos.directory", "address": "https://rest.cosmos.directory/safrochain" }
   ],
   "rpc": [
