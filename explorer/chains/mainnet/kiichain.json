@@ -1,0 +1,26 @@
+{
+  "chain_name": "kiichain",
+  "registry_name": "kiichain",
+  "api": [
+    { "provider": "Node39.TOP", "address": "https://kiichain-api.node39.top" },
+    { "provider": "KiiChain", "address": "https://lcd.kiivalidator.com" },
+    { "provider": "cosmos.directory", "address": "https://rest.cosmos.directory/kiichain" }
+  ],
+  "rpc": [
+    { "provider": "cosmos.directory", "address": "https://rpc.cosmos.directory/kiichain" }
+  ],
+  "sdk_version": "0.50.6",
+  "coin_type": "118",
+  "min_tx_fee": "100",
+  "addr_prefix": "kii",
+  "logo": "https://raw.githubusercontent.com/cosmos/chain-registry/master/kiichain/images/kii.png",
+  "assets": [
+    {
+      "base": "ukii",
+      "symbol": "KII",
+      "exponent": "6",
+      "coingecko_id": "",
+      "logo": "https://raw.githubusercontent.com/cosmos/chain-registry/master/kiichain/images/kii.png"
+    }
+  ]
+}

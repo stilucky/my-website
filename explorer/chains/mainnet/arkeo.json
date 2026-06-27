@@ -1,0 +1,26 @@
+{
+  "chain_name": "arkeo",
+  "registry_name": "arkeo",
+  "api": [
+    { "provider": "node39", "address": "https://arkeo-api.node39.top" },
+    { "provider": "anode.team", "address": "https://arkeo.api.m.anode.team" },
+    { "provider": "cosmos.directory", "address": "https://rest.cosmos.directory/arkeo" }
+  ],
+  "rpc": [
+    { "provider": "cosmos.directory", "address": "https://rpc.cosmos.directory/arkeo" }
+  ],
+  "sdk_version": "0.47.5",
+  "coin_type": "118",
+  "min_tx_fee": "100",
+  "addr_prefix": "arkeo",
+  "logo": "https://raw.githubusercontent.com/cosmos/chain-registry/master/arkeo/images/arkeo.svg",
+  "assets": [
+    {
+      "base": "uarkeo",
+      "symbol": "ARKEO",
+      "exponent": "6",
+      "coingecko_id": "",
+      "logo": "https://raw.githubusercontent.com/cosmos/chain-registry/master/arkeo/images/arkeo.svg"
+    }
+  ]
+}

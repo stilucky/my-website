@@ -1,0 +1,26 @@
+{
+  "chain_name": "paxi",
+  "registry_name": "paxi",
+  "api": [
+    { "provider": "Node39.TOP", "address": "https://paxi-api.node39.top" },
+    { "provider": "Foundation", "address": "https://mainnet-lcd.paxinet.io" },
+    { "provider": "cosmos.directory", "address": "https://rest.cosmos.directory/paxi" }
+  ],
+  "rpc": [
+    { "provider": "cosmos.directory", "address": "https://rpc.cosmos.directory/paxi" }
+  ],
+  "sdk_version": "0.50.6",
+  "coin_type": "118",
+  "min_tx_fee": "500",
+  "addr_prefix": "paxi",
+  "logo": "https://raw.githubusercontent.com/cosmos/chain-registry/master/paxi/images/paxi.png",
+  "assets": [
+    {
+      "base": "upaxi",
+      "symbol": "PAXI",
+      "exponent": "6",
+      "coingecko_id": "",
+      "logo": "https://raw.githubusercontent.com/cosmos/chain-registry/master/paxi/images/paxi.png"
+    }
+  ]
+}
